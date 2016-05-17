@@ -11,12 +11,13 @@ out/
 log/
 target/
 
-
-# Sphinx documentation
-docs/_build/
-
 # Lucene indices
-solr/core0/data/
+backend-solr/server/solr/ORFDocs/data/
+backend-solr/server/solr/pathwayRuns/data/
+
+#Solr libs
+backend-solr/server/solr-webapp/
+backend-solr/server/lib/
 
 
 
