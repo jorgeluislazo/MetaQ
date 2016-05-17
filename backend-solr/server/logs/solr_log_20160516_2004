@@ -1,0 +1,244 @@
+2016-05-17 02:56:27.204 INFO  (main) [   ] o.e.j.u.log Logging initialized @230ms
+2016-05-17 02:56:27.332 INFO  (main) [   ] o.e.j.s.Server jetty-9.3.8.v20160314
+2016-05-17 02:56:27.342 INFO  (main) [   ] o.e.j.d.p.ScanningAppProvider Deployment monitor [file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/contexts/] at interval 0
+2016-05-17 02:56:27.512 INFO  (main) [   ] o.e.j.w.StandardDescriptorProcessor NO JSP Support for /solr, did not find org.apache.jasper.servlet.JspServlet
+2016-05-17 02:56:27.519 WARN  (main) [   ] o.e.j.s.SecurityHandler ServletContext@o.e.j.w.WebAppContext@5383967b{/solr,file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp/,STARTING}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp} has uncovered http methods for path: /
+2016-05-17 02:56:27.527 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter SolrDispatchFilter.init(): WebAppClassLoader=1465085305@57536d79
+2016-05-17 02:56:27.538 INFO  (main) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:56:27.538 INFO  (main) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.539 INFO  (main) [   ] o.a.s.c.SolrResourceLoader new SolrResourceLoader for directory: '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr'
+2016-05-17 02:56:27.539 INFO  (main) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:56:27.539 INFO  (main) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.546 INFO  (main) [   ] o.a.s.c.SolrXmlConfig Loading container configuration from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/solr.xml
+2016-05-17 02:56:27.605 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Config-defined core root directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.626 INFO  (main) [   ] o.a.s.c.CoreContainer New CoreContainer 1658926803
+2016-05-17 02:56:27.626 INFO  (main) [   ] o.a.s.c.CoreContainer Loading cores into CoreContainer [instanceDir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr]
+2016-05-17 02:56:27.626 WARN  (main) [   ] o.a.s.c.CoreContainer Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/lib to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/lib
+2016-05-17 02:56:27.633 INFO  (main) [   ] o.a.s.h.c.HttpShardHandlerFactory created with socketTimeout : 600000,connTimeout : 60000,maxConnectionsPerHost : 20,maxConnections : 10000,corePoolSize : 0,maximumPoolSize : 2147483647,maxThreadIdleTime : 5,sizeOfQueue : -1,fairnessPolicy : false,useRetries : false,
+2016-05-17 02:56:27.825 INFO  (main) [   ] o.a.s.u.UpdateShardHandler Creating UpdateShardHandler HTTP client with params: socketTimeout=600000&connTimeout=60000&retry=true
+2016-05-17 02:56:27.827 INFO  (main) [   ] o.a.s.l.LogWatcher SLF4J impl is org.slf4j.impl.Log4jLoggerFactory
+2016-05-17 02:56:27.828 INFO  (main) [   ] o.a.s.l.LogWatcher Registering Log Listener [Log4j (org.slf4j.impl.Log4jLoggerFactory)]
+2016-05-17 02:56:27.830 INFO  (main) [   ] o.a.s.c.CoreContainer Security conf doesn't exist. Skipping setup for authorization module.
+2016-05-17 02:56:27.831 INFO  (main) [   ] o.a.s.c.CoreContainer No authentication plugin used.
+2016-05-17 02:56:27.864 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Looking for core definitions underneath /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.866 INFO  (main) [   ] o.a.s.c.CoreDescriptor Created CoreDescriptor: {name=pathwayRuns, config=solrconfig.xml, loadOnStartup=true, schema=schema.xml, configSetProperties=configsetprops.json, transient=false, dataDir=data/}
+2016-05-17 02:56:27.866 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found core pathwayRuns in /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns
+2016-05-17 02:56:27.869 INFO  (main) [   ] o.a.s.c.CoreDescriptor Created CoreDescriptor: {name=ORFDocs, config=solrconfig.xml, loadOnStartup=true, schema=schema.xml, configSetProperties=configsetprops.json, transient=false, dataDir=data/}
+2016-05-17 02:56:27.869 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found core ORFDocs in /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs
+2016-05-17 02:56:27.869 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found 2 core definitions
+2016-05-17 02:56:27.872 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter user.dir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server
+2016-05-17 02:56:27.872 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter SolrDispatchFilter.init() done
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrResourceLoader new SolrResourceLoader for directory: '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns'
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrResourceLoader new SolrResourceLoader for directory: '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs'
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:56:27.873 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:56:27.882 INFO  (main) [   ] o.e.j.s.h.ContextHandler Started o.e.j.w.WebAppContext@5383967b{/solr,file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp/,AVAILABLE}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp}
+2016-05-17 02:56:27.898 INFO  (main) [   ] o.e.j.s.ServerConnector Started ServerConnector@5aa9e4eb{HTTP/1.1,[http/1.1]}{0.0.0.0:8983}
+2016-05-17 02:56:27.898 INFO  (main) [   ] o.e.j.s.Server Started @925ms
+2016-05-17 02:56:27.918 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig current version of requestparams : 0
+2016-05-17 02:56:27.918 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig current version of requestparams : 0
+2016-05-17 02:56:27.922 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Adding specified lib dirs to ClassLoader
+2016-05-17 02:56:27.922 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Adding specified lib dirs to ClassLoader
+2016-05-17 02:56:27.923 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/extraction/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/extraction/lib
+2016-05-17 02:56:27.923 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/extraction/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/extraction/lib
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-cell-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-cell-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/clustering/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/clustering/lib
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/clustering/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/clustering/lib
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-clustering-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-clustering-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/langid/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/langid/lib
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/langid/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/langid/lib
+2016-05-17 02:56:27.924 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-langid-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.925 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-langid-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.925 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/velocity/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/velocity/lib
+2016-05-17 02:56:27.925 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/velocity/lib filtered by .*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/contrib/velocity/lib
+2016-05-17 02:56:27.925 WARN  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-velocity-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.925 WARN  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist filtered by solr-velocity-\d.*\.jar to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/dist
+2016-05-17 02:56:27.975 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Using Lucene MatchVersion: 6.0.0
+2016-05-17 02:56:27.983 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Using Lucene MatchVersion: 6.0.0
+2016-05-17 02:56:28.078 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.SolrConfig Loaded SolrConfig: solrconfig.xml
+2016-05-17 02:56:28.078 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.SolrConfig Loaded SolrConfig: solrconfig.xml
+2016-05-17 02:56:28.137 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.s.IndexSchema [ORFDocs] Schema name=example-data-driven-schema
+2016-05-17 02:56:28.138 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.s.IndexSchema [pathwayRuns] Schema name=example-data-driven-schema
+2016-05-17 02:56:28.535 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.s.IndexSchema unique key field: id
+2016-05-17 02:56:28.535 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.s.IndexSchema unique key field: id
+2016-05-17 02:56:28.688 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.s.FileExchangeRateProvider Reloading exchange rates from file currency.xml
+2016-05-17 02:56:28.688 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.s.FileExchangeRateProvider Reloading exchange rates from file currency.xml
+2016-05-17 02:56:28.692 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.s.FileExchangeRateProvider Reloading exchange rates from file currency.xml
+2016-05-17 02:56:28.692 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.s.FileExchangeRateProvider Reloading exchange rates from file currency.xml
+2016-05-17 02:56:28.721 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.ConfigSetProperties Did not find ConfigSet properties, assuming default properties: Can't find resource 'configsetprops.json' in classpath or '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns'
+2016-05-17 02:56:28.721 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.ConfigSetProperties Did not find ConfigSet properties, assuming default properties: Can't find resource 'configsetprops.json' in classpath or '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs'
+2016-05-17 02:56:28.721 INFO  (coreLoadExecutor-6-thread-1) [   ] o.a.s.c.CoreContainer Creating SolrCore 'pathwayRuns' using configuration from instancedir /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns
+2016-05-17 02:56:28.721 INFO  (coreLoadExecutor-6-thread-2) [   ] o.a.s.c.CoreContainer Creating SolrCore 'ORFDocs' using configuration from instancedir /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs
+2016-05-17 02:56:28.744 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore solr.NRTCachingDirectoryFactory
+2016-05-17 02:56:28.744 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore solr.NRTCachingDirectoryFactory
+2016-05-17 02:56:28.753 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore [[pathwayRuns] ] Opening new SolrCore at [/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns], dataDir=[/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/]
+2016-05-17 02:56:28.753 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore [[ORFDocs] ] Opening new SolrCore at [/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs], dataDir=[/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/]
+2016-05-17 02:56:28.755 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.JmxMonitoredMap No JMX servers found, not exposing Solr information with JMX.
+2016-05-17 02:56:28.755 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.JmxMonitoredMap No JMX servers found, not exposing Solr information with JMX.
+2016-05-17 02:56:28.757 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore [[pathwayRuns] ] Added SolrEventListener for newSearcher: [org.apache.solr.core.QuerySenderListener{queries=[]}]
+2016-05-17 02:56:28.759 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore [[pathwayRuns] ] Added SolrEventListener for firstSearcher: [org.apache.solr.core.QuerySenderListener{queries=[]}]
+2016-05-17 02:56:28.759 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore [[ORFDocs] ] Added SolrEventListener for newSearcher: [org.apache.solr.core.QuerySenderListener{queries=[]}]
+2016-05-17 02:56:28.762 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore [[ORFDocs] ] Added SolrEventListener for firstSearcher: [org.apache.solr.core.QuerySenderListener{queries=[]}]
+2016-05-17 02:56:28.766 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SchemaCodecFactory Using default compressionMode: BEST_SPEED
+2016-05-17 02:56:28.767 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SchemaCodecFactory Using default compressionMode: BEST_SPEED
+2016-05-17 02:56:28.828 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory return new directory for /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data
+2016-05-17 02:56:28.828 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory return new directory for /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data
+2016-05-17 02:56:28.829 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore New index directory detected: old=null new=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index/
+2016-05-17 02:56:28.829 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore New index directory detected: old=null new=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index/
+2016-05-17 02:56:28.829 WARN  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore [ORFDocs] Solr index directory '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index' doesn't exist. Creating new index...
+2016-05-17 02:56:28.829 WARN  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore [pathwayRuns] Solr index directory '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index' doesn't exist. Creating new index...
+2016-05-17 02:56:28.841 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory return new directory for /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index
+2016-05-17 02:56:28.841 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory return new directory for /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index
+2016-05-17 02:56:28.952 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrDeletionPolicy SolrDeletionPolicy.onCommit: commits: num=1
+	commit{dir=NRTCachingDirectory(MMapDirectory@/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@2dd2a7ae; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_1,generation=1}
+2016-05-17 02:56:28.952 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrDeletionPolicy SolrDeletionPolicy.onCommit: commits: num=1
+	commit{dir=NRTCachingDirectory(MMapDirectory@/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@2dd2a7ae; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_1,generation=1}
+2016-05-17 02:56:28.953 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrDeletionPolicy newest commit generation = 1
+2016-05-17 02:56:28.954 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrDeletionPolicy newest commit generation = 1
+2016-05-17 02:56:28.957 INFO  (OldIndexDirectoryCleanupThreadForCore-pathwayRuns) [   x:pathwayRuns] o.a.s.c.SolrCore Looking for old index directories to cleanup for core pathwayRuns in /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/
+2016-05-17 02:56:28.960 INFO  (OldIndexDirectoryCleanupThreadForCore-ORFDocs) [   x:ORFDocs] o.a.s.c.SolrCore Looking for old index directories to cleanup for core ORFDocs in /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/
+2016-05-17 02:56:28.960 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag queryResponseWriter : 'velocity' created with startup=lazy 
+2016-05-17 02:56:28.961 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag queryResponseWriter : 'velocity' created with startup=lazy 
+2016-05-17 02:56:28.963 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.r.XSLTResponseWriter xsltCacheLifetimeSeconds=5
+2016-05-17 02:56:28.979 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.r.XSLTResponseWriter xsltCacheLifetimeSeconds=5
+2016-05-17 02:56:29.132 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.p.UpdateRequestProcessorChain creating updateRequestProcessorChain "add-unknown-fields-to-the-schema"
+2016-05-17 02:56:29.132 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.p.UpdateRequestProcessorChain creating updateRequestProcessorChain "add-unknown-fields-to-the-schema"
+2016-05-17 02:56:29.285 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore no updateRequestProcessorChain defined as default, creating implicit default
+2016-05-17 02:56:29.285 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore no updateRequestProcessorChain defined as default, creating implicit default
+2016-05-17 02:56:29.320 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.320 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.327 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.327 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.331 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.332 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.333 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.333 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.l.XMLLoader xsltCacheLifetimeSeconds=60
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/update/extract' created with startup=lazy 
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/update/extract' created with startup=lazy 
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/analysis/field' created with startup=lazy 
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/analysis/field' created with startup=lazy 
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/analysis/document' created with startup=lazy 
+2016-05-17 02:56:29.432 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/analysis/document' created with startup=lazy 
+2016-05-17 02:56:29.437 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/spell' created with startup=lazy 
+2016-05-17 02:56:29.437 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/spell' created with startup=lazy 
+2016-05-17 02:56:29.437 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/tvrh' created with startup=lazy 
+2016-05-17 02:56:29.437 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/terms' created with startup=lazy 
+2016-05-17 02:56:29.438 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.PluginBag requestHandler : '/elevate' created with startup=lazy 
+2016-05-17 02:56:29.439 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.RequestHandlers Registered paths: /admin/mbeans,/browse,/update/json/docs,/admin/luke,/export,/get,/admin/properties,/elevate,/update/json,/admin/threads,/query,/analysis/field,/analysis/document,/spell,/update/csv,/sql,/tvrh,/select,/admin/segments,/admin/system,/replication,/config,/stream,/schema,/admin/plugins,/admin/logging,/admin/ping,/update,/admin/file,/debug/dump,/terms,/update/extract
+2016-05-17 02:56:29.440 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrCore Using default statsCache cache: org.apache.solr.search.stats.LocalStatsCache
+2016-05-17 02:56:29.437 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/tvrh' created with startup=lazy 
+2016-05-17 02:56:29.441 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/terms' created with startup=lazy 
+2016-05-17 02:56:29.442 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.PluginBag requestHandler : '/elevate' created with startup=lazy 
+2016-05-17 02:56:29.442 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.RequestHandlers Registered paths: /admin/mbeans,/browse,/update/json/docs,/admin/luke,/export,/get,/admin/properties,/elevate,/update/json,/admin/threads,/query,/analysis/field,/analysis/document,/spell,/update/csv,/sql,/tvrh,/select,/admin/segments,/admin/system,/replication,/config,/stream,/schema,/admin/plugins,/admin/logging,/admin/ping,/update,/admin/file,/debug/dump,/terms,/update/extract
+2016-05-17 02:56:29.443 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrCore Using default statsCache cache: org.apache.solr.search.stats.LocalStatsCache
+2016-05-17 02:56:29.466 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.UpdateHandler Using UpdateLog implementation: org.apache.solr.update.UpdateLog
+2016-05-17 02:56:29.466 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.UpdateHandler Using UpdateLog implementation: org.apache.solr.update.UpdateLog
+2016-05-17 02:56:29.466 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.UpdateLog Initializing UpdateLog: dataDir= defaultSyncLevel=FLUSH numRecordsToKeep=100 maxNumLogsToKeep=10 numVersionBuckets=65536
+2016-05-17 02:56:29.466 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.UpdateLog Initializing UpdateLog: dataDir= defaultSyncLevel=FLUSH numRecordsToKeep=100 maxNumLogsToKeep=10 numVersionBuckets=65536
+2016-05-17 02:56:29.498 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.CommitTracker Hard AutoCommit: if uncommited for 15000ms; 
+2016-05-17 02:56:29.499 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.CommitTracker Soft AutoCommit: disabled
+2016-05-17 02:56:29.500 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.CommitTracker Hard AutoCommit: if uncommited for 15000ms; 
+2016-05-17 02:56:29.501 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.CommitTracker Soft AutoCommit: disabled
+2016-05-17 02:56:29.512 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrDeletionPolicy SolrDeletionPolicy.onInit: commits: num=1
+	commit{dir=NRTCachingDirectory(MMapDirectory@/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@2dd2a7ae; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_1,generation=1}
+2016-05-17 02:56:29.512 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrDeletionPolicy SolrDeletionPolicy.onInit: commits: num=1
+	commit{dir=NRTCachingDirectory(MMapDirectory@/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@2dd2a7ae; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_1,generation=1}
+2016-05-17 02:56:29.512 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.SolrDeletionPolicy newest commit generation = 1
+2016-05-17 02:56:29.512 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.SolrDeletionPolicy newest commit generation = 1
+2016-05-17 02:56:29.536 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.s.SolrIndexSearcher Opening [Searcher@57239c3b[pathwayRuns] main]
+2016-05-17 02:56:29.539 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.s.SolrIndexSearcher Opening [Searcher@254e78b7[ORFDocs] main]
+2016-05-17 02:56:29.546 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.r.ManagedResourceStorage File-based storage initialized to use dir: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/conf
+2016-05-17 02:56:29.546 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.r.ManagedResourceStorage File-based storage initialized to use dir: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/conf
+2016-05-17 02:56:29.546 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.r.RestManager Initializing RestManager with initArgs: {storageDir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/conf}
+2016-05-17 02:56:29.546 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.r.RestManager Initializing RestManager with initArgs: {storageDir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/conf}
+2016-05-17 02:56:29.565 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.r.ManagedResourceStorage Reading _rest_managed.json using file:dir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/conf
+2016-05-17 02:56:29.565 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.r.ManagedResourceStorage Reading _rest_managed.json using file:dir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/conf
+2016-05-17 02:56:29.565 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.r.RestManager Initializing 0 registered ManagedResources
+2016-05-17 02:56:29.565 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.r.RestManager Initializing 0 registered ManagedResources
+2016-05-17 02:56:29.574 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.c.SpellCheckComponent Initializing spell checkers
+2016-05-17 02:56:29.574 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.c.SpellCheckComponent Initializing spell checkers
+2016-05-17 02:56:29.588 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.s.DirectSolrSpellChecker init: {name=default,field=_text_,classname=solr.DirectSolrSpellChecker,distanceMeasure=internal,accuracy=0.5,maxEdits=2,minPrefix=1,maxInspections=5,minQueryLength=4,maxQueryFrequency=0.01}
+2016-05-17 02:56:29.589 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.s.DirectSolrSpellChecker init: {name=default,field=_text_,classname=solr.DirectSolrSpellChecker,distanceMeasure=internal,accuracy=0.5,maxEdits=2,minPrefix=1,maxInspections=5,minQueryLength=4,maxQueryFrequency=0.01}
+2016-05-17 02:56:29.590 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.c.SpellCheckComponent No queryConverter defined, using default converter
+2016-05-17 02:56:29.590 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.c.SpellCheckComponent No queryConverter defined, using default converter
+2016-05-17 02:56:29.594 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.c.QueryElevationComponent Loading QueryElevation from: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/conf/elevate.xml
+2016-05-17 02:56:29.595 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.c.QueryElevationComponent Loading QueryElevation from: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/conf/elevate.xml
+2016-05-17 02:56:29.632 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.h.ReplicationHandler Commits will be reserved for  10000
+2016-05-17 02:56:29.636 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.h.ReplicationHandler Commits will be reserved for  10000
+2016-05-17 02:56:29.649 INFO  (searcherExecutor-7-thread-1-processing-x:ORFDocs) [   x:ORFDocs] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@254e78b7[ORFDocs] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2016-05-17 02:56:29.649 INFO  (searcherExecutor-7-thread-1-processing-x:ORFDocs) [   x:ORFDocs] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2016-05-17 02:56:29.649 INFO  (searcherExecutor-7-thread-1-processing-x:ORFDocs) [   x:ORFDocs] o.a.s.h.c.SpellCheckComponent Loading spell index for spellchecker: default
+2016-05-17 02:56:29.650 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.UpdateLog Looking up max value of version field to seed version buckets
+2016-05-17 02:56:29.650 INFO  (searcherExecutor-7-thread-1-processing-x:ORFDocs) [   x:ORFDocs] o.a.s.c.SolrCore [ORFDocs] Registered new searcher Searcher@254e78b7[ORFDocs] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2016-05-17 02:56:29.650 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.VersionInfo Refreshing highest value of _version_ for 65536 version buckets from index
+2016-05-17 02:56:29.650 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.VersionInfo No terms found for _version_, cannot seed version bucket highest value from index
+2016-05-17 02:56:29.650 INFO  (searcherExecutor-8-thread-1-processing-x:pathwayRuns) [   x:pathwayRuns] o.a.s.c.QuerySenderListener QuerySenderListener sending requests to Searcher@57239c3b[pathwayRuns] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2016-05-17 02:56:29.650 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.UpdateLog Could not find max version in index or recent updates, using new clock 1534542520936038400
+2016-05-17 02:56:29.650 INFO  (searcherExecutor-8-thread-1-processing-x:pathwayRuns) [   x:pathwayRuns] o.a.s.c.QuerySenderListener QuerySenderListener done.
+2016-05-17 02:56:29.650 INFO  (searcherExecutor-8-thread-1-processing-x:pathwayRuns) [   x:pathwayRuns] o.a.s.h.c.SpellCheckComponent Loading spell index for spellchecker: default
+2016-05-17 02:56:29.650 INFO  (searcherExecutor-8-thread-1-processing-x:pathwayRuns) [   x:pathwayRuns] o.a.s.c.SolrCore [pathwayRuns] Registered new searcher Searcher@57239c3b[pathwayRuns] main{ExitableDirectoryReader(UninvertingDirectoryReader())}
+2016-05-17 02:56:29.651 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.UpdateLog Looking up max value of version field to seed version buckets
+2016-05-17 02:56:29.651 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.VersionInfo Refreshing highest value of _version_ for 65536 version buckets from index
+2016-05-17 02:56:29.651 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.VersionInfo No terms found for _version_, cannot seed version bucket highest value from index
+2016-05-17 02:56:29.653 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.UpdateLog Could not find max version in index or recent updates, using new clock 1534542520939184128
+2016-05-17 02:56:29.657 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.u.UpdateLog Took 7.0ms to seed version buckets with highest version 1534542520936038400
+2016-05-17 02:56:29.658 INFO  (coreLoadExecutor-6-thread-2) [   x:ORFDocs] o.a.s.c.CoreContainer registering core: ORFDocs
+2016-05-17 02:56:29.660 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.u.UpdateLog Took 8.0ms to seed version buckets with highest version 1534542520939184128
+2016-05-17 02:56:29.660 INFO  (coreLoadExecutor-6-thread-1) [   x:pathwayRuns] o.a.s.c.CoreContainer registering core: pathwayRuns
+2016-05-17 02:56:29.675 INFO  (qtp110456297-22) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453789323} status=0 QTime=14
+2016-05-17 02:56:29.746 INFO  (qtp110456297-13) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453789327} status=0 QTime=68
+2016-05-17 02:56:29.747 INFO  (qtp110456297-14) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453789327} status=0 QTime=60
+2016-05-17 02:56:34.424 INFO  (qtp110456297-39) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453794223} status=0 QTime=0
+2016-05-17 02:56:34.445 INFO  (qtp110456297-13) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=10
+2016-05-17 02:56:34.456 INFO  (qtp110456297-14) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=4
+2016-05-17 02:56:36.023 INFO  (qtp110456297-20) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453794223} status=0 QTime=1
+2016-05-17 02:56:36.035 INFO  (qtp110456297-22) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=12
+2016-05-17 02:56:36.053 INFO  (qtp110456297-16) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/luke params={numTerms=0&show=index&wt=json&_=1463453796008} status=0 QTime=2
+2016-05-17 02:56:36.064 INFO  (qtp110456297-15) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/replication params={wt=json&command=details&_=1463453796009} status=0 QTime=3
+2016-05-17 02:56:36.091 INFO  (qtp110456297-21) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/system params={wt=json&_=1463453796009} status=0 QTime=14
+2016-05-17 02:56:36.101 INFO  (qtp110456297-38) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/ping params={action=status&wt=json&_=1463453794225&ts=1463453794225} status=503 QTime=2
+2016-05-17 02:56:37.333 INFO  (qtp110456297-13) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453794223} status=0 QTime=0
+2016-05-17 02:56:37.345 INFO  (qtp110456297-39) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=11
+2016-05-17 02:56:37.354 INFO  (qtp110456297-18) [   x:ORFDocs] o.a.s.c.S.Request [ORFDocs]  webapp=/solr path=/admin/luke params={numTerms=0&show=index&wt=json&_=1463453796008} status=0 QTime=0
+2016-05-17 02:56:37.364 INFO  (qtp110456297-22) [   x:ORFDocs] o.a.s.c.S.Request [ORFDocs]  webapp=/solr path=/replication params={wt=json&command=details&_=1463453796009} status=0 QTime=0
+2016-05-17 02:56:37.384 INFO  (qtp110456297-16) [   x:ORFDocs] o.a.s.c.S.Request [ORFDocs]  webapp=/solr path=/admin/system params={wt=json&_=1463453796009} status=0 QTime=9
+2016-05-17 02:56:37.395 INFO  (qtp110456297-15) [   x:ORFDocs] o.a.s.c.S.Request [ORFDocs]  webapp=/solr path=/admin/ping params={action=status&wt=json&_=1463453794225&ts=1463453794225} status=503 QTime=0
+2016-05-17 02:56:41.633 INFO  (qtp110456297-21) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453794223} status=0 QTime=0
+2016-05-17 02:56:41.642 INFO  (qtp110456297-39) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=4
+2016-05-17 02:56:41.655 INFO  (qtp110456297-18) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=6
+2016-05-17 02:56:43.077 INFO  (qtp110456297-22) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453794223} status=0 QTime=0
+2016-05-17 02:56:43.077 INFO  (qtp110456297-41) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/luke params={numTerms=0&show=index&wt=json&_=1463453796008} status=0 QTime=0
+2016-05-17 02:56:43.085 INFO  (qtp110456297-40) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/ping params={action=status&wt=json&_=1463453794225&ts=1463453794225} status=503 QTime=0
+2016-05-17 02:56:43.085 INFO  (qtp110456297-14) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/replication params={wt=json&command=details&_=1463453796009} status=0 QTime=0
+2016-05-17 02:56:43.085 INFO  (qtp110456297-13) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453794224} status=0 QTime=8
+2016-05-17 02:56:43.090 INFO  (qtp110456297-41) [   x:pathwayRuns] o.a.s.c.S.Request [pathwayRuns]  webapp=/solr path=/admin/system params={wt=json&_=1463453796009} status=0 QTime=4
+2016-05-17 02:59:59.130 INFO  (ShutdownMonitor) [   ] o.e.j.s.ServerConnector Stopped ServerConnector@5aa9e4eb{HTTP/1.1,[http/1.1]}{0.0.0.0:8983}
+2016-05-17 02:59:59.131 INFO  (ShutdownMonitor) [   ] o.a.s.c.CoreContainer Shutting down CoreContainer instance=1658926803
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.SolrCore [ORFDocs]  CLOSING SolrCore org.apache.solr.core.SolrCore@3cb92d49
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.SolrCore [pathwayRuns]  CLOSING SolrCore org.apache.solr.core.SolrCore@2f00af67
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.u.DirectUpdateHandler2 closing DirectUpdateHandler2{commits=0,autocommit maxTime=15000ms,autocommits=0,soft autocommits=0,optimizes=0,rollbacks=0,expungeDeletes=0,docsPending=0,adds=0,deletesById=0,deletesByQuery=0,errors=0,cumulative_adds=0,cumulative_deletesById=0,cumulative_deletesByQuery=0,cumulative_errors=0,transaction_logs_total_size=0,transaction_logs_total_number=0}
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.u.DirectUpdateHandler2 closing DirectUpdateHandler2{commits=0,autocommit maxTime=15000ms,autocommits=0,soft autocommits=0,optimizes=0,rollbacks=0,expungeDeletes=0,docsPending=0,adds=0,deletesById=0,deletesByQuery=0,errors=0,cumulative_adds=0,cumulative_deletesById=0,cumulative_deletesByQuery=0,cumulative_errors=0,transaction_logs_total_size=0,transaction_logs_total_number=0}
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.u.SolrCoreState Closing SolrCoreState
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.u.SolrCoreState Closing SolrCoreState
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.u.DefaultSolrCoreState SolrCoreState ref count has reached 0 - closing IndexWriter
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.u.DefaultSolrCoreState closing IndexWriter with IndexWriterCloser
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.u.DefaultSolrCoreState SolrCoreState ref count has reached 0 - closing IndexWriter
+2016-05-17 02:59:59.132 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.u.DefaultSolrCoreState closing IndexWriter with IndexWriterCloser
+2016-05-17 02:59:59.134 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.SolrCore [ORFDocs] Closing main searcher on request.
+2016-05-17 02:59:59.134 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.SolrCore [pathwayRuns] Closing main searcher on request.
+2016-05-17 02:59:59.134 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory Closing NRTCachingDirectoryFactory - 2 directories currently being tracked
+2016-05-17 02:59:59.134 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory Closing NRTCachingDirectoryFactory - 2 directories currently being tracked
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory looking to close /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data [CachedDir<<refCount=0;path=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data;done=false>>]
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory looking to close /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data [CachedDir<<refCount=0;path=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data;done=false>>]
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory Closing directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory Closing directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory looking to close /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index [CachedDir<<refCount=0;path=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index;done=false>>]
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory looking to close /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index [CachedDir<<refCount=0;path=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index;done=false>>]
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-2) [   x:pathwayRuns] o.a.s.c.CachingDirectoryFactory Closing directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/pathwayRuns/data/index
+2016-05-17 02:59:59.135 INFO  (coreCloseExecutor-17-thread-1) [   x:ORFDocs] o.a.s.c.CachingDirectoryFactory Closing directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/ORFDocs/data/index
+2016-05-17 02:59:59.138 INFO  (ShutdownMonitor) [   ] o.e.j.s.h.ContextHandler Stopped o.e.j.w.WebAppContext@5383967b{/solr,null,UNAVAILABLE}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp}
+2016-05-17 02:59:59.139 WARN  (ShutdownMonitor) [   ] o.e.j.s.ServletContextHandler ServletContextHandler.setHandler should not be called directly. Use insertHandler or setSessionHandler etc.

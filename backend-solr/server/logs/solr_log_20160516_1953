@@ -1,0 +1,36 @@
+2016-05-17 02:52:14.736 INFO  (main) [   ] o.e.j.u.log Logging initialized @240ms
+2016-05-17 02:52:14.862 INFO  (main) [   ] o.e.j.s.Server jetty-9.3.8.v20160314
+2016-05-17 02:52:14.874 INFO  (main) [   ] o.e.j.d.p.ScanningAppProvider Deployment monitor [file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/contexts/] at interval 0
+2016-05-17 02:52:15.043 INFO  (main) [   ] o.e.j.w.StandardDescriptorProcessor NO JSP Support for /solr, did not find org.apache.jasper.servlet.JspServlet
+2016-05-17 02:52:15.052 WARN  (main) [   ] o.e.j.s.SecurityHandler ServletContext@o.e.j.w.WebAppContext@5383967b{/solr,file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp/,STARTING}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp} has uncovered http methods for path: /
+2016-05-17 02:52:15.059 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter SolrDispatchFilter.init(): WebAppClassLoader=1465085305@57536d79
+2016-05-17 02:52:15.071 INFO  (main) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:52:15.072 INFO  (main) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:52:15.072 INFO  (main) [   ] o.a.s.c.SolrResourceLoader new SolrResourceLoader for directory: '/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr'
+2016-05-17 02:52:15.072 INFO  (main) [   ] o.a.s.c.SolrResourceLoader JNDI not configured for solr (NoInitialContextEx)
+2016-05-17 02:52:15.072 INFO  (main) [   ] o.a.s.c.SolrResourceLoader using system property solr.solr.home: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:52:15.076 INFO  (main) [   ] o.a.s.c.SolrXmlConfig Loading container configuration from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/solr.xml
+2016-05-17 02:52:15.128 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Config-defined core root directory: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:52:15.149 INFO  (main) [   ] o.a.s.c.CoreContainer New CoreContainer 1658926803
+2016-05-17 02:52:15.150 INFO  (main) [   ] o.a.s.c.CoreContainer Loading cores into CoreContainer [instanceDir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr]
+2016-05-17 02:52:15.150 WARN  (main) [   ] o.a.s.c.CoreContainer Couldn't add files from /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/lib to classpath: /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr/lib
+2016-05-17 02:52:15.157 INFO  (main) [   ] o.a.s.h.c.HttpShardHandlerFactory created with socketTimeout : 600000,connTimeout : 60000,maxConnectionsPerHost : 20,maxConnections : 10000,corePoolSize : 0,maximumPoolSize : 2147483647,maxThreadIdleTime : 5,sizeOfQueue : -1,fairnessPolicy : false,useRetries : false,
+2016-05-17 02:52:15.319 INFO  (main) [   ] o.a.s.u.UpdateShardHandler Creating UpdateShardHandler HTTP client with params: socketTimeout=600000&connTimeout=60000&retry=true
+2016-05-17 02:52:15.321 INFO  (main) [   ] o.a.s.l.LogWatcher SLF4J impl is org.slf4j.impl.Log4jLoggerFactory
+2016-05-17 02:52:15.321 INFO  (main) [   ] o.a.s.l.LogWatcher Registering Log Listener [Log4j (org.slf4j.impl.Log4jLoggerFactory)]
+2016-05-17 02:52:15.323 INFO  (main) [   ] o.a.s.c.CoreContainer Security conf doesn't exist. Skipping setup for authorization module.
+2016-05-17 02:52:15.323 INFO  (main) [   ] o.a.s.c.CoreContainer No authentication plugin used.
+2016-05-17 02:52:15.354 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Looking for core definitions underneath /home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr
+2016-05-17 02:52:15.357 INFO  (main) [   ] o.a.s.c.CorePropertiesLocator Found 0 core definitions
+2016-05-17 02:52:15.360 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter user.dir=/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server
+2016-05-17 02:52:15.360 INFO  (main) [   ] o.a.s.s.SolrDispatchFilter SolrDispatchFilter.init() done
+2016-05-17 02:52:15.368 INFO  (main) [   ] o.e.j.s.h.ContextHandler Started o.e.j.w.WebAppContext@5383967b{/solr,file:///home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp/,AVAILABLE}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp}
+2016-05-17 02:52:15.374 INFO  (main) [   ] o.e.j.s.ServerConnector Started ServerConnector@44c03695{HTTP/1.1,[http/1.1]}{0.0.0.0:8983}
+2016-05-17 02:52:15.375 INFO  (main) [   ] o.e.j.s.Server Started @880ms
+2016-05-17 02:52:25.090 INFO  (qtp110456297-14) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/cores params={indexInfo=false&wt=json&_=1463453544810} status=0 QTime=59
+2016-05-17 02:52:25.112 INFO  (qtp110456297-15) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453544811} status=0 QTime=66
+2016-05-17 02:52:25.113 INFO  (qtp110456297-21) [   ] o.a.s.s.HttpSolrCall [admin] webapp=null path=/admin/info/system params={wt=json&_=1463453544811} status=0 QTime=55
+2016-05-17 02:53:21.653 INFO  (ShutdownMonitor) [   ] o.e.j.s.ServerConnector Stopped ServerConnector@44c03695{HTTP/1.1,[http/1.1]}{0.0.0.0:8983}
+2016-05-17 02:53:21.653 INFO  (ShutdownMonitor) [   ] o.a.s.c.CoreContainer Shutting down CoreContainer instance=1658926803
+2016-05-17 02:53:21.660 INFO  (ShutdownMonitor) [   ] o.e.j.s.h.ContextHandler Stopped o.e.j.w.WebAppContext@5383967b{/solr,null,UNAVAILABLE}{/home/jorgeluis/IdeaProjects/metaPathwaysQuery/backend/server/solr-webapp/webapp}
+2016-05-17 02:53:21.661 WARN  (ShutdownMonitor) [   ] o.e.j.s.ServletContextHandler ServletContextHandler.setHandler should not be called directly. Use insertHandler or setSessionHandler etc.
