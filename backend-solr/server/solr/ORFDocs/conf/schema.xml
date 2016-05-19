@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema name="ORFDocs" version="1.5">
+    <types>
+        <fieldType name="ORF_key" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
+        <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
+        <fieldType name="simple_float" class="solr.TrieFloatField" indexed="false" stored="true"/>
+        <fieldType name="simple_string" class="solr.StrField" indexed="false" stored="true"/>
+        <fieldType name="pathway_id" class="solr.StrField" indexed="true" stored ="true"/>
+
+        <fieldType name="word-list" class="solr.TextField" indexed="true" stored="true" multiValued="true">
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+        </fieldType>
+
+        <fieldType name="text" class="solr.TextField" indexed="true" stored="true" multiValued="false" omitNorms="false"
+                   termVectors="true" termPositions="true">
+              <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.HyphenatedWordsFilterFactory"/><!--Eg when querying TNFα, "TNF-α" will be a hit as well -->
+                <filter class="solr.LowerCaseFilterFactory"/>      <!--Eg when querying "tnf-α", "TNF-α" will be a hit as well -->
+                <filter class="solr.ASCIIFoldingFilterFactory"/>   <!--Eg when querying "TNF-a", "TNF-α" will be a hit  as well -->
+              </analyzer>
+              <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.ASCIIFoldingFilterFactory"/>
+              </analyzer>
+        </fieldType>
+
+        <fieldType name="extended_text" class="solr.TextField" indexed="false" stored="true" multiValued="false" omitNorms="false"
+                   termVectors="true" termPositions="true">
+        </fieldType>
+
+        <field name="_version_" type="long" indexed="true" stored="false"/>
+
+    </types>
+
+    <fields>
+        <!--functional_and_taxonomic_table.txt-->
+        <field name="ORFID" type="ORF_key"/>
+        <field name="ORF_len" type="simple_number"/>
+        <field name="start" type="simple_number"/>
+        <field name="end" type="simple_number"/>
+        <field name="strand_sense" type="simple_string"/>
+        <field name="taxonomy" type="simple_string" />
+
+        <!--ORF_annotation-->
+        <field name="COGID" type="pathway_id"/>
+        <field name="KEGGID" type="pathway_id"/>
+        <field name="product" type="text" />
+        <field name="extended_desc" type="extended_text"/>
+
+        <!--RPKM data -->
+        <field name="rpkm" type="simple_float"/>
+        <field name="rpkm_stats" type="extended_text"/>
+    </fields>
+
+    <uniqueKey>ORFID</uniqueKey>
+
+    <solrQueryParser defaultOperator="AND"/>
+
+</schema>

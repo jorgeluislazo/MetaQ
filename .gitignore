@@ -19,6 +19,9 @@ backend-solr/server/solr/pathwayRuns/data/
 backend-solr/server/solr-webapp/
 backend-solr/server/lib/
 
+#Solr logs
+backend-solr/server/logs/
+
 
 
 
