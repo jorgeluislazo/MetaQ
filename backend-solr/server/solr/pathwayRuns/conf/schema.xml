@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<schema name="ORFDocs" version="1.5">
+<schema name="pathwayRun" version="1.5">
     <types>
         <fieldType name="pathwayRunID" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
         <fieldType name="simple_number" class="solr.TrieIntField" indexed="true" stored="true"/>
