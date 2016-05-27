@@ -46,13 +46,48 @@ public class SolrLink {
      * @param documents: the {@link java.util.Collection} of {@link org.apache.solr.common.SolrInputDocument}
      *                   to index to Solr.
      */
-    public void update(Collection<SolrInputDocument> documents) {
+    public void index(Collection<SolrInputDocument> documents) {
         try {
             solrClient.add(documents);
             solrClient.commit();
+            System.out.println("succesfully indexed a batch size of :" + documents.size());
         } catch (SolrServerException | IOException e) {
             e.printStackTrace();
         }
+    }
+    /**
+     * This method is called to index data to Solr.
+     * See https://wiki.apache.org/solr/Solrj#Adding_Data_to_Solr
+     *
+     * @param document: the {@link org.apache.solr.common.SolrInputDocument}
+     *                   to index to Solr.
+     */
+    public void indexSingle(SolrInputDocument document) {
+        try {
+            changeTargetCore("pathwayRuns");
+            solrClient.add(document);
+            solrClient.commit();
+            System.out.println("Succesfully added PathwayRun: " + document.getFieldValue("runID"));
+        } catch (SolrServerException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Method to delete all indexed records in Solr.
+     *
+     * @throws IOException
+     * @throws SolrServerException
+     */
+    public void deleteRecords() throws IOException, SolrServerException {
+        solrClient.deleteByQuery("*:*");
+        solrClient.commit();
+        System.out.println("Deleting all records...Done");
+    }
+
+    public void changeTargetCore(String newTarget){
+        // http://localhost:8983/solr/#/pathwayRuns
+        this.solrClient = new HttpSolrClient(BASE_URL + newTarget);
     }
 
 }

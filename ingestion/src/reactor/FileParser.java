@@ -2,23 +2,19 @@ package reactor;
 
 import com.univocity.parsers.tsv.TsvParser;
 import com.univocity.parsers.tsv.TsvParserSettings;
+import org.apache.solr.common.SolrInputDocument;
 import org.javatuples.Pair;
 import org.javatuples.Quartet;
 import org.javatuples.Sextet;
 
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by jorgeluis on 20/05/16.
  */
 class FileParser {
-//    private TsvParserSettings settings;
     private TsvParser parser;
 
     FileParser(){
@@ -32,39 +28,12 @@ class FileParser {
         parser = new TsvParser(settings);
     }
 
-    public void parse(){
-        TsvParserSettings settings = new TsvParserSettings();
-        //the file used here uses '\n' as the line separator sequence.
-        //the line separator sequence is defined here to ensure systems such as MacOS and Windows
-        //are able to process this file correctly (MacOS uses '\r'; and Windows uses '\r\n').
-        settings.getFormat().setLineSeparator("\n");
-
-        // creates a TSV parser
-        parser = new TsvParser(settings);
-
-        // parses all rows in one go.
-        List<String[]> allRows = parser.parseAll(new File("/home/jorgeluis/Documents/Hallam/AlyseData/SI4096441_results/annotation_table/COG_stats_1.txt"));
-
-        for(String[] row : allRows){
-            prettyPrint(row);
-        }
-
-    }
-
-    private void prettyPrint(String[] row){
-        StringBuilder output = new StringBuilder();
-        for (int i = 0; i <row.length ; i++){
-            output.append(row[i]);
-        }
-        System.out.println(output);
-    }
-
-     Quartet getCogStats1(File file){
+    Quartet parseCogStats1(File file){
         List<String[]> allRows = parser.parseAll(file);
         return new Quartet<>(allRows.get(1)[1],allRows.get(2)[1], allRows.get(3)[1], allRows.get(4)[1]);
     }
 
-    List<Pair> getCogStats2(File file){
+    List<Pair> parseCogStats2(File file){
         List<Pair> result = new ArrayList<>();
         List<String[]> allRows = parser.parseAll(file);
 
@@ -76,7 +45,7 @@ class FileParser {
         return result;
     }
 
-    Sextet getKeggStats1(File file){
+    Sextet parseKeggStats1(File file){
         List<String[]> allRows = parser.parseAll(file);
         return new Sextet<>(
                 allRows.get(1)[1],
@@ -88,7 +57,7 @@ class FileParser {
         );
     }
 
-    List<Pair> getKeggStats2(File file){
+    List<Pair> parseKeggStats2(File file){
         List<Pair> result = new ArrayList<>();
         List<String[]> allRows = parser.parseAll(file);
 
@@ -100,6 +69,86 @@ class FileParser {
 
         return result;
     }
+
+    List<SolrInputDocument> parseFuncTable(File file){
+        parser.beginParsing(file);
+        String[] row;
+        List<SolrInputDocument> documentBatch = new ArrayList<>();
+
+        parser.parseNext(); //skip the titles...
+        while((row = parser.parseNext()) != null){
+            SolrInputDocument orfDoc = parseFunctTableRow(row);
+            documentBatch.add(orfDoc);
+
+        }
+        return documentBatch;
+    }
+
+    private SolrInputDocument parseFunctTableRow(String[] row){
+        SolrInputDocument doc = new SolrInputDocument();
+        doc.addField("ORFID", row[0]);
+        doc.addField("ORF_len", row[1]);
+        doc.addField("start", row[2]);
+        doc.addField("end", row[3]);
+        doc.addField("strand_sense", row[6]);
+        doc.addField("taxonomy", row[8]);
+        return doc;
+    }
+
+
+    List<SolrInputDocument> parseORFAnnotTable(File file){
+        parser.beginParsing(file);
+        String[] row;
+        List<SolrInputDocument> documentBatch = new ArrayList<>();
+
+        while((row = parser.parseNext()) != null){
+            SolrInputDocument orfDoc = parseORFAnnotTableRow(row);
+            documentBatch.add(orfDoc);
+        }
+        return documentBatch;
+    }
+
+    private SolrInputDocument parseORFAnnotTableRow(String[] row){
+        SolrInputDocument doc = new SolrInputDocument();
+        doc.addField("ORFID", row[0]);
+
+        Map<String, String> cogID = new HashMap<>();
+        cogID.put("set", row[2]);
+        doc.addField("COGID", cogID);
+
+        Map<String, String> keggID = new HashMap<>();
+        keggID.put("set", row[3]);
+        doc.addField("KEGGID", keggID);
+
+        Map<String, String> product = new HashMap<>();
+        product.put("set", row[4]);
+        doc.addField("product", product);
+
+        Map<String, String> extended = new HashMap<>();
+        extended.put("set", row[6]);
+        doc.addField("extended_desc", extended);
+        return doc;
+    }
+
+    List<SolrInputDocument> parseRPKMTable(File file){
+        parser.beginParsing(file);
+        String[] row;
+        List<SolrInputDocument> documentBatch = new ArrayList<>();
+        while((row = parser.parseNext()) != null){
+            SolrInputDocument rpkmDoc = new SolrInputDocument();
+            if(row[0].equals("")){
+                System.out.println("here");
+            }
+
+            rpkmDoc.addField("ORFID", row[0]);
+            Map<String, String> rpkmValue = new HashMap<>();
+            rpkmValue.put("set", row[1]);
+            rpkmDoc.addField("rpkm", rpkmValue);
+            documentBatch.add(rpkmDoc);
+        }
+        return documentBatch;
+    }
+
 
     private static String modifyName(String title){
         StringBuilder result = new StringBuilder();

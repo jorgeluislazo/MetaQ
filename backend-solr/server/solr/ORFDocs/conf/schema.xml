@@ -28,11 +28,12 @@
               </analyzer>
         </fieldType>
 
-        <fieldType name="extended_text" class="solr.TextField" indexed="false" stored="true" multiValued="false" omitNorms="false"
+        <fieldType name="extended_text" class="solr.TextField" indexed="true" stored="true" multiValued="false" omitNorms="false"
                    termVectors="true" termPositions="true">
+            <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
         </fieldType>
 
-        <field name="_version_" type="long" indexed="true" stored="false"/>
+
 
     </types>
 
@@ -54,6 +55,8 @@
         <!--RPKM data -->
         <field name="rpkm" type="simple_float"/>
         <field name="rpkm_stats" type="extended_text"/>
+
+        <field name="_version_" type="long" indexed="true" stored="false"/>
     </fields>
 
     <uniqueKey>ORFID</uniqueKey>

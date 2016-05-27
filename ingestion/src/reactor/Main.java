@@ -11,7 +11,7 @@ import org.javatuples.Sextet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,9 +21,15 @@ public class Main {
 
     private static SolrLink client;
     private static FileParser parser;
-    public static Collection<SolrInputDocument> collection;
+    private static List<SolrInputDocument> orfDocs;
 
     public static void main(String[] args) throws IOException, SolrServerException {
+        if(args[0].equals("del")){
+            client = new SolrLink("ORFDocs");
+            client.deleteRecords();
+            return;
+        }
+
         boolean isDirectory = (new File(args[0]).isDirectory());
         if (!isDirectory){
             System.out.println("\n\nERROR: Invalid arguments passed.");
@@ -35,51 +41,69 @@ public class Main {
         File baseDir = new File(args[0]);
         client = new SolrLink("pathwayRuns");
         parser = new FileParser();
+
         //for each pathway run
-
         for( File pathwayRun : Files.fileTreeTraverser().children(baseDir)){
+            Long start = System.currentTimeMillis();
 
-            SolrInputDocument document = new SolrInputDocument();
+            String runID = pathwayRun.getName().substring(0, pathwayRun.getName().indexOf("_"));
+            SolrInputDocument pathwayRunDoc = new SolrInputDocument();
+            orfDocs = new ArrayList<>();
+
             for (File f : Files.fileTreeTraverser().preOrderTraversal(pathwayRun)){
-                importFile(f, document);
+                importFile(f, pathwayRunDoc);
             }
+            pathwayRunDoc.addField("runID", runID);
+            client.indexSingle(pathwayRunDoc);
+            System.out.println(System.currentTimeMillis() - start);
         }
-        //parser.parse();
     }
 
-    static private void importFile(File file, SolrInputDocument document){
+    static private void importFile(File file, SolrInputDocument pathwayRunDoc){
         String name = file.getName();
-//        System.out.println(file.getName());
 
         switch (name){
             case "COG_stats_1.txt":
-                Quartet cogStats1 = parser.getCogStats1(file);
-                document.addField("poorly_char_cog1", cogStats1.getValue0());
-                document.addField("info_process_cog1", cogStats1.getValue1());
-                document.addField("metabolism_cog1", cogStats1.getValue2());
-                document.addField("cell_signal_cog1", cogStats1.getValue3());
+                Quartet cogStats1 = parser.parseCogStats1(file);
+                pathwayRunDoc.addField("poorly_char_cog1", cogStats1.getValue0());
+                pathwayRunDoc.addField("info_process_cog1", cogStats1.getValue1());
+                pathwayRunDoc.addField("metabolism_cog1", cogStats1.getValue2());
+                pathwayRunDoc.addField("cell_signal_cog1", cogStats1.getValue3());
                 break;
             case "COG_stats_2.txt":
-                List<Pair> cogStats2 = parser.getCogStats2(file);
+                List<Pair> cogStats2 = parser.parseCogStats2(file);
                 for (Pair tuple : cogStats2){
-                    document.addField((String) tuple.getValue0(), tuple.getValue1());
+                    pathwayRunDoc.addField((String) tuple.getValue0(), tuple.getValue1());
                 }
                 break;
             case "KEGG_stats_1.txt":
-                Sextet keggStats1 = parser.getKeggStats1(file);
-                document.addField("cell_process_kegg1", keggStats1.getValue0());
-                document.addField("human_disease_kegg1", keggStats1.getValue1());
-                document.addField("gene_info_kegg1", keggStats1.getValue2());
-                document.addField("environmental_info_kegg1", keggStats1.getValue3());
-                document.addField("organism_sys_kegg1", keggStats1.getValue4());
-                document.addField("metabolism_kegg1", keggStats1.getValue5());
+                Sextet keggStats1 = parser.parseKeggStats1(file);
+                pathwayRunDoc.addField("cell_process_kegg1", keggStats1.getValue0());
+                pathwayRunDoc.addField("human_disease_kegg1", keggStats1.getValue1());
+                pathwayRunDoc.addField("gene_info_kegg1", keggStats1.getValue2());
+                pathwayRunDoc.addField("environmental_info_kegg1", keggStats1.getValue3());
+                pathwayRunDoc.addField("organism_sys_kegg1", keggStats1.getValue4());
+                pathwayRunDoc.addField("metabolism_kegg1", keggStats1.getValue5());
                 break;
             case "KEGG_stats_2.txt":
-                List<Pair> keggStats2 = parser.getKeggStats2(file);
+                List<Pair> keggStats2 = parser.parseKeggStats2(file);
                 for (Pair tuple : keggStats2){
-                    document.addField((String) tuple.getValue0(), tuple.getValue1());
+                    pathwayRunDoc.addField((String) tuple.getValue0(), tuple.getValue1());
                 }
                 break;
+            case "functional_and_taxonomic_table.txt":
+                client.changeTargetCore("ORFDocs");
+                orfDocs = parser.parseFuncTable(file);
+                client.index(orfDocs);
+                break;
+            case "ORF_annotation_table.txt":
+                orfDocs = parser.parseORFAnnotTable(file);
+                client.index(orfDocs);
+                break;
+            case "SI4096390_combined_unique.orf_rpkm.txt":
+                orfDocs = parser.parseRPKMTable(file);
+                client.index(orfDocs);
+
         }
 
     }

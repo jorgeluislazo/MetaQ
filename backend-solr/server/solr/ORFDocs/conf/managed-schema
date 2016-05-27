@@ -4,7 +4,7 @@
   <uniqueKey>ORFID</uniqueKey>
   <solrQueryParser defaultOperator="AND"/>
   <fieldType name="ORF_key" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
-  <fieldType name="extended_text" class="solr.TextField" omitNorms="false" indexed="false" stored="true" termPositions="true" termVectors="true" multiValued="false"/>
+  <fieldType name="extended_text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false"/>
   <fieldType name="pathway_id" class="solr.StrField" indexed="true" stored="true"/>
   <fieldType name="simple_float" class="solr.TrieFloatField" indexed="false" stored="true"/>
   <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
@@ -22,7 +22,7 @@
       <filter class="solr.ASCIIFoldingFilterFactory"/>
     </analyzer>
   </fieldType>
-  <fieldType name="word-list" class="solr.TextField" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
   <field name="COGID" type="pathway_id"/>
   <field name="KEGGID" type="pathway_id"/>
   <field name="ORFID" type="ORF_key"/>
@@ -35,4 +35,5 @@
   <field name="start" type="simple_number"/>
   <field name="strand_sense" type="simple_string"/>
   <field name="taxonomy" type="simple_string"/>
+  <field name="_version_" type="long" indexed="true" stored="false"/>
 </schema>
