@@ -81,6 +81,7 @@ class FileParser {
                 SolrInputDocument orfDoc = parseFunctTableRow(row);
                 documentBatch.add(orfDoc);
             }catch(IllegalTableException e){
+                e.printStackTrace();
                 System.out.println("File originating error: " + file.getName());
                 System.out.println("Path: " + file.getAbsoluteFile());
                 System.out.println("row #: " + parser.getContext().currentLine());
@@ -91,7 +92,7 @@ class FileParser {
     }
 
     private SolrInputDocument parseFunctTableRow(String[] row) throws IllegalTableException{
-        if(row[0].equals("")){
+        if(row[0] == null){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
 
@@ -118,6 +119,7 @@ class FileParser {
                 SolrInputDocument orfDoc = parseORFAnnotTableRow(row);
                 documentBatch.add(orfDoc);
             }catch(IllegalTableException e){
+                e.printStackTrace();
                 System.out.println("File originating error: " + file.getName());
                 System.out.println("Path: " + file.getAbsoluteFile());
                 System.out.println("row #: " + parser.getContext().currentLine());
