@@ -77,14 +77,25 @@ class FileParser {
 
         parser.parseNext(); //skip the titles...
         while((row = parser.parseNext()) != null){
-            SolrInputDocument orfDoc = parseFunctTableRow(row);
-            documentBatch.add(orfDoc);
+            try {
+                SolrInputDocument orfDoc = parseFunctTableRow(row);
+                documentBatch.add(orfDoc);
+            }catch(IllegalTableException e){
+                System.out.println("File originating error: " + file.getName());
+                System.out.println("Path: " + file.getAbsoluteFile());
+                System.out.println("row #: " + parser.getContext().currentLine());
+            }
 
         }
         return documentBatch;
     }
 
-    private SolrInputDocument parseFunctTableRow(String[] row){
+    private SolrInputDocument parseFunctTableRow(String[] row) throws IllegalTableException{
+        if(row[0].equals("")){
+            //no id found
+            throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
+
+        }
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField("ORFID", row[0]);
         doc.addField("ORF_len", row[1]);
@@ -92,6 +103,7 @@ class FileParser {
         doc.addField("end", row[3]);
         doc.addField("strand_sense", row[6]);
         doc.addField("taxonomy", row[8]);
+        doc.addField("product", row[9]);
         return doc;
     }
 
@@ -102,13 +114,24 @@ class FileParser {
         List<SolrInputDocument> documentBatch = new ArrayList<>();
 
         while((row = parser.parseNext()) != null){
-            SolrInputDocument orfDoc = parseORFAnnotTableRow(row);
-            documentBatch.add(orfDoc);
+            try {
+                SolrInputDocument orfDoc = parseORFAnnotTableRow(row);
+                documentBatch.add(orfDoc);
+            }catch(IllegalTableException e){
+                System.out.println("File originating error: " + file.getName());
+                System.out.println("Path: " + file.getAbsoluteFile());
+                System.out.println("row #: " + parser.getContext().currentLine());
+            }
         }
         return documentBatch;
     }
 
-    private SolrInputDocument parseORFAnnotTableRow(String[] row){
+    private SolrInputDocument parseORFAnnotTableRow(String[] row) throws IllegalTableException{
+        if(row[0].equals("")){
+            //no id found
+            throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
+
+        }
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField("ORFID", row[0]);
 
@@ -120,9 +143,12 @@ class FileParser {
         keggID.put("set", row[3]);
         doc.addField("KEGGID", keggID);
 
-        Map<String, String> product = new HashMap<>();
-        product.put("set", row[4]);
-        doc.addField("product", product);
+        //overwrite the product field if found, since its a bit more descriptive in this table
+        if(row[4] != null){
+            Map<String, String> product = new HashMap<>();
+            product.put("set", row[4]);
+            doc.addField("product", product);
+        }
 
         Map<String, String> extended = new HashMap<>();
         extended.put("set", row[6]);
@@ -150,7 +176,7 @@ class FileParser {
     }
 
 
-    private static String modifyName(String title){
+    private String modifyName(String title){
         StringBuilder result = new StringBuilder();
 
         int len = title.length();
@@ -174,6 +200,14 @@ class FileParser {
             result = result.append(words[0].replaceAll(",","").toLowerCase()).append("_kegg2");
             return result.toString();
         }
+    }
+
+    private String prettyPrintRow(String[] row){
+        StringBuilder result = new StringBuilder();
+        for (String value : row){
+            result.append(value).append("\t");
+        }
+        return result.toString();
     }
 
 

@@ -50,7 +50,7 @@ public class SolrLink {
         try {
             solrClient.add(documents);
             solrClient.commit();
-            System.out.println("succesfully indexed a batch size of :" + documents.size());
+            System.out.println("succesfully indexed/updated a batch size of :" + documents.size());
         } catch (SolrServerException | IOException e) {
             e.printStackTrace();
         }

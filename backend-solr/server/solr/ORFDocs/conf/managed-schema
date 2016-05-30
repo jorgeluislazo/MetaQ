@@ -29,7 +29,7 @@
   <field name="ORF_len" type="simple_number"/>
   <field name="end" type="simple_number"/>
   <field name="extended_desc" type="extended_text"/>
-  <field name="product" type="text"/>
+  <field name="product" type="text" default="hypothetical protein"/>
   <field name="rpkm" type="simple_float"/>
   <field name="rpkm_stats" type="extended_text"/>
   <field name="start" type="simple_number"/>

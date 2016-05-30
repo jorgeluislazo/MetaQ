@@ -49,7 +49,7 @@
         <!--ORF_annotation-->
         <field name="COGID" type="pathway_id"/>
         <field name="KEGGID" type="pathway_id"/>
-        <field name="product" type="text" />
+        <field name="product" type="text" default="Hypothetical protein" />
         <field name="extended_desc" type="extended_text"/>
 
         <!--RPKM data -->

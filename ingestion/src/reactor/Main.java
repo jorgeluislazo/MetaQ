@@ -43,6 +43,7 @@ public class Main {
         parser = new FileParser();
 
         //for each pathway run
+        System.out.println("Indexing files...\nWorking directory: " + args[0]);
         for( File pathwayRun : Files.fileTreeTraverser().children(baseDir)){
             Long start = System.currentTimeMillis();
 
