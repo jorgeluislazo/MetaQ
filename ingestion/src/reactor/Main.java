@@ -44,9 +44,11 @@ public class Main {
 
         //for each pathway run
         System.out.println("Indexing files...\nWorking directory: " + args[0]);
+        Long start = System.currentTimeMillis();
         for( File pathwayRun : Files.fileTreeTraverser().children(baseDir)){
-            Long start = System.currentTimeMillis();
-
+            if(!pathwayRun.isDirectory()){
+                continue;
+            }
             String runID = pathwayRun.getName().substring(0, pathwayRun.getName().indexOf("_"));
             SolrInputDocument pathwayRunDoc = new SolrInputDocument();
             orfDocs = new ArrayList<>();
@@ -56,8 +58,8 @@ public class Main {
             }
             pathwayRunDoc.addField("runID", runID);
             client.indexSingle(pathwayRunDoc);
-            System.out.println(System.currentTimeMillis() - start);
         }
+        System.out.println("Total time taken in seconds: " + (System.currentTimeMillis() - start)/1000);
     }
 
     static private void importFile(File file, SolrInputDocument pathwayRunDoc){
@@ -101,9 +103,16 @@ public class Main {
                 orfDocs = parser.parseORFAnnotTable(file);
                 client.index(orfDocs);
                 break;
-            case "SI4096390_combined_unique.orf_rpkm.txt":
-                orfDocs = parser.parseRPKMTable(file);
-                client.index(orfDocs);
+//            case "SI4096390_combined_unique.orf_rpkm.txt":
+//                orfDocs = parser.parseRPKMTable(file);
+//                client.index(orfDocs);
+//                break;
+            default:
+                if (name.matches(".+_combined_unique\\.orf_rpkm\\.txt")){
+                    orfDocs = parser.parseRPKMTable(file);
+                    client.index(orfDocs);
+                }
+                break;
 
         }
 

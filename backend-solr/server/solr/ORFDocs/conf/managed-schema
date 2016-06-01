@@ -8,7 +8,7 @@
   <fieldType name="pathway_id" class="solr.StrField" indexed="true" stored="true"/>
   <fieldType name="simple_float" class="solr.TrieFloatField" indexed="false" stored="true"/>
   <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
-  <fieldType name="simple_string" class="solr.StrField" indexed="false" stored="true"/>
+  <fieldType name="simple_string" class="solr.StrField" indexed="true" stored="true"/>
   <fieldType name="text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false">
     <analyzer type="index">
       <tokenizer class="solr.StandardTokenizerFactory"/>

@@ -5,7 +5,7 @@
         <fieldType name="ORF_key" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
         <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
         <fieldType name="simple_float" class="solr.TrieFloatField" indexed="false" stored="true"/>
-        <fieldType name="simple_string" class="solr.StrField" indexed="false" stored="true"/>
+        <fieldType name="simple_string" class="solr.StrField" indexed="true" stored="true"/>
         <fieldType name="pathway_id" class="solr.StrField" indexed="true" stored ="true"/>
 
         <fieldType name="word-list" class="solr.TextField" indexed="true" stored="true" multiValued="true">
