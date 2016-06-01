@@ -22,6 +22,19 @@ backend-solr/server/lib/
 #Solr logs
 backend-solr/server/logs/
 
+#play framework
+/lib/
+/logs/
+/modules
+*/project/target
+frontend/target
+tmp/
+test-result
+server.pid
+*.eml
+/dist/
+.cache
+
 
 
 
