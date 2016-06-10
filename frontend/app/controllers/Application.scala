@@ -7,11 +7,16 @@ import play.api.mvc._
 class Application extends Controller {
 
   def index = Action {
-    Ok(views.html.index("Search application is ready."))
+    Ok(views.html.index())
   }
   
-  def get(query: String): Action[AnyContent] = Action { implicit request =>
+  def simpleSearch(query: String): Action[AnyContent] = Action { implicit request =>
     val results = SearchLib.get(query,request)
+    Ok(results)
+  }
+
+  def test(): Action[AnyContent] = Action { implicit request =>
+    val results = SearchLib.get( "product:protein" ,request)
     Ok(results)
   }
 

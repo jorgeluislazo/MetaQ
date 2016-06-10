@@ -193,8 +193,8 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
     def toList(docList: SolrDocumentList): List[Map[String, Any]] = {
       (for(i <- 0 to docList.size() - 1) yield {
         val doc = docList.get(i)
-        val map = doc.getFieldNames().asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
-        if(solrQuery.getHighlight()){
+        val map = doc.getFieldNames.asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
+        if(solrQuery.getHighlight){
           val id = doc.getFieldValue(this.id)
           if(id != null && highlight.get(id) != null && highlight.get(id).get(highlightField) != null){
             map + ("highlight" -> highlight.get(id).get(highlightField).get(0))

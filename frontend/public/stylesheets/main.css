@@ -1,0 +1,42 @@
+.nav-bar{
+    border-bottom: 1px solid #000;
+}
+
+#search{
+    margin-left: 20%;
+    margin-top: 2%;
+    margin-bottom: 1.5%;
+
+}
+
+#searchBox{
+    width: 40%;
+}
+
+.container{
+
+}
+
+.side-bar{
+    float: left;
+    width: 25%;
+    height: 1000px;
+    background-color: rgba(126,196,122, 0.2);
+    margin-top: 2px;
+}
+
+.documents{
+    float: left;
+    width: 74.8%;
+    height: 1000px;
+    background-color: rgba(126,196,122, 0.2);
+    margin-top: 2px;
+    margin-left: 2px;
+    border-left: 1px solid #000;
+
+}
+
+.footer{
+   clear: left;
+}
+

@@ -3,7 +3,7 @@ package libs.solr.scala
 import libs.solr.scala.query.ExpressionParser
 import libs.solr.scala.query.QueryTemplate
 import org.apache.solr.client.solrj.SolrServer
-import org.apache.solr.common.params.CommonParams
+
 
 class QueryBuilder(server: SolrServer, query: String)(implicit parser: ExpressionParser)
   extends QueryBuilderBase[QueryBuilder] {
@@ -18,9 +18,10 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
    */
   def getResultAsMap(params: Any = null): MapQueryResult = {
     solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
-    println("query= " + solrQuery.toString)
+    println("query= " + solrQuery.toString + " | line 21 of QueryBuilder.scala")
     responseToMap(server.query(solrQuery))
   }
+
 
   /**
    * Returns the search result of this query as the case class.
