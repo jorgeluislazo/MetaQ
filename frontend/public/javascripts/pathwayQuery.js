@@ -30,16 +30,22 @@ jQuery(function($) {
             contentType: "application/json"
         });
 
-        // jqxhr.beforeSend(function(){
-        //
-        // });
 
         jqxhr.done(function(response){
-            console.log(response);
-            displayResultsInfo(response.noOfResults, response.results.length);
-            for(var i in response.results){
-                    parseOrfData(response.results[i], i);
+            var documents = $('.documents');
+            documents.empty();
+
+            if(response.noOfResults == 0){
+                var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
+                documents.append(div);
             }
+            else{
+                displayResultsInfo(response.noOfResults, response.results.length);
+                for(var i in response.results){
+                    parseOrfData(response.results[i], i);
+                }
+            }
+
         });
 
         jqxhr.fail(function(data){
@@ -51,7 +57,8 @@ jQuery(function($) {
     };
 
     var parseOrfData = function(data, i){
-        var rank = $("<span>").attr('class', 'rank').text(parseInt(i) + 1),
+        var number = $("<small>" + (parseInt(i) + 1) + "</small>"),
+            rank = $("<span>").attr('class', 'rank').append(number),
             proteinTitle = $("<a>").attr("href", addProteinLink(data.product)).text(data.product),
             idTitle = $("<a>").attr("href", addIdLink(data.ORFID)).text(data.ORFID),
 
@@ -95,7 +102,6 @@ jQuery(function($) {
 
     //on submit
     $search.submit( function () {
-        $('.documents').empty();
         var value = $('#searchBox').val();
         var fetchDataURL = $search.data('search') + value;
         fetchData(fetchDataURL);
