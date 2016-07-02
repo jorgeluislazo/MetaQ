@@ -8,6 +8,13 @@
     padding-top: 50px;
 }
 
+.settings{
+    padding-top: 20px;
+}
+.radio-inline{
+    padding-left: 0;
+}
+
 #searchBox{
     top: 50px;
     width: 400px;

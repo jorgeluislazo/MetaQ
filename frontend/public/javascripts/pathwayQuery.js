@@ -17,6 +17,9 @@ jQuery(function($) {
             "COGID"     : "COG id",
             "KEGGID"    : "KEGG id",
             "rpkm"      : "rpkm"
+        },
+        userSettingsDefaults ={
+            "searchField" : "product"
         };
 
 
@@ -102,10 +105,12 @@ jQuery(function($) {
 
     //on submit
     $search.submit( function () {
+        var searchType = $('input:radio[name=df]:checked').val();
         var value = $('#searchBox').val();
-        var fetchDataURL = $search.data('search') + value;
-        fetchData(fetchDataURL);
+        var fetchDataURL = $search.data('search') + value + "&searchField=" + searchType;
         console.log(fetchDataURL);
+        fetchData(fetchDataURL);
+
 
         return false;
     });

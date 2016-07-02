@@ -6,7 +6,7 @@
 GET     /                           controllers.Application.index
 
 # Search API 
-GET     /search                        controllers.Application.simpleSearch(query: String)
+GET     /search                controllers.Application.simpleSearch(query: String)
 
 #test
 GET     /test                       controllers.Application.test

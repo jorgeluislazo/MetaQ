@@ -64,13 +64,15 @@ object SearchLib {
     // Checking URI Parameters
 //    val query = request.getQueryString("query").getOrElse("*:*")
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
+    val field = request.getQueryString("searchField").getOrElse("product").toString
     val mm = request.getQueryString("mm").getOrElse("<NULL>").replace("\"", "")
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(200).toString)
     val sort = request.getQueryString("sort").getOrElse("<NULL>")
 
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
-    //println(query)
+//    println(request.getQueryString("searchField").toString)
+
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
       offset = Integer.parseInt(request.getQueryString("offset").getOrElse(0).toString)
@@ -78,14 +80,10 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-    ///////////////////////////////////////////////////////////////////////
-
-    // The current time in milliseconds.
-
     // Strip whitespace (or other characters) from the beginning and end of a string
+    val settings = "{!df=" + field + "}"
 
-
-    var queryBuilder = client.query(query)
+    var queryBuilder = client.query(settings + query)
       .start(offset)
       .rows(resultsPerPage)
 

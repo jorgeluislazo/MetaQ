@@ -10,12 +10,28 @@
     <body>
         <div class="container-fluid">
             <div class="nav-bar row">
-                <div class="search col-md-offset-3">
+                <div class="search col-md-4 col-md-offset-3">
                     <form id="search" data-search="@routes.Application.simpleSearch("")">
                         <label for="searchBox">Search</label>
                         <input id="searchBox" type="text">
                         <input type="submit" value="search">
                     </form>
+                </div>
+                <div class="settings  col-md-5">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <p>Search by:</p>
+                        </div>
+                        <div class="radio-inline col-md-3">
+                            <label><input type="radio" name="df" value="product" checked="checked">Protein product (default)</label>
+                        </div>
+                        <div class="radio-inline col-md-3">
+                            <label><input type="radio" name="df" value="extended_desc">Extended Description</label>
+                        </div>
+                        <div class="radio-inline col-md-3">
+                            <label><input type="radio" name="df" value="ORFID">ORF id</label>
+                        </div>
+                    </div>
                 </div>
             </div>
 
