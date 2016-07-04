@@ -105,9 +105,16 @@ jQuery(function($) {
 
     //on submit
     $search.submit( function () {
-        var searchType = $('input:radio[name=df]:checked').val();
-        var value = $('#searchBox').val();
-        var fetchDataURL = $search.data('search') + value + "&searchField=" + searchType;
+        var query = $('#searchBox').val(),
+            searchType = $('input:radio[name=df]:checked').val(),
+            highQualOnly = $('input:checkbox[name=hq]:checked').val(),
+            rpkm = $('#rpkm').val();
+
+        if(highQualOnly === undefined){
+            highQualOnly = "false"
+        }
+
+        var fetchDataURL = $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm;
         console.log(fetchDataURL);
         fetchData(fetchDataURL);
 

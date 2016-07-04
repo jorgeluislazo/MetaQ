@@ -61,17 +61,17 @@ object SearchLib {
    */
 
   def buildQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
-    // Checking URI Parameters
-//    val query = request.getQueryString("query").getOrElse("*:*")
+    // Checking URL Parameters
+    val settings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
+    val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
+
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
-    val field = request.getQueryString("searchField").getOrElse("product").toString
     val mm = request.getQueryString("mm").getOrElse("<NULL>").replace("\"", "")
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(200).toString)
     val sort = request.getQueryString("sort").getOrElse("<NULL>")
 
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
-
-//    println(request.getQueryString("searchField").toString)
 
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
@@ -80,12 +80,18 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-    // Strip whitespace (or other characters) from the beginning and end of a string
-    val settings = "{!df=" + field + "}"
 
     var queryBuilder = client.query(settings + query)
       .start(offset)
       .rows(resultsPerPage)
+      .addFilterQuery("rpkm:[" + minRPKM + " TO *]") 
+
+    if(highQualOnly.equals("true")){
+      val fq1 = "COGID:[* TO *]"
+      val fq2 = "KEGGID:[* TO *]"
+      queryBuilder = queryBuilder.addFilterQuery(fq1)
+          .addFilterQuery(fq2)
+    }
 
     // When you assign mm (Minimum 'Should' Match), we remove q.op
     // becuase we can't set two params to the same function
