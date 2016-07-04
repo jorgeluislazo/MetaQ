@@ -84,13 +84,11 @@ object SearchLib {
     var queryBuilder = client.query(settings + query)
       .start(offset)
       .rows(resultsPerPage)
-      .addFilterQuery("rpkm:[" + minRPKM + " TO *]") 
+      .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
 
     if(highQualOnly.equals("true")){
-      val fq1 = "COGID:[* TO *]"
-      val fq2 = "KEGGID:[* TO *]"
-      queryBuilder = queryBuilder.addFilterQuery(fq1)
-          .addFilterQuery(fq2)
+      val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
+      queryBuilder = queryBuilder.addFilterQuery(fq)
     }
 
     // When you assign mm (Minimum 'Should' Match), we remove q.op
