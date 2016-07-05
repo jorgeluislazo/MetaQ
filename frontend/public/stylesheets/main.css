@@ -22,10 +22,18 @@
     font-size: 15px;
 }
 
+/*sidebar left hand side*/
+
 .side-bar{
     height: 1000px;
     background-color: rgba(126,196,122, 0.2);
 }
+
+.facetList{
+    display: inline;
+}
+
+/*results right hand side*/
 
 .documents{
     background-color: rgba(126,196,122, 0.2);

@@ -188,6 +188,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
 
   protected def responseToMap(response: QueryResponse): MapQueryResult = {
+//    println(response.getFacetFields)
     val highlight = response.getHighlighting()
 
     def toList(docList: SolrDocumentList): List[Map[String, Any]] = {
@@ -239,8 +240,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
           field.getValues().asScala.map { value => (value.getName(), value.getCount()) }.toMap
       )}.toMap
     }
-    
-    MapQueryResult(response.getResults().getNumFound(), queryResult, facetResult,facetDates)    
+    MapQueryResult(response.getResults().getNumFound(), queryResult, facetResult,facetDates)
   }
   
   def responseToObject[T](response: QueryResponse)(implicit m: Manifest[T]): CaseClassQueryResult[T] = {

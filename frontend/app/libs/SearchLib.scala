@@ -15,6 +15,7 @@ import play.api.libs.json.JsBoolean
 import play.api.db.DB
 import play.api.Play.current
 
+import scala.collection.immutable.ListMap
 import util.control.Breaks._
 
 /**
@@ -36,7 +37,8 @@ object SearchLib {
     val queryBuilder = this.buildQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_results" -> 0,
-      "results" -> List[JsString]())
+      "results" -> List[JsString](),
+      "facetFields" -> Map[String, Map[String, Long]]())
 
     try {
       // Get Results from Solr.
@@ -85,6 +87,9 @@ object SearchLib {
       .start(offset)
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
+      .facetFields("COGID")
+      .facetFields("KEGGID")
+
 
     if(highQualOnly.equals("true")){
       val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
@@ -130,9 +135,17 @@ object SearchLib {
         resultsInfo::=resultJsonDoc
     }
 
+
+    //sort the facet fields and add them back
+    val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2):_*)
+    val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2):_*)
+    val sortedFacets = Map( "COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
+
+
     val resultsJson = Json.obj(
       "noOfResults" -> results.numFound,
-      "results" -> resultsInfo)
+      "results" -> resultsInfo,
+      "facetFields" -> sortedFacets)
     resultsJson
   }
 

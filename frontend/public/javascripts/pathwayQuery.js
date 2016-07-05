@@ -35,6 +35,10 @@ jQuery(function($) {
 
 
         jqxhr.done(function(response){
+            console.log(response);
+            // for(var facet in response.facetFields["KEGGID"]){
+            //     console.log(response.facetFields["KEGGID"][facet])
+            // }
             var documents = $('.documents');
             documents.empty();
 
@@ -47,6 +51,8 @@ jQuery(function($) {
                 for(var i in response.results){
                     parseOrfData(response.results[i], i);
                 }
+                displayCogFacets(response.facetFields["COGID"]);
+                displayKeggFacets(response.facetFields["KEGGID"]);
             }
 
         });
@@ -86,12 +92,38 @@ jQuery(function($) {
         orfDiv.append(ul);
 
         $('.documents').append(orfDiv);
-        console.log(orfDiv)
+
     };
 
     var displayResultsInfo = function(totalCount, displayCount){
         var div = $('<div>').attr('class', "resultsInfo").text("Displaying " + displayCount + " result(s) out of " + totalCount + " results found.");
         $('.documents').append(div);
+    };
+
+    var displayCogFacets = function(facetResults){
+        var h4 = $('<h4>').text("COG result facets"),
+            ul = $('<ul>'),
+            facetDiv = $('#facetPanel').append(h4);
+
+        for (var value in facetResults){
+            var li = $('<li>').attr('class','facetList').text(value + " (" + facetResults[value] + ")");
+            ul.append(li)
+        }
+        facetDiv.append(ul)
+
+    };
+
+    var displayKeggFacets = function(facetResults){
+        var h4 = $('<h4>').text("KEGG result facets"),
+            ul = $('<ul>'),
+            facetDiv = $('#facetPanel').append(h4);
+
+        for (var value in facetResults){
+            var li = $('<li>').attr('class','facetList').text(value + " (" + facetResults[value] + ")");
+            ul.append(li)
+        }
+        facetDiv.append(ul)
+
     };
 
 
@@ -118,8 +150,12 @@ jQuery(function($) {
         console.log(fetchDataURL);
         fetchData(fetchDataURL);
 
-
         return false;
     });
+
+    $('#tabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show')
+    })
 
 });
