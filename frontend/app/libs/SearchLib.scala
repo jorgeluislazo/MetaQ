@@ -89,6 +89,7 @@ object SearchLib {
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
       .facetFields("COGID")
       .facetFields("KEGGID")
+      .setParameter("facet.limit","25")
 
 
     if(highQualOnly.equals("true")){
@@ -145,7 +146,7 @@ object SearchLib {
     val resultsJson = Json.obj(
       "noOfResults" -> results.numFound,
       "results" -> resultsInfo,
-      "facetFields" -> sortedFacets)
+      "facetFields" -> results.facetFields)
     resultsJson
   }
 

@@ -33,6 +33,33 @@
     display: inline;
 }
 
+.facet-size-1{
+    font-size: 85%;
+}
+
+.facet-size-2{
+    font-size: 95%;
+}
+
+.facet-size-3{
+    font-size: 105%;
+}
+
+.facet-size-4{
+    font-size: 120%;
+    padding: 2px;
+}
+
+.facet-size-5{
+    font-size: 135%;
+    padding: 4px;
+}
+
+.facet-size-6{
+    font-size: 145%;
+    padding: 5px;
+}
+
 /*results right hand side*/
 
 .documents{

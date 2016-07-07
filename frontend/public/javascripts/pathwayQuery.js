@@ -36,11 +36,11 @@ jQuery(function($) {
 
         jqxhr.done(function(response){
             console.log(response);
-            // for(var facet in response.facetFields["KEGGID"]){
-            //     console.log(response.facetFields["KEGGID"][facet])
-            // }
-            var documents = $('.documents');
+            //before
+            var documents = $('.documents'),
+                sidePanel = $('#facetPanel');
             documents.empty();
+            sidePanel.empty();
 
             if(response.noOfResults == 0){
                 var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
@@ -105,8 +105,25 @@ jQuery(function($) {
             ul = $('<ul>'),
             facetDiv = $('#facetPanel').append(h4);
 
-        for (var value in facetResults){
-            var li = $('<li>').attr('class','facetList').text(value + " (" + facetResults[value] + ")");
+        //make a new scale for sizing the facets
+        var oldMin = 99999999, oldMax = 0, oldRange, newMin = 1, newRange = 5;
+        for (var facet in facetResults){
+            var value = facetResults[facet];
+            if (value < oldMin){
+                oldMin = value;
+            }
+            if (value > oldMax){
+                oldMax = value;
+            }
+        }
+        oldRange = oldMax - oldMin;
+
+        for (facet in facetResults){
+            var facetClass = normalizeFacetSize(facetResults[facet],oldMin,oldRange,newRange,newMin),
+                a = $('<a>').attr('class' , facetClass).text(facet + " "),
+                li = $('<li>').attr('class','facetList').append(a);
+
+            console.log(normalizeFacetSize(facetResults[facet],oldMin,oldRange,newRange,newMin));
             ul.append(li)
         }
         facetDiv.append(ul)
@@ -124,6 +141,11 @@ jQuery(function($) {
         }
         facetDiv.append(ul)
 
+    };
+
+    var normalizeFacetSize = function(oldValue, oldMin, oldRange, newRange, newMin){
+        var newValue = (((oldValue - oldMin) * newRange) / oldRange) + newMin;
+        return "facet-size-" + Math.ceil(newValue)
     };
 
 
