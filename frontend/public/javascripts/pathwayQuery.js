@@ -20,11 +20,12 @@ jQuery(function($) {
         },
         userSettingsDefaults ={
             "searchField" : "product"
-        };
+        },
+        cachedResponse =  null,
+        currentFacetFilter = "";
 
 
     var fetchData = function(url){
-
         $('.documents').append("<img src='images/loading.gif'>");
 
         var jqxhr = $.ajax({
@@ -35,24 +36,53 @@ jQuery(function($) {
 
 
         jqxhr.done(function(response){
-            console.log(response);
-            //before
-            var documents = $('.documents'),
-                sidePanel = $('#facetPanel');
-            documents.empty();
-            sidePanel.empty();
+            // save/update the results
+            // before
+            var results = $('.results'),
+                sidePanel = $('#facetPanel'),
+                documents = $('<div>').attr('class', 'documents');
 
-            if(response.noOfResults == 0){
-                var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
-                documents.append(div);
-            }
-            else{
-                displayResultsInfo(response.noOfResults, response.results.length);
-                for(var i in response.results){
-                    parseOrfData(response.results[i], i);
+
+            if(response.isFilterSearch){
+                $('.filterGuide').remove();
+                $('.resultsInfo').remove();
+                $('.documents').remove();
+                for (var j in response.results) {
+                    var hit = parseOrfData(response.results[j], j);
+                    documents.append(hit)
                 }
-                displayCogFacets(response.facetFields["COGID"]);
-                displayKeggFacets(response.facetFields["KEGGID"]);
+                var a = $('<a>').text("remove").click(function(){
+                        restoreResults()
+                    }),
+                    p = $('<p>').text("Applying the facet filter: ").append($('<b>').text(currentFacetFilter)),
+                    filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
+
+                var resultsInfo = $('<div>').attr('class', "resultsInfo")
+                    .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
+                results.append(filterGuide).append(resultsInfo).append(documents);
+            }else {
+                cachedResponse = response;
+                console.log(cachedResponse);
+                results.empty();
+                sidePanel.empty();
+
+                if (cachedResponse.noOfResults == 0) {
+                    var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
+                    results.append(div);
+                }
+                else {
+                    resultsInfo = $('<div>').attr('class', "resultsInfo")
+                        .text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+                    results.append(resultsInfo);
+
+                    for (var i in cachedResponse.results) {
+                        hit = parseOrfData(cachedResponse.results[i], i);
+                        documents.append(hit)
+                    }
+                    results.append(documents);
+                    displayFacets(cachedResponse.facetFields["COGID"], "COG");
+                    displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
+                }
             }
 
         });
@@ -60,7 +90,7 @@ jQuery(function($) {
         jqxhr.fail(function(data){
             var  message;
             message = data.responseText || data.statusText;
-           console.log(message);
+            console.log(message);
         });
 
     };
@@ -90,56 +120,72 @@ jQuery(function($) {
             ul.append(li)
         }
         orfDiv.append(ul);
-
-        $('.documents').append(orfDiv);
-
+        return orfDiv
     };
 
-    var displayResultsInfo = function(totalCount, displayCount){
-        var div = $('<div>').attr('class', "resultsInfo").text("Displaying " + displayCount + " result(s) out of " + totalCount + " results found.");
-        $('.documents').append(div);
-    };
-
-    var displayCogFacets = function(facetResults){
-        var h4 = $('<h4>').text("COG result facets"),
+    var displayFacets = function(facetResults, fieldType){
+        var h4 = $('<h4>').text(fieldType + " result facets"),
             ul = $('<ul>'),
             facetDiv = $('#facetPanel').append(h4);
 
+
         //make a new scale for sizing the facets
-        var oldMin = 99999999, oldMax = 0, oldRange, newMin = 1, newRange = 5;
-        for (var facet in facetResults){
+        var oldMin = 99999999, oldMax = 0, oldRange, newMin = 1, newRange = 5, sizeList = 0;
+        for (var facet in facetResults) {
             var value = facetResults[facet];
-            if (value < oldMin){
+            if (value < oldMin) {
                 oldMin = value;
             }
-            if (value > oldMax){
+            if (value > oldMax) {
                 oldMax = value;
             }
+            sizeList++
         }
         oldRange = oldMax - oldMin;
 
-        for (facet in facetResults){
-            var facetClass = normalizeFacetSize(facetResults[facet],oldMin,oldRange,newRange,newMin),
-                a = $('<a>').attr('class' , facetClass).text(facet + " "),
-                li = $('<li>').attr('class','facetList').append(a);
+        if(sizeList == 0){
+            var p = $('<p>').text("No facets found for " + fieldType + " candidate hits in results");
+            facetDiv.append(p)
+        }else {
+            for (facet in facetResults) {
+                var facetClass = normalizeFacetSize(facetResults[facet], oldMin, oldRange, newRange, newMin),
+                    a = $('<a>').attr('class', facetClass).text(facet + " "),
+                    li = $('<li>').attr('class', 'facetList').append(a);
 
-            console.log(normalizeFacetSize(facetResults[facet],oldMin,oldRange,newRange,newMin));
-            ul.append(li)
+                (function (f) {
+                    li.click(function () {
+                        currentFacetFilter = f;
+                        var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + f;
+                        var fetchDataURL = constructURL(facetSearchParam);
+                        fetchData(fetchDataURL)
+                    });
+                })(facet);
+
+                ul.append(li)
+            }
+            facetDiv.append(ul)
         }
-        facetDiv.append(ul)
-
     };
 
-    var displayKeggFacets = function(facetResults){
-        var h4 = $('<h4>').text("KEGG result facets"),
-            ul = $('<ul>'),
-            facetDiv = $('#facetPanel').append(h4);
+    var restoreResults = function(){
+        var results = $('.results'),
+            sidePanel = $('#facetPanel'),
+            documents = $('<div>').attr('class', 'documents');
 
-        for (var value in facetResults){
-            var li = $('<li>').attr('class','facetList').text(value + " (" + facetResults[value] + ")");
-            ul.append(li)
+        results.empty();
+        sidePanel.empty();
+
+        var resultsInfo = $('<div>').attr('class', "resultsInfo")
+            .text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+        results.append(resultsInfo);
+
+        for (var i in cachedResponse.results) {
+            var hit = parseOrfData(cachedResponse.results[i], i);
+            documents.append(hit)
         }
-        facetDiv.append(ul)
+        results.append(documents);
+        displayFacets(cachedResponse.facetFields["COGID"], 'COG');
+        displayFacets(cachedResponse.facetFields["KEGGID"], 'KEGG');
 
     };
 
@@ -159,21 +205,25 @@ jQuery(function($) {
 
     //on submit
     $search.submit( function () {
+        var fetchDataURL = constructURL();
+        fetchData(fetchDataURL);
+
+        return false;
+    });
+
+    var constructURL = function(extraParam){
         var query = $('#searchBox').val(),
             searchType = $('input:radio[name=df]:checked').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
 
-        if(highQualOnly === undefined){
-            highQualOnly = "false"
-        }
+        if(highQualOnly === undefined){ highQualOnly = "false" }
+        if(extraParam == undefined){ extraParam = ""}
 
-        var fetchDataURL = $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm;
+        var fetchDataURL = $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm + extraParam;
         console.log(fetchDataURL);
-        fetchData(fetchDataURL);
-
-        return false;
-    });
+        return fetchDataURL
+    };
 
     $('#tabs a').click(function (e) {
         e.preventDefault();

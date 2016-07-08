@@ -22,6 +22,13 @@
     font-size: 15px;
 }
 
+.filterGuide a{
+    display: inline;
+}
+.filterGuide p{
+    display: inline;
+}
+
 /*sidebar left hand side*/
 
 .side-bar{
@@ -62,7 +69,7 @@
 
 /*results right hand side*/
 
-.documents{
+.results{
     background-color: rgba(126,196,122, 0.2);
     margin-top: 2px;
     border-left: 1px solid #000;

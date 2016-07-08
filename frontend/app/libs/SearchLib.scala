@@ -67,11 +67,11 @@ object SearchLib {
     val settings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
+    val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
+    val filterSearchQuery = request.getQueryString("facetFilter").getOrElse("")
 
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
-    val mm = request.getQueryString("mm").getOrElse("<NULL>").replace("\"", "")
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(200).toString)
-    val sort = request.getQueryString("sort").getOrElse("<NULL>")
 
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
@@ -82,29 +82,25 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-
     var queryBuilder = client.query(settings + query)
       .start(offset)
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
-      .facetFields("COGID")
-      .facetFields("KEGGID")
-      .setParameter("facet.limit","25")
 
+    if(isFilterSearch){
+      queryBuilder = queryBuilder.addFilterQuery(filterSearchQuery)
+    } else {
+      queryBuilder = queryBuilder.facetFields("COGID")
+        .facetFields("KEGGID")
+        .setParameter("facet.limit","25")
+        .setParameter("facet.mincount", "1")
+    }
 
     if(highQualOnly.equals("true")){
       val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
       queryBuilder = queryBuilder.addFilterQuery(fq)
     }
 
-    // When you assign mm (Minimum 'Should' Match), we remove q.op
-    // becuase we can't set two params to the same function
-    // q.op=AND == mm=100% | q.op=OR == mm=0%
-    if (!mm.equals("<NULL>")) {
-      queryBuilder = queryBuilder.setParameter("mm", "100%")
-    } else {
-      //queryBuilder = queryBuilder.setParameter("q.op", queryOperator)
-    }
 
     if (query.equals("*:*")) {
       queryBuilder = queryBuilder.setParameter("q", "product:protein")
@@ -118,6 +114,10 @@ object SearchLib {
    */
   def prepareResults(results: MapQueryResult, request: Request[AnyContent]): JsObject = {
     var resultsInfo = List[JsObject]()
+
+    val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
+
+
     results.documents.foreach {
       doc =>
         var resultJsonDoc = Json.obj(
@@ -136,17 +136,18 @@ object SearchLib {
         resultsInfo::=resultJsonDoc
     }
 
-
-    //sort the facet fields and add them back
-    val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2):_*)
-    val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2):_*)
-    val sortedFacets = Map( "COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
-
+    if(!isFilterSearch){
+      //sort the facet fields and add them back
+      val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2):_*)
+      val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2):_*)
+      val sortedFacets = Map( "COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
+    }
 
     val resultsJson = Json.obj(
       "noOfResults" -> results.numFound,
       "results" -> resultsInfo,
-      "facetFields" -> results.facetFields)
+      "facetFields" -> results.facetFields,
+      "isFilterSearch" -> isFilterSearch)
     resultsJson
   }
 
