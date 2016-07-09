@@ -101,11 +101,6 @@ object SearchLib {
       queryBuilder = queryBuilder.addFilterQuery(fq)
     }
 
-
-    if (query.equals("*:*")) {
-      queryBuilder = queryBuilder.setParameter("q", "product:protein")
-    }
-
     queryBuilder
   }
 
@@ -116,7 +111,6 @@ object SearchLib {
     var resultsInfo = List[JsObject]()
 
     val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
-
 
     results.documents.foreach {
       doc =>
@@ -136,6 +130,8 @@ object SearchLib {
         resultsInfo::=resultJsonDoc
     }
 
+    resultsInfo = resultsInfo.reverse
+
     if(!isFilterSearch){
       //sort the facet fields and add them back
       val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2):_*)
@@ -145,6 +141,7 @@ object SearchLib {
 
     val resultsJson = Json.obj(
       "noOfResults" -> results.numFound,
+      "start" -> results.start,
       "results" -> resultsInfo,
       "facetFields" -> results.facetFields,
       "isFilterSearch" -> isFilterSearch)

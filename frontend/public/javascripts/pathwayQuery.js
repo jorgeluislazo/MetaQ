@@ -4,7 +4,7 @@
 jQuery(function($) {
 
     var $search = $('#search'),
-    //Arbitrary mappings
+    //mappings for parsing Solr field ids to readable text
         li_map2 = {
             "ORF_len"       : "ORF length",
             "start"         : "Start",
@@ -18,8 +18,10 @@ jQuery(function($) {
             "KEGGID"    : "KEGG id",
             "rpkm"      : "rpkm"
         },
-        userSettingsDefaults ={
-            "searchField" : "product"
+        userSettDef ={
+            "searchField" : "product",
+            "resultsPerPage": 200,
+            "page" : 1
         },
         cachedResponse =  null,
         currentFacetFilter = "";
@@ -43,7 +45,7 @@ jQuery(function($) {
                 documents = $('<div>').attr('class', 'documents');
 
 
-            if(response.isFilterSearch){
+            if(response.isFilterSearch){ // keep the current search and update result section
                 $('.filterGuide').remove();
                 $('.resultsInfo').remove();
                 $('.documents').remove();
@@ -61,6 +63,7 @@ jQuery(function($) {
                     .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
                 results.append(filterGuide).append(resultsInfo).append(documents);
             }else {
+                //update the cached result and parse all the new information
                 cachedResponse = response;
                 console.log(cachedResponse);
                 results.empty();
@@ -84,7 +87,7 @@ jQuery(function($) {
                     displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
                 }
             }
-
+            displayPager(response.start, response.noOfResults)
         });
 
         jqxhr.fail(function(data){
@@ -189,6 +192,48 @@ jQuery(function($) {
 
     };
 
+    var displayPager = function(start, totalResults){
+        var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
+            nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
+            container = $(".pagination"),
+            allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
+            minPage = Math.max(1, userSettDef["page"] - 4),
+            maxPage = Math.min(Math.max(userSettDef["page"] + 4, 10) , allPages),
+            numPages = maxPage - minPage; // to render
+        //renew pages and set handlers
+        container.empty()
+
+        backButton.click(function(){
+            userSettDef["page"]--;
+            var fetchDataURL = constructURL();
+            fetchData(fetchDataURL);
+        });
+
+        nextButton.click(function(){
+            userSettDef["page"]++;
+            var fetchDataURL = constructURL();
+            fetchData(fetchDataURL);
+        });
+        
+        container.append(backButton)
+
+        if(allPages <= 10){ //render all
+            for(var i = 1; i <= numPages; i++){
+                var li = $("<li>").append($("<a>").text(i))
+                container.append(li)
+            }
+        }else{
+            for(i = minPage; i <= maxPage; i++){
+                li = $("<li>").append($("<a>").text(i))
+                container.append(li)
+            }
+
+        }
+        container.append(nextButton)
+        console.log(start)
+        console.log(numPages)
+    }
+
     var normalizeFacetSize = function(oldValue, oldMin, oldRange, newRange, newMin){
         var newValue = (((oldValue - oldMin) * newRange) / oldRange) + newMin;
         return "facet-size-" + Math.ceil(newValue)
@@ -203,8 +248,10 @@ jQuery(function($) {
         return "#"
     };
 
-    //on submit
+    //search
     $search.submit( function () {
+        //reset pagination
+        userSettDef["page"] = 1;
         var fetchDataURL = constructURL();
         fetchData(fetchDataURL);
 
@@ -220,7 +267,8 @@ jQuery(function($) {
         if(highQualOnly === undefined){ highQualOnly = "false" }
         if(extraParam == undefined){ extraParam = ""}
 
-        var fetchDataURL = $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm + extraParam;
+        var fetchDataURL =
+            $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm + "&page=" + userSettDef["page"] + extraParam;
         console.log(fetchDataURL);
         return fetchDataURL
     };

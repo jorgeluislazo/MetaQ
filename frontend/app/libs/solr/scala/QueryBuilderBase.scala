@@ -71,7 +71,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
    */
   def groupBy(fields: String*): Repr = {
     val ret = copy()
-    if(fields.size > 0){
+    if(fields.nonEmpty){
       ret.solrQuery.setParam("group", "true")
       ret.solrQuery.setParam("group.field", fields: _*)
     }
@@ -188,8 +188,10 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
 
   protected def responseToMap(response: QueryResponse): MapQueryResult = {
-//    println(response.getFacetFields)
-    val highlight = response.getHighlighting()
+//    println(response)
+//    println(solrQuery.getStart)
+
+    val highlight = response.getHighlighting
 
     def toList(docList: SolrDocumentList): List[Map[String, Any]] = {
       (for(i <- 0 to docList.size() - 1) yield {
@@ -216,36 +218,32 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
       }.toList
     } else { 
       solrQuery.getParams("group") match {
-        case null => {
-          toList(response.getResults())
-        }
-        case _ => {
-           toList(response.getResults())
-        }
+        case null => toList(response.getResults)
+        case _ => toList(response.getResults)
       }
     }
 
-    val facetResult = response.getFacetFields() match {
+    val facetResult = response.getFacetFields match {
       case null => Map.empty[String, Map[String, Long]]
       case facetFields => facetFields.asScala.map { field => (
-          field.getName(),
-          field.getValues().asScala.map { value => (value.getName(), value.getCount()) }.toMap
+          field.getName,
+          field.getValues.asScala.map { value => (value.getName, value.getCount) }.toMap
       )}.toMap
     }
 
-    val facetDates = response.getFacetDates() match {
+    val facetDates = response.getFacetDates match {
       case null => Map.empty[String, Map[String, Long]]
       case facetFields => facetFields.asScala.map { field => (
-          field.getName(),
-          field.getValues().asScala.map { value => (value.getName(), value.getCount()) }.toMap
+          field.getName,
+          field.getValues.asScala.map { value => (value.getName, value.getCount) }.toMap
       )}.toMap
     }
-    MapQueryResult(response.getResults().getNumFound(), queryResult, facetResult,facetDates)
+    MapQueryResult(response.getResults.getNumFound, queryResult, facetResult,facetDates, solrQuery.getStart)
   }
   
   def responseToObject[T](response: QueryResponse)(implicit m: Manifest[T]): CaseClassQueryResult[T] = {
     val result = responseToMap(response)
-    
+
     CaseClassQueryResult[T](
       result.numFound,
       result.documents.map { doc =>
