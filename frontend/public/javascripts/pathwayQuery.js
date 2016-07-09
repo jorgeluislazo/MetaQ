@@ -197,7 +197,7 @@ jQuery(function($) {
             nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
-            minPage = Math.max(1, userSettDef["page"] - 4),
+            minPage = Math.max(1, userSettDef["page"] - 5),
             maxPage = Math.min(Math.max(userSettDef["page"] + 4, 10) , allPages),
             numPages = maxPage - minPage; // to render
         //renew pages and set handlers
@@ -214,22 +214,32 @@ jQuery(function($) {
             var fetchDataURL = constructURL();
             fetchData(fetchDataURL);
         });
-        
+
+        if(userSettDef["page"] = 1){
+            backButton.attr("class", "disabled")
+        }
+
         container.append(backButton)
 
         if(allPages <= 10){ //render all
             for(var i = 1; i <= numPages; i++){
-                var li = $("<li>").append($("<a>").text(i))
-                container.append(li)
+                var li = $("<li>").append($("<a>").text(i));
+                if(i == userSettDef["page"]){
+                    li.attr("class", "active")
+                }
+                container.append(li);
             }
-        }else{
+        }else{ // render currPage +/- 4
             for(i = minPage; i <= maxPage; i++){
-                li = $("<li>").append($("<a>").text(i))
-                container.append(li)
+                li = $("<li>").append($("<a>").text(i));
+                if(i == userSettDef["page"]){
+                    li.attr("class", "active")
+                }
+                container.append(li);
             }
 
         }
-        container.append(nextButton)
+        container.append(nextButton);
         console.log(start)
         console.log(numPages)
     }
