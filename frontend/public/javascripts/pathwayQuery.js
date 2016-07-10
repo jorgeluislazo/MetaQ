@@ -21,14 +21,15 @@ jQuery(function($) {
         userSettDef ={
             "searchField" : "product",
             "resultsPerPage": 200,
-            "page" : 1
+            "page" : 1,
+            "facetField" : ""
         },
         cachedResponse =  null,
-        currentFacetFilter = "";
+        currentFacetFilter = "",
+        currentFacetField = "";
 
 
     var fetchData = function(url){
-        $('.documents').append("<img src='images/loading.gif'>");
 
         var jqxhr = $.ajax({
             type: "GET",
@@ -37,65 +38,70 @@ jQuery(function($) {
         });
 
 
-        jqxhr.done(function(response){
-            // save/update the results
-            // before
+        jqxhr.done(function (response) {
+            //before
             var results = $('.results'),
+                resultsInfo = $('.resultsInfo'),
                 sidePanel = $('#facetPanel'),
-                documents = $('<div>').attr('class', 'documents');
+                documents = $('.documents');
 
+            documents.fadeOut("fast", function(){
+                documents.empty()
 
-            if(response.isFilterSearch){ // keep the current search and update result section
-                $('.filterGuide').remove();
-                $('.resultsInfo').remove();
-                $('.documents').remove();
-                for (var j in response.results) {
-                    var hit = parseOrfData(response.results[j], j);
-                    documents.append(hit)
-                }
-                var a = $('<a>').text("remove").click(function(){
-                        restoreResults()
-                    }),
-                    p = $('<p>').text("Applying the facet filter: ").append($('<b>').text(currentFacetFilter)),
-                    filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
-
-                var resultsInfo = $('<div>').attr('class', "resultsInfo")
-                    .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
-                results.append(filterGuide).append(resultsInfo).append(documents);
-            }else {
-                //update the cached result and parse all the new information
-                cachedResponse = response;
-                console.log(cachedResponse);
-                results.empty();
-                sidePanel.empty();
-
-                if (cachedResponse.noOfResults == 0) {
-                    var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
-                    results.append(div);
-                }
-                else {
-                    resultsInfo = $('<div>').attr('class', "resultsInfo")
-                        .text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
-                    results.append(resultsInfo);
-
-                    for (var i in cachedResponse.results) {
-                        hit = parseOrfData(cachedResponse.results[i], i);
+                if (response.isFilterSearch) { // keep the current search and update result section
+                    $('.filterGuide').remove();
+                    $('.resultsInfo').remove();
+                    for (var j in response.results) {
+                        var hit = parseOrfData(response.results[j], j);
                         documents.append(hit)
                     }
-                    results.append(documents);
-                    displayFacets(cachedResponse.facetFields["COGID"], "COG");
-                    displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
+                    var a = $('<a>').text("remove").click(function () {
+                            restoreResults()
+                        }),
+                        p = $('<p>').text("Applying the facet filter: ").append($('<b>').text(currentFacetFilter)),
+                        filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
+
+                    var infoDiv = $('<div>').attr('class', "resultsInfo")
+                        .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
+                    results.prepend(infoDiv).prepend(filterGuide);
+                    documents.fadeIn("slow", function(){
+                        displayPager(response.start, response.noOfResults, true)
+                    });
+                } else {
+                    //update the cached result and parse all the new information
+                    cachedResponse = response;
+                    console.log(cachedResponse);
+                    sidePanel.empty();
+
+                    if (cachedResponse.noOfResults == 0) {
+                        var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
+                        results.append(div);
+                    }
+                    else {
+                        resultsInfo.empty()
+                        resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+
+                        for (var i in cachedResponse.results) {
+                            hit = parseOrfData(cachedResponse.results[i], i);
+                            documents.append(hit)
+                        }
+
+                        documents.fadeIn("slow", function(){
+                            displayFacets(cachedResponse.facetFields["COGID"], "COG");
+                            displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
+                            displayPager(response.start, response.noOfResults, false)
+                        });
+                    }
                 }
-            }
-            displayPager(response.start, response.noOfResults)
+            });
         });
 
-        jqxhr.fail(function(data){
-            var  message;
+        jqxhr.fail(function (data) {
+            var message;
             message = data.responseText || data.statusText;
             console.log(message);
         });
-
+        // $('.documents').append("<img src='images/loading.gif'>");
     };
 
     var parseOrfData = function(data, i){
@@ -157,7 +163,10 @@ jQuery(function($) {
 
                 (function (f) {
                     li.click(function () {
+                        //save variables and send data
+                        userSettDef["page"] = 1;
                         currentFacetFilter = f;
+                        currentFacetField = fieldType;
                         var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + f;
                         var fetchDataURL = constructURL(facetSearchParam);
                         fetchData(fetchDataURL)
@@ -173,75 +182,96 @@ jQuery(function($) {
     var restoreResults = function(){
         var results = $('.results'),
             sidePanel = $('#facetPanel'),
-            documents = $('<div>').attr('class', 'documents');
+            resultsInfo = $('.resultsInfo'),
+            documents = $('.documents');
+        documents.fadeOut("fast", function(){
+            $('.filterGuide').remove();
+            documents.empty();
 
-        results.empty();
-        sidePanel.empty();
+            resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
 
-        var resultsInfo = $('<div>').attr('class', "resultsInfo")
-            .text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
-        results.append(resultsInfo);
+            for (var i in cachedResponse.results) {
+                var hit = parseOrfData(cachedResponse.results[i], i);
+                documents.append(hit)
+            }
+            documents.fadeIn("slow", function(){
 
-        for (var i in cachedResponse.results) {
-            var hit = parseOrfData(cachedResponse.results[i], i);
-            documents.append(hit)
-        }
-        results.append(documents);
-        displayFacets(cachedResponse.facetFields["COGID"], 'COG');
-        displayFacets(cachedResponse.facetFields["KEGGID"], 'KEGG');
-
+            });
+        });
     };
 
-    var displayPager = function(start, totalResults){
+    var displayPager = function(start, totalResults, isFilterPager){
         var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
             nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
             minPage = Math.max(1, userSettDef["page"] - 5),
             maxPage = Math.min(Math.max(userSettDef["page"] + 4, 10) , allPages),
-            numPages = maxPage - minPage; // to render
+            numPages = maxPage - minPage + 1; // to render
         //renew pages and set handlers
         container.empty()
 
+        var filterOrEmpty
+        if(isFilterPager == true){
+            filterOrEmpty = "&facetFilter=" + currentFacetField + "ID:" + currentFacetFilter;
+        }else{
+            filterOrEmpty = ""
+        }
+
         backButton.click(function(){
             userSettDef["page"]--;
-            var fetchDataURL = constructURL();
+            var fetchDataURL = constructURL(filterOrEmpty);
             fetchData(fetchDataURL);
         });
 
         nextButton.click(function(){
             userSettDef["page"]++;
-            var fetchDataURL = constructURL();
+            var fetchDataURL = constructURL(filterOrEmpty);
             fetchData(fetchDataURL);
         });
 
-        if(userSettDef["page"] = 1){
+        if(userSettDef["page"] == 1){
             backButton.attr("class", "disabled")
+        }
+        if(userSettDef["page"] == maxPage){
+            nextButton.attr("class", "disabled")
         }
 
         container.append(backButton)
 
         if(allPages <= 10){ //render all
             for(var i = 1; i <= numPages; i++){
-                var li = $("<li>").append($("<a>").text(i));
+                var li = $("<li>").append($("<a>").attr("href", "#").text(i));
                 if(i == userSettDef["page"]){
                     li.attr("class", "active")
                 }
+                (function(a,b){
+                    b.click(function(){
+                        userSettDef["page"] = a;
+                        var fetchDataURL = constructURL(filterOrEmpty);
+                        fetchData(fetchDataURL);
+                    });
+                })(i,li)
                 container.append(li);
             }
         }else{ // render currPage +/- 4
             for(i = minPage; i <= maxPage; i++){
-                li = $("<li>").append($("<a>").text(i));
+                li = $("<li>").append($("<a>").attr("href", "#").text(i));
                 if(i == userSettDef["page"]){
                     li.attr("class", "active")
                 }
+                (function(a,b){
+                    b.click(function(){
+                        userSettDef["page"] = a;
+                        var fetchDataURL = constructURL(filterOrEmpty);
+                        fetchData(fetchDataURL);
+                    });
+                })(i,li)
                 container.append(li);
             }
 
         }
         container.append(nextButton);
-        console.log(start)
-        console.log(numPages)
     }
 
     var normalizeFacetSize = function(oldValue, oldMin, oldRange, newRange, newMin){
@@ -264,7 +294,6 @@ jQuery(function($) {
         userSettDef["page"] = 1;
         var fetchDataURL = constructURL();
         fetchData(fetchDataURL);
-
         return false;
     });
 
