@@ -20,7 +20,7 @@ jQuery(function($) {
         },
         userSettDef ={
             "searchField" : "product",
-            "resultsPerPage": 200,
+            "resultsPerPage": 100,
             "page" : 1,
             "facetField" : ""
         },
@@ -39,26 +39,34 @@ jQuery(function($) {
 
 
         jqxhr.done(function (response) {
+
             //before
             var results = $('.results'),
                 resultsInfo = $('.resultsInfo'),
                 sidePanel = $('#facetPanel'),
                 documents = $('.documents');
 
+            if($.trim(documents.html())==''){
+                documents.append("<img src='images/loading.gif' class='loading-gif'>");
+
+            }
+
             documents.fadeOut("fast", function(){
-                documents.empty()
+                documents.empty();
 
                 if (response.isFilterSearch) { // keep the current search and update result section
                     $('.filterGuide').remove();
                     $('.resultsInfo').remove();
+                    console.log("page: "+ userSettDef["page"] + " results/page: " + userSettDef["resultsPerPage"])
                     for (var j in response.results) {
                         var hit = parseOrfData(response.results[j], j);
                         documents.append(hit)
                     }
-                    var a = $('<a>').text("remove").click(function () {
+                    var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
+                        a = $('<a>').css("margin-left","10px").css("cursor", "pointer").text("remove").prepend(glyph).click(function () {
                             restoreResults()
                         }),
-                        p = $('<p>').text("Applying the facet filter: ").append($('<b>').text(currentFacetFilter)),
+                        p = $('<p>').text("Current facet filter: ").append($('<b>').text(currentFacetFilter)),
                         filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
 
                     var infoDiv = $('<div>').attr('class', "resultsInfo")
@@ -79,7 +87,7 @@ jQuery(function($) {
                     }
                     else {
                         resultsInfo.empty()
-                        resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+                        resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
                         for (var i in cachedResponse.results) {
                             hit = parseOrfData(cachedResponse.results[i], i);
@@ -105,7 +113,7 @@ jQuery(function($) {
     };
 
     var parseOrfData = function(data, i){
-        var number = $("<small>" + (parseInt(i) + 1) + "</small>"),
+        var number = $("<small>" + (parseInt(i) + 1 + (userSettDef['page'] -1)*userSettDef['resultsPerPage']) + "</small>"),
             rank = $("<span>").attr('class', 'rank').append(number),
             proteinTitle = $("<a>").attr("href", addProteinLink(data.product)).text(data.product),
             idTitle = $("<a>").attr("href", addIdLink(data.ORFID)).text(data.ORFID),
@@ -133,7 +141,7 @@ jQuery(function($) {
     };
 
     var displayFacets = function(facetResults, fieldType){
-        var h4 = $('<h4>').text(fieldType + " result facets"),
+        var h4 = $('<h4>').text("Common " + fieldType + " results"),
             ul = $('<ul>'),
             facetDiv = $('#facetPanel').append(h4);
 
@@ -195,14 +203,14 @@ jQuery(function($) {
                 documents.append(hit)
             }
             documents.fadeIn("slow", function(){
-
+                displayPager(cachedResponse.start, cachedResponse.noOfResults, false)
             });
         });
     };
 
     var displayPager = function(start, totalResults, isFilterPager){
-        var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
-            nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
+        var backButton = $("<li>").append($("<a>").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
+            nextButton = $("<li>").append($("<a>").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
             minPage = Math.max(1, userSettDef["page"] - 5),
@@ -218,23 +226,24 @@ jQuery(function($) {
             filterOrEmpty = ""
         }
 
-        backButton.click(function(){
-            userSettDef["page"]--;
-            var fetchDataURL = constructURL(filterOrEmpty);
-            fetchData(fetchDataURL);
-        });
-
-        nextButton.click(function(){
-            userSettDef["page"]++;
-            var fetchDataURL = constructURL(filterOrEmpty);
-            fetchData(fetchDataURL);
-        });
-
+        // disable/activate accordingly
         if(userSettDef["page"] == 1){
-            backButton.attr("class", "disabled")
+            backButton.attr("class", "disabled").css("cursor", "pointer");
+        }else{
+            backButton.click(function(){
+                userSettDef["page"]--;
+                var fetchDataURL = constructURL(filterOrEmpty);
+                fetchData(fetchDataURL);
+            }).css("cursor", "pointer");
         }
         if(userSettDef["page"] == maxPage){
-            nextButton.attr("class", "disabled")
+            nextButton.css("cursor", "default").attr("class", "disabled");
+        }else{
+            nextButton.click(function(){
+                userSettDef["page"]++;
+                var fetchDataURL = constructURL(filterOrEmpty);
+                fetchData(fetchDataURL);
+            }).css("cursor", "pointer");
         }
 
         container.append(backButton)
@@ -316,5 +325,17 @@ jQuery(function($) {
         e.preventDefault();
         $(this).tab('show')
     })
+
+    $('#settings-toggle').click(function(){
+        var $settings = $('.settings'),
+            $text = function(a){$("#settings-toggle").text(a)};
+        if($settings.css("display") == "flex"){
+            $settings.css("display", "none");
+            $text("Show more settings");
+        }else{
+            $settings.css("display", "flex");
+            $text("Hide more settings");
+        }
+    });
 
 });

@@ -71,7 +71,7 @@ object SearchLib {
     val filterSearchQuery = request.getQueryString("facetFilter").getOrElse("")
 
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
-    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(200).toString)
+    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 

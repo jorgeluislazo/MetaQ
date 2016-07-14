@@ -1,25 +1,63 @@
 /*header and search bar*/
+body{
+    background-color: #f8fcf1;
+}
 .nav-bar{
-    border-bottom: 1px solid #000;
-    height: 110px;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+    height: 150px;
+    background-color: #2e6da4;
 }
 
 .search{
-    padding-top: 50px;
-}
-
-.settings{
-    padding-top: 20px;
-}
-.radio-inline{
-    padding-left: 0;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: center;
+    justify-content: center;
+    padding-top: 25px;
+    padding-right: 150px;
 }
 
 #searchBox{
     top: 50px;
-    width: 400px;
-    height: 25px;
+    width: 500px;
     font-size: 15px;
+}
+
+#settings-toggle{
+    position: relative;
+    top: 4px;
+    font-size: 85%;
+    color: #5bc0de;
+    cursor: pointer;
+}
+
+.settings{
+    display: -webkit-flex;
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    width: 700px;
+}
+
+.settings div{
+    color: white;
+    padding-left: 15px;
+    padding-right: 10px;
+}
+
+#sizing-addon3{
+    height: 10px;
+    padding: 0 0;
+    color: black;
+}
+.radio-inline{
+
 }
 
 .filterGuide a{
@@ -30,14 +68,38 @@
 }
 
 /*sidebar left hand side*/
+.main-container{
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: center;
+    justify-content: center;
+}
 
 .side-bar{
+    margin-right: 12px;
+    width: 23%;
     height: 1000px;
-    background-color: rgba(126,196,122, 0.2);
+    position: relative;
+    top: -41px;
+}
+
+.nav-tabs>li>a {
+    background-color: white;
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus{
+    background-color: #66afe9;
+}
+
+.tab-content{
+    height: 800px;
 }
 
 .facetList{
     display: inline;
+}
+
+.facetList a{
+    cursor: pointer;
 }
 
 .facet-size-1{
@@ -70,18 +132,26 @@
 /*results right hand side*/
 
 .results{
-    background-color: rgba(126,196,122, 0.2);
-    margin-top: 2px;
-    border-left: 1px solid #000;
+    position: relative;
+    margin: 7px 20px 20px 20px;
+    width: 77%;
 
 }
 .resultsInfo{
     margin-left: 50px;
     margin-top: 5px;
 }
+
+.filterGuide{
+    margin-left: 50px;
+}
 .documents ul{
     margin: 5px;
     padding: 0;
+}
+
+.documents{
+    padding-left: 5px;
 }
 .documents ul li {
     margin-left: 5px;
@@ -107,3 +177,10 @@
 
 /*footer and misc*/
 
+.loading-gif{
+    padding: 30px;
+}
+
+.well{
+    padding: 10px;
+}
