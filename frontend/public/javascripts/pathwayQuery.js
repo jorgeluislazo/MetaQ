@@ -121,21 +121,36 @@ jQuery(function($) {
             h4 = $('<h4>').prepend(rank).append(proteinTitle).append(" | ORF id: ").append(idTitle),
             orfDiv = $("<div>").attr('class', 'hit').append(h4);
 
-        var ul = $("<ul>");
-        for( var a in li_map1){
-            var cat = $('<b>').append(li_map1[a]),
-                li = $("<li>").append(cat).append(": ").append(data[a]);
+        //append all fields and data to each hit, using helper function
+        var appendDataToList = function(ul, list){
+            for( var a in list){
+                var field = $('<b>').append(list[a]),
+                    p = $('<p>').text(data[a] + " ").attr("class", "hit-data"),
+                    li = $("<li>").append(field).append(": ").append(p);
 
-            ul.append(li)
+                (function(field, value){
+                    if(field == "COGID" && p.text() != "N/A "){
+                        p.attr("class", "hit-data " + field).append($('<i>').attr("class", "glyphicon glyphicon-new-window"));
+                        p.click(function(){
+                            window.open('http://www.ncbi.nlm.nih.gov/Structure/cdd/cddsrv.cgi?uid=' + value, '_blank');
+                        });
+                    }
+                    if(field == "KEGGID" && p.text() != "N/A "){
+                        p.attr("class", "hit-data " + field).append($('<i>').attr("class", "glyphicon glyphicon-new-window"));
+                        p.click(function(){
+                            window.open('http://www.genome.jp/dbget-bin/www_bget?' + value, '_blank');
+                        });
+                    }
+                })(a, data[a])
+                ul.append(li)
+            }
+            return ul;
         }
+        
+        var ul = appendDataToList( $("<ul>"), li_map1);
         ul.append("<br>");
+        ul = appendDataToList(ul, li_map2)
 
-        for( var b in li_map2){
-            cat = $('<b>').append(li_map2[b]);
-            li = $("<li>").append(cat).append(": ").append(data[b]);
-
-            ul.append(li)
-        }
         orfDiv.append(ul);
         return orfDiv
     };

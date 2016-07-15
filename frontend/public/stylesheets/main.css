@@ -175,6 +175,34 @@ body{
     text-align: right;
 }
 
+.hit-data{
+    display: inline;
+}
+
+.COGID{
+    color: #428bca;
+    text-decoration: none;
+}
+
+.COGID:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.KEGGID{
+    color: #428bca;
+    text-decoration: none;
+}
+
+.KEGGID:hover{
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.glyphicon-new-window{
+    color: black;
+}
+
 /*footer and misc*/
 
 .loading-gif{
