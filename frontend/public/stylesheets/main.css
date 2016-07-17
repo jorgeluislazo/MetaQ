@@ -69,15 +69,19 @@ body{
 
 /*sidebar left hand side*/
 .main-container{
-    display: -webkit-flex;
-    display: flex;
-    -webkit-justify-content: center;
-    justify-content: center;
+    width: 100%;
+    min-width: 1400px;
+    /*display: -webkit-flex;*/
+    /*display: flex;*/
+    /*-webkit-justify-content: center;*/
+    /*justify-content: center;*/
 }
 
 .side-bar{
-    margin-right: 12px;
+    float: left;
     width: 23%;
+    min-width: 300px;
+    margin-right: 12px;
     height: 1000px;
     position: relative;
     top: -41px;
@@ -99,19 +103,29 @@ body{
 }
 
 .facetList a{
+    text-decoration: none;
     cursor: pointer;
+}
+
+.facet-selected a{
+    color: white;
+    border-radius: 25px;
+    background-color: #1b6d85;
 }
 
 .facet-size-1{
     font-size: 85%;
+    padding: 2px;
 }
 
 .facet-size-2{
     font-size: 95%;
+    padding: 2px;
 }
 
 .facet-size-3{
     font-size: 105%;
+    padding: 2px;
 }
 
 .facet-size-4{
@@ -132,9 +146,13 @@ body{
 /*results right hand side*/
 
 .results{
+    float: left;
+    width: 74%;
+    min-width: 300px;
+    min-height: 900px;
     position: relative;
-    margin: 7px 20px 20px 20px;
-    width: 77%;
+    margin: 7px 10px 20px 10px;
+
 
 }
 .resultsInfo{
@@ -154,7 +172,7 @@ body{
     padding-left: 5px;
 }
 .documents ul li {
-    margin-left: 5px;
+    margin-left: 17px;
     margin-right: 4px;
     display: inline;
 }
@@ -173,6 +191,12 @@ body{
     font-weight: bold;
     color: #a0a0a0;
     text-align: right;
+}
+
+.hit-title{
+    display: inline;
+    font-size: 21px;
+
 }
 
 .hit-data{
@@ -197,6 +221,10 @@ body{
 .KEGGID:hover{
     cursor: pointer;
     text-decoration: underline;
+}
+
+.noResultsFound{
+    margin: 30px;
 }
 
 .glyphicon-new-window{

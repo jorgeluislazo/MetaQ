@@ -79,14 +79,16 @@ jQuery(function($) {
                     //update the cached result and parse all the new information
                     cachedResponse = response;
                     console.log(cachedResponse);
-                    sidePanel.empty();
+
+                    resultsInfo.empty();
 
                     if (cachedResponse.noOfResults == 0) {
-                        var div = $('<div>').attr('class', "noResultsFound").text("No results found for this search.");
-                        results.append(div);
+                        var query = $('#searchBox').val(),
+                            noResultsFound = $('<h4>').attr('class', "noResultsFound").text("No results found for the search: '" + query + "'.");
+                        sidePanel.empty();
+                        results.append(noResultsFound);
                     }
                     else {
-                        resultsInfo.empty()
                         resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
                         for (var i in cachedResponse.results) {
@@ -94,11 +96,15 @@ jQuery(function($) {
                             documents.append(hit)
                         }
 
-                        documents.fadeIn("slow", function(){
+                        // sidePanel.fadeOut("fast", function(){
+                            sidePanel.empty();
                             displayFacets(cachedResponse.facetFields["COGID"], "COG");
                             displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
-                            displayPager(response.start, response.noOfResults, false)
-                        });
+                            displayPager(response.start, response.noOfResults, false);
+                            // sidePanel.fadeIn("slow");
+                        // });
+
+                        documents.fadeIn("slow");
                     }
                 }
             });
@@ -115,7 +121,7 @@ jQuery(function($) {
     var parseOrfData = function(data, i){
         var number = $("<small>" + (parseInt(i) + 1 + (userSettDef['page'] -1)*userSettDef['resultsPerPage']) + "</small>"),
             rank = $("<span>").attr('class', 'rank').append(number),
-            proteinTitle = $("<a>").attr("href", addProteinLink(data.product)).text(data.product),
+            proteinTitle = $("<h3>").attr("class", "hit-title").text(data.product),
             idTitle = $("<a>").attr("href", addIdLink(data.ORFID)).text(data.ORFID),
 
             h4 = $('<h4>').prepend(rank).append(proteinTitle).append(" | ORF id: ").append(idTitle),
@@ -184,17 +190,19 @@ jQuery(function($) {
                     a = $('<a>').attr('class', facetClass).text(facet + " "),
                     li = $('<li>').attr('class', 'facetList').append(a);
 
-                (function (f) {
+                (function (facet, li) {
                     li.click(function () {
+                        $('.facet-selected').attr("class","facetList");
+                        li.attr("class","facetList facet-selected");
                         //save variables and send data
                         userSettDef["page"] = 1;
-                        currentFacetFilter = f;
+                        currentFacetFilter = facet;
                         currentFacetField = fieldType;
-                        var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + f;
+                        var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
                         var fetchDataURL = constructURL(facetSearchParam);
                         fetchData(fetchDataURL)
                     });
-                })(facet);
+                })(facet, li);
 
                 ul.append(li)
             }
@@ -207,6 +215,8 @@ jQuery(function($) {
             sidePanel = $('#facetPanel'),
             resultsInfo = $('.resultsInfo'),
             documents = $('.documents');
+
+        $('.facet-selected').attr("class","facetList");
         documents.fadeOut("fast", function(){
             $('.filterGuide').remove();
             documents.empty();
@@ -303,11 +313,7 @@ jQuery(function($) {
         return "facet-size-" + Math.ceil(newValue)
     };
 
-
-    var addProteinLink = function(name){
-        return "#"
-    };
-
+    
     var addIdLink = function(id){
         return "#"
     };
@@ -337,8 +343,22 @@ jQuery(function($) {
     };
 
     $('#tabs a').click(function (e) {
+        console.log("here")
         e.preventDefault();
         $(this).tab('show')
+
+    })
+
+    $('a[data-target="#facetPanel"]').click(function(e){
+        var w = $('.main-container').width() * 0.23
+        $('.results').css("width",'74%');
+        $('.side-bar').width(w);
+    })
+
+    $('a[data-target="#clusterPanel"]').click(function(e){
+        var w = $('.main-container').width() * 0.54
+        $('.results').css("width",'44%');
+        $('.side-bar').width(w);
     })
 
     $('#settings-toggle').click(function(){
