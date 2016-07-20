@@ -37,6 +37,18 @@
   -->
   <luceneMatchVersion>6.0.0</luceneMatchVersion>
 
+ <!-- <lib/> directives can be used to instruct Solr to load any Jars
+       identified and use them to resolve any "plugins" specified in
+       your solrconfig.xml or schema.xml (ie: Analyzers, Request
+       Handlers, etc...).
+
+       All directories and paths are resolved relative to the
+       instanceDir. 
+	-->
+
+  <lib dir="../../../contrib/clustering/lib" regex=".*\.jar" />
+  <lib dir="../../../dist/" regex=".*\.jar" />
+
   <!-- Data Directory
 
        Used to specify an alternate directory to hold all index data
@@ -540,6 +552,42 @@ AutoCommit
        <searchComponent name="debug"     class="solr.DebugComponent" />
        
      -->
+
+	<searchComponent name="clustering" class="solr.clustering.ClusteringComponent">
+	<!-- Lingo clustering algorithm -->
+	<lst name="engine">
+		<str name="name">lingo</str>
+		<str name="carrot.algorithm">org.carrot2.clustering.lingo.LingoClusteringAlgorithm</str>
+	</lst>
+		<!-- An example definition for the STC clustering algorithm. -->
+	<lst name="engine">
+		<str name="name">stc</str>
+		<str name="carrot.algorithm">org.carrot2.clustering.stc.STCClusteringAlgorithm</str>
+	</lst>
+	</searchComponent>
+
+	<requestHandler name="/clustering" class="solr.SearchHandler">
+	<lst name="defaults">
+		<bool name="clustering">true</bool>
+		<bool name="clustering.results">true</bool>
+		<!-- Logical field to physical field mapping. 
+		<str name="carrot.url">id</str> 
+		<str name="carrot.snippet">extended_desc</str> -->
+		<str name="carrot.title">product</str>
+		
+
+		<!-- Configure any other request handler parameters. We will cluster the top 100 search results so bump up the 'rows' parameter. -->
+		<str name="rows">175</str>
+		<str name="fl">*,score</str>
+
+            <!--default search field-->
+            <str name="df">product</str>
+	</lst>
+	<!-- Append clustering at the end of the list of search components. -->
+	<arr name="last-components">
+		<str>clustering</str>
+	</arr>
+	</requestHandler>
 
   <!-- Terms Component
 

@@ -1,13 +1,14 @@
 package libs.solr.scala
 
+import java.util
+
 import org.apache.solr.common.SolrDocumentList
 import org.apache.solr.common.SolrDocument
 import org.apache.solr.common.util.NamedList
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.response.QueryResponse
-import scala.collection.JavaConverters._
-import libs.solr.scala.Order
 
+import scala.collection.JavaConverters._
 
 trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
 
@@ -188,8 +189,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
 
   protected def responseToMap(response: QueryResponse): MapQueryResult = {
-//    println(response)
-//    println(solrQuery.getStart)
+//    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
 
     val highlight = response.getHighlighting
 
@@ -238,7 +238,27 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
           field.getValues.asScala.map { value => (value.getName, value.getCount) }.toMap
       )}.toMap
     }
+
+    println(facetResult)
     MapQueryResult(response.getResults.getNumFound, queryResult, facetResult,facetDates, solrQuery.getStart)
+  }
+
+  protected def clustersToMap(response: QueryResponse): MapClusterQueryResult = {
+//    println("Solr Response: " + response + " | line 244 of QueryBuilderBase.scala")
+
+    //why is there no getClusters method in SolrResponse Class?? this is a messy workaround
+    val allData = response.getResponse.get("clusters").asInstanceOf[util.ArrayList[NamedList[util.ArrayList[String]]]]
+    var clusters = List[Map[String , List[String]]]()
+
+    for(i <- 0 until allData.size){
+      val label = allData.get(i).get("labels").get(0)
+      val docs = allData.get(i).get("docs").asScala.toList
+      val cluster = Map(label -> docs)
+      clusters = clusters.+:(cluster)
+    }
+
+    clusters = clusters.reverse
+    MapClusterQueryResult(allData.size, clusters)
   }
   
   def responseToObject[T](response: QueryResponse)(implicit m: Manifest[T]): CaseClassQueryResult[T] = {

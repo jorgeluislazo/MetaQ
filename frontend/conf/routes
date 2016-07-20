@@ -6,14 +6,15 @@
 GET     /                           controllers.Application.index
 
 # Search API 
-GET     /search                controllers.Application.simpleSearch(query: String)
+GET     /search                     controllers.Application.simpleSearch(query: String)
 
 #test
-GET     /test                       controllers.Application.test
+GET     /cluster                    controllers.Application.clusterSearch(query: String)
+
 
 # Map static resources from the /public folder to the /assets URL path
-GET    /assets/*file               controllers.Assets.at(path="/public", file)
+GET    /assets/*file                controllers.Assets.at(path="/public", file)
 
-GET  /images/loading.gif                 controllers.Assets.at(path="/public", file="/images/loading.gif")
+GET  /images/loading.gif            controllers.Assets.at(path="/public", file="/images/loading.gif")
 
     

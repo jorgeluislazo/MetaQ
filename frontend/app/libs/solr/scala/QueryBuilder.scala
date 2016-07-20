@@ -17,9 +17,15 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
    * @return the search result
    */
   def getResultAsMap(params: Any = null): MapQueryResult = {
-    solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
-    println("query= " + solrQuery.toString + " | line 21 of QueryBuilder.scala")
-    responseToMap(server.query(solrQuery))
+      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
+//      println("query= " + solrQuery.toString + " | line 22 of QueryBuilder.scala")
+      responseToMap(server.query(solrQuery))
+  }
+
+  def getClustersAsMap(params: Any = null): MapClusterQueryResult = {
+      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
+//      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
+      clustersToMap(server.query(solrQuery))
   }
 
 

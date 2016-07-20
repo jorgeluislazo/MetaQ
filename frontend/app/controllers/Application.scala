@@ -15,6 +15,11 @@ class Application extends Controller {
     Ok(results)
   }
 
+  def clusterSearch(query: String): Action[AnyContent] = Action{ implicit request =>
+    val results = SearchLib.cluster(query,request)
+    Ok(results)
+  }
+
   def test(): Action[AnyContent] = Action { implicit request =>
     val results = SearchLib.get( "product:protein" ,request)
     Ok(results)

@@ -14,6 +14,10 @@ case class MapQueryResult(
     facetDates: Map[String, Map[String, Long]],
     start: Int)
 
+case class MapClusterQueryResult(
+    numOfClusters: Int,
+    clusters : List[Map[String , List[String]]])
+
 case class CaseClassQueryResult[T](
     numFound: Long,
     documents: List[T],

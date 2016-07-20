@@ -1,51 +1,46 @@
 package libs
-import libs.solr.scala.QueryBuilderBase
 import libs.solr.scala.QueryBuilder
 import libs.solr.scala.SolrClient
 import libs.solr.scala.MapQueryResult
-import org.apache.solr.client.solrj.SolrQuery
+import libs.solr.scala.MapClusterQueryResult
 import play.api.libs.json.JsObject
 import play.api.libs.json.Json
 import play.api.libs.json.JsString
 import play.api._
 import play.api.mvc._
-import org.slf4j.LoggerFactory
-import play.api.libs.json.JsValue
 import play.api.libs.json.JsBoolean
-import play.api.db.DB
-import play.api.Play.current
 
 import scala.collection.immutable.ListMap
-import util.control.Breaks._
 
 /**
- * Class Search performs many functions about information retrieval .
+  * Class Search performs many functions about information retrieval .
   *
- * @version 0.1
- */
+  * @version 0.1
+  */
 object SearchLib {
 
   /**
-   * is a main function that handling search process.
+    * is a main function that handling search process.
     *
     * @param query
-   * @param request
-   * @version 0.1
-   */
+    * @param request
+    * @version 0.1
+    */
   def get(query: String,request: Request[AnyContent]): JsObject = {
     // Construct the solr query and handling the parameters
-    val queryBuilder = this.buildQuery(query, request)
+    val queryBuilder = this.buildSelectQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_results" -> 0,
       "results" -> List[JsString](),
-      "facetFields" -> Map[String, Map[String, Long]]())
+      "facetFields" -> Map[String, Map[String, Long]](),
+      "isFilterSearch" -> JsBoolean(false))
 
     try {
       // Get Results from Solr.
       val results = queryBuilder.getResultAsMap()
 
       // prepare results
-      resultsInfo = this.prepareResults(results, request)
+      resultsInfo = this.prepareSearchResults(results, request)
     } catch {
       case e: Exception =>
         println("exception caught: " + e);
@@ -54,17 +49,38 @@ object SearchLib {
     resultsInfo
   }
 
+  def cluster(query: String, request: Request[AnyContent]) : JsObject = {
+    val queryBuilder = this.buildClusterQuery(query, request)
+    var resultsInfo = Json.obj(
+      "num_of_clusters" -> 0,
+      "clusters" -> List[JsString]())
+
+    try {
+      // Get Results from Solr.
+      val results = queryBuilder.getClustersAsMap()
+
+      // prepare results
+      resultsInfo = this.prepareClusterResults(results, request)
+    } catch {
+      case e: Exception =>
+        println("exception caught: " + e);
+    }
+
+    resultsInfo
+
+  }
+
   /**
-   *
-   * constructQuery : constructs the query and handling the user params
+    *
+    * constructQuery : constructs the query and handling the user params
     *
     * @param  query
-   * @param  request
-   */
+    * @param  request
+    */
 
-  def buildQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+  def buildSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     // Checking URL Parameters
-    val settings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
     val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
@@ -82,7 +98,7 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-    var queryBuilder = client.query(settings + query)
+    var queryBuilder = client.query(searchSettings + query)
       .start(offset)
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
@@ -104,10 +120,29 @@ object SearchLib {
     queryBuilder
   }
 
+  def buildClusterQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
+    val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
+
+    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+
+    var queryBuilder = client.query(searchSettings + query)
+      .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
+      .setParameter("qt", "/clustering")
+
+    if(highQualOnly.equals("true")){
+      val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
+      queryBuilder = queryBuilder.addFilterQuery(fq)
+    }
+
+    queryBuilder
+  }
+
   /**
-   * Prepare the results and build mapping between Solr and Application Level
-   */
-  def prepareResults(results: MapQueryResult, request: Request[AnyContent]): JsObject = {
+    * Prepare the results and build mapping between Solr and Application Level
+    */
+  def prepareSearchResults(results: MapQueryResult, request: Request[AnyContent]): JsObject = {
     var resultsInfo = List[JsObject]()
 
     val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
@@ -148,7 +183,14 @@ object SearchLib {
     resultsJson
   }
 
+  def prepareClusterResults(results: MapClusterQueryResult, request: Request[AnyContent]): JsObject = {
+    val resultsJson = Json.obj(
+      "noOfResults" -> results.numOfClusters,
+      "clusters" -> results.clusters)
+    resultsJson
+  }
 
-  
+
+
 
 }
