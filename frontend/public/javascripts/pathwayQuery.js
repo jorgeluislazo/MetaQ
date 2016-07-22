@@ -97,11 +97,11 @@ jQuery(function($) {
                         }
 
                         // sidePanel.fadeOut("fast", function(){
-                            sidePanel.empty();
-                            displayFacets(cachedResponse.facetFields["COGID"], "COG");
-                            displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
-                            displayPager(response.start, response.noOfResults, false);
-                            // sidePanel.fadeIn("slow");
+                        sidePanel.empty();
+                        displayFacets(cachedResponse.facetFields["COGID"], "COG");
+                        displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
+                        displayPager(response.start, response.noOfResults, false);
+                        // sidePanel.fadeIn("slow");
                         // });
 
                         documents.fadeIn("slow");
@@ -152,7 +152,7 @@ jQuery(function($) {
             }
             return ul;
         }
-        
+
         var ul = appendDataToList( $("<ul>"), li_map1);
         ul.append("<br>");
         ul = appendDataToList(ul, li_map2)
@@ -199,7 +199,7 @@ jQuery(function($) {
                         currentFacetFilter = facet;
                         currentFacetField = fieldType;
                         var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
-                        var fetchDataURL = constructURL(facetSearchParam);
+                        var fetchDataURL = constructSearchURL(facetSearchParam);
                         fetchData(fetchDataURL)
                     });
                 })(facet, li);
@@ -209,6 +209,224 @@ jQuery(function($) {
             facetDiv.append(ul)
         }
     };
+
+    var fetchClusters = function(url){
+
+        var jqxhr = $.ajax({
+            type: "GET",
+            url: url,
+            contentType: "application/json"
+        });
+
+        jqxhr.done(function (data) {
+            console.log(data)
+            var graphData = nodeify(data);
+            renderNodeGraph(graphData);
+        });
+    }
+
+    var nodeify = function(data){
+        var graph = { "nodes": [], "links": [], "nuclei": [] };//results
+        var list = { "docs": [], "group": []}, //for intersection
+            index = 0, //for nucleus
+            total = 0, // nodes
+            label = ""
+
+        for (var i=0; i< data.noOfResults; i++){ //for each cluster
+            label = Object.keys(data.clusters[i])[0]
+            graph["nodes"].push( {"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
+            graph["nuclei"].push({"name":label, index: total});
+            list["docs"].push(i);
+            list["group"].push(index);
+            var child = {"name": undefined, "cluster": []};
+
+            for (var k=0; k< data.clusters[i][label].length; k++){
+                child = {"name": data.clusters[i][label][k], "cluster": ["clust"+i], "selected": false}; //create a node
+                var intersection = list["docs"].indexOf(child.name); //is it found in any other cluster?
+                list["docs"].push(child.name);
+                list["group"].push(index);
+                total++;
+
+                if(intersection > -1){
+                    graph["links"].push({"source": intersection, "target": list["group"][total]}); // create link from intersection
+
+                    graph["nodes"][intersection]["cluster"].push("clust" + i);
+                    graph["nodes"].push({"fixed": true, "x": -30}); //tombstone node quick fix
+                    continue;
+                }
+                graph["nodes"].push(child); //add the node
+                graph["links"].push({"source": index, "target": total}); //create links within each cluster
+
+            }
+            total++;
+            index = total;
+        }
+        console.log(graph)
+        return  graph;
+    }
+
+    var renderNodeGraph = function(graphData){
+        var self = this;
+        var width = 900,
+            height = 700,
+            ctrlKey,
+            grav,
+            charge,
+            rig;
+
+        var linksLength = graphData.links.length;
+        grav = (linksLength >= 700) ? 0.7: (linksLength<= 50) ? 0.05 : linksLength/2000;
+        charge = (linksLength >= 400) ? -350: (linksLength <= 100) ? -150 : linksLength*-0.2;
+        rig = (linksLength >= 1000) ? 0.95: (linksLength <= 100) ? 0.4 : linksLength/1000;
+
+        var force = d3.layout.force()
+            .size([900, 700])
+            .charge(charge)     //sets the repulsion/attraction strength to the specified value. def=-30 myval = charge/4
+            .chargeDistance(600)//sets the maximum distance over which charge forces are applied. def= inf myval= 750
+            .theta(0.5)         //sets the Barnes–Hut approximation criterion to the specified value. def=0.8 myval = 0.5
+            .linkDistance(20)    //sets the target distance between linked nodes to the specified value. def=20 myval=3
+            .linkStrength(0.5)  //sets the strength (rigidity) of links to the specified value in the range [0,1]. def=1 myval=rig
+            .gravity(grav)      //sets the gravitational strength to the specified numerical value. def=0.1 myval=grav
+            // .friction(0.9)      //sets the friction coefficient, approximates velocity decay. def= 0.9
+            .alpha(0.01)         //cooling parameter, if >0 restarts force layout, if <0 ends it. def=0.1
+            .on("tick", tick);
+
+        var svg = d3.select("#clusterPanel").append("svg")
+            .attr("id", "cluster-svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        force
+            .nodes(graphData.nodes)
+            .links(graphData.links)
+            .start();
+
+        var link = svg.selectAll(".link").data(graphData.links)
+            .enter().append("line")
+            .attr("class", "link");
+
+
+        var  node = svg.selectAll(".node")
+            .data(graphData.nodes)
+            .enter().append("g")
+            .attr("class", "cluster")
+            .attr("id", function(d){
+                if (d.name) return d.name;
+                if (d.cluster) return d.cluster;
+                else return "tombstone"})
+            .call(force.drag);
+
+        node.append("circle")
+            .attr("class", function(d){
+                if (d.nucleus && d.cluster){
+                    return "nucleus " + d.cluster[0]
+                }
+                if (d.cluster){
+                    var l = d.cluster.length,
+                        result = "node";
+                    while(l > 0){
+                        result+= " " + d.cluster[l-1];
+                        l--;
+                    }
+                    return result;
+                }
+                else{
+                    return "tombstone"
+                }})
+            .attr("id", function(d){
+                if(d.name) return d.name
+            })
+            .attr("r", function(d){
+                if (d.nucleus){
+                    return 9
+                }
+                return 4
+            })
+            .on("click", toggle);
+
+        node.append("text")
+            .attr("class", "cluster-text")
+            .attr("dx", function(d){
+                if (d.nucleus){
+                    return (-4 * (d.nucleus.length));
+                }
+            })
+            .attr("dy", -20)
+            .text(function(d){
+                if (d.nucleus){
+                    return d.nucleus + " (" + d.weight + ")"
+                }
+            })
+            .on("mouseover", function(d){d3.select(this).style("fill", "red")
+            })
+            .on("mouseout", function(d){d3.select(this).style("fill", "black")});
+
+        /**
+         * D3 Method, handles the movement behaviour of every node at each tick (every fraction of a second)
+         */
+        function tick() {
+            link.attr("x1", function(d) {
+                    if (d.source.x < 8){ return 10;}
+                    if (d.source.x > (width * 1.2)){ return (width * 1.2);}
+                    return d.source.x;
+                })
+                .attr("y1", function(d) {
+                    if (d.source.y < 8){ return 8;}
+                    if (d.source.y > (height - 10)) {return (height - 10);}
+                    return d.source.y;
+                })
+                .attr("x2", function(d) {
+                    if (d.target.x < 8){ return 10;}
+                    if (d.target.x > (width * 1.2)){ return (width * 1.2);}
+                    return d.target.x;
+                })
+                .attr("y2", function(d) {
+                    if (d.target.y < 8){ return 8;}
+                    if (d.target.y > (height - 10)) {return (height - 10);}
+                    return d.target.y;
+                });
+
+            node.attr("transform", function(d) {
+                var d_x = d.x,
+                    d_y = d.y;
+                if (d.x < 8){ d_x = 10;}
+                if (d.x > (width * 1.2)){ d_x = width * 1.2;}
+                if (d.y < 8){ d_y = 10;}
+                if (d.y > (height - 10)) {d_y = height - 10;}
+                return "translate(" +  d_x + "," + d_y + ")";
+            });
+        }
+
+        /**
+         * D3 Method, handles a click to a node (both css effects, as well as initiating a manager.doRequest
+         * @param d a single data point.
+         */
+        function toggle(d) {
+            ctrlKey = d3.event.ctrlKey;
+            if (ctrlKey){
+                if (d.fixed){
+                    for (var k = 0; k< d.cluster.length; k++){d3.selectAll("." + d.cluster[k]).classed( d.fixed = false);}
+                }
+                else{
+                    for (var i = 0; i< d.cluster.length; i++){d3.selectAll("." + d.cluster[i]).classed( d.fixed = true);}}
+            }
+            else{
+                // self.manager.clusterLabels = []; //resetting
+                $("circle").css("fill", "#50c1cc");
+                var IDs = [];
+                for (var l = 0; l < d.cluster.length; l++) {
+                    $("." + d.cluster[l]).css("fill", "#ff3c1f").each(function(){
+                        var text =$(this).next().text();
+                        if (text.length > 0){
+                            // self.manager.clusterLabels.push(text);
+                        }
+                        if(this.id)IDs.push(this.id);
+                    });
+                }
+                // self.manager.requestClusterDocs(IDs);
+            }
+        }
+    }
 
     var restoreResults = function(){
         var results = $('.results'),
@@ -257,7 +475,7 @@ jQuery(function($) {
         }else{
             backButton.click(function(){
                 userSettDef["page"]--;
-                var fetchDataURL = constructURL(filterOrEmpty);
+                var fetchDataURL = constructSearchURL(filterOrEmpty);
                 fetchData(fetchDataURL);
             }).css("cursor", "pointer");
         }
@@ -266,7 +484,7 @@ jQuery(function($) {
         }else{
             nextButton.click(function(){
                 userSettDef["page"]++;
-                var fetchDataURL = constructURL(filterOrEmpty);
+                var fetchDataURL = constructSearchURL(filterOrEmpty);
                 fetchData(fetchDataURL);
             }).css("cursor", "pointer");
         }
@@ -282,7 +500,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructURL(filterOrEmpty);
+                        var fetchDataURL = constructSearchURL(filterOrEmpty);
                         fetchData(fetchDataURL);
                     });
                 })(i,li)
@@ -297,7 +515,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructURL(filterOrEmpty);
+                        var fetchDataURL = constructSearchURL(filterOrEmpty);
                         fetchData(fetchDataURL);
                     });
                 })(i,li)
@@ -313,7 +531,7 @@ jQuery(function($) {
         return "facet-size-" + Math.ceil(newValue)
     };
 
-    
+
     var addIdLink = function(id){
         return "#"
     };
@@ -322,12 +540,14 @@ jQuery(function($) {
     $search.submit( function () {
         //reset pagination
         userSettDef["page"] = 1;
-        var fetchDataURL = constructURL();
+        var fetchDataURL = constructSearchURL();
         fetchData(fetchDataURL);
+        var fetchCLustersURL = constructSearchURL(undefined,true);
+        fetchClusters(fetchCLustersURL)
         return false;
     });
 
-    var constructURL = function(extraParam){
+    var constructSearchURL = function(extraParam, isClusterSearch){
         var query = $('#searchBox').val(),
             searchType = $('input:radio[name=df]:checked').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
@@ -335,10 +555,17 @@ jQuery(function($) {
 
         if(highQualOnly === undefined){ highQualOnly = "false" }
         if(extraParam == undefined){ extraParam = ""}
+        if(isClusterSearch == undefined){isClusterSearch = false}
 
-        var fetchDataURL =
-            $search.data('search') + query + "&searchField=" + searchType + "&highQualOnly=" + highQualOnly + "&minRPKM=" + rpkm + "&page=" + userSettDef["page"] + extraParam;
-        console.log(fetchDataURL);
+        if(isClusterSearch){
+            var fetchDataURL =
+                $('#clusterPanel').data("request") + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
+            console.log(fetchDataURL)
+        }else {
+            fetchDataURL =
+                $search.data('search') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
+            console.log(fetchDataURL);
+        }
         return fetchDataURL
     };
 

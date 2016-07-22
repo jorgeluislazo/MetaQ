@@ -239,7 +239,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
       )}.toMap
     }
 
-    println(facetResult)
+//    println(facetResult)
     MapQueryResult(response.getResults.getNumFound, queryResult, facetResult,facetDates, solrQuery.getStart)
   }
 

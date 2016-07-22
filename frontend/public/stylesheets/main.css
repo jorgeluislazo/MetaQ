@@ -143,6 +143,35 @@ body{
     padding: 5px;
 }
 
+/* clusters*/
+.cluster-text {
+    font-size: 110%;
+}
+.link {
+    stroke: #aaa7b4;
+    stroke-width: 0;
+}
+.nucleus{
+    cursor: move;
+    fill: #50c1cc;
+    stroke: #000;
+    stroke-width: 2px;
+}
+.node{
+    cursor: move;
+    fill: #50c1cc;
+    opacity: 0.9;
+}
+.tombstone{
+    display: none;
+}
+.node.selected {
+    fill: #ff3c1f;
+}
+.nucleus.selected {
+    fill: #ff3c1f;
+}
+
 /*results right hand side*/
 
 .results{
