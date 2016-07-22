@@ -26,7 +26,16 @@ jQuery(function($) {
         },
         cachedResponse =  null,
         currentFacetFilter = "",
-        currentFacetField = "";
+        currentFacetField = "",
+        dummyData = {
+            "clusters": [
+                {"clust1": ["id1", "id2", "id3", "id10"]},
+                {"clust2": ["id2", "id4", "id5", "id10"]},
+                {"clust3": ["id2", "id3", "id6", "id7", "id10"]},
+                {"clust4": ["id8", "id9", "id10"]}
+            ],
+            "noOfResults": 4
+        };
 
 
     var fetchData = function(url){
@@ -226,43 +235,42 @@ jQuery(function($) {
     }
 
     var nodeify = function(data){
-        var graph = { "nodes": [], "links": [], "nuclei": [] };//results
-        var list = { "docs": [], "group": []}, //for intersection
-            index = 0, //for nucleus
-            total = 0, // nodes
-            label = ""
+        var graph = { "nodes": [], "links": []},
+            list = [],//for intersection
+            NucleiIndex = 0;
 
-        for (var i=0; i< data.noOfResults; i++){ //for each cluster
-            label = Object.keys(data.clusters[i])[0]
-            graph["nodes"].push( {"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
-            graph["nuclei"].push({"name":label, index: total});
-            list["docs"].push(i);
-            list["group"].push(index);
-            var child = {"name": undefined, "cluster": []};
+        for(var i=0; i < data.noOfResults; i++){ // for each cluster
+            var label = Object.keys(data.clusters[i])[0],
+                clusterSize = data.clusters[i][label].length;
 
-            for (var k=0; k< data.clusters[i][label].length; k++){
-                child = {"name": data.clusters[i][label][k], "cluster": ["clust"+i], "selected": false}; //create a node
-                var intersection = list["docs"].indexOf(child.name); //is it found in any other cluster?
-                list["docs"].push(child.name);
-                list["group"].push(index);
-                total++;
+            for(var k=0; k < clusterSize; k++){// for each doc inside a cluster
+                var child = {"name": data.clusters[i][label][k], "cluster": ["clust"+i], "selected": false}; //create that node
+                // console.log(child.name)
+                var intersection = list.indexOf(child.name); //is it found in any other cluster?
+                // console.log(intersection)
 
-                if(intersection > -1){
-                    graph["links"].push({"source": intersection, "target": list["group"][total]}); // create link from intersection
-
-                    graph["nodes"][intersection]["cluster"].push("clust" + i);
-                    graph["nodes"].push({"fixed": true, "x": -30}); //tombstone node quick fix
-                    continue;
+                if(intersection > -1){//was found before
+                    if(graph["nodes"][intersection]["fixed"] != true){
+                        graph["nodes"][intersection]["cluster"].push("clust" + i); //add the cluster id to the intersection's parents
+                    }
+                    else{
+                        console.log(intersection)
+                        console.log(graph["nodes"][intersection])
+                    }
+                    list.push(child.name);
+                    graph["links"].push({"source": NucleiIndex + i + clusterSize, "target": intersection}); // create link to intersection
+                    graph["nodes"].push({"fixed": true, "x": -30}); //make it tombstone so the repeated node is removed later
+                }else{
+                    list.push(child.name); //add that id to be checked later
+                    graph["nodes"].push(child); //add the node to the results
+                    graph["links"].push({"source": NucleiIndex + i + clusterSize, "target": NucleiIndex + i+k}); //create link to node
                 }
-                graph["nodes"].push(child); //add the node
-                graph["links"].push({"source": index, "target": total}); //create links within each cluster
-
             }
-            total++;
-            index = total;
+            graph["nodes"].push({"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
+            NucleiIndex = NucleiIndex + clusterSize; //update the index
         }
-        console.log(graph)
-        return  graph;
+        console.log(graph);
+        return graph;
     }
 
     var renderNodeGraph = function(graphData){
@@ -276,15 +284,15 @@ jQuery(function($) {
 
         var linksLength = graphData.links.length;
         grav = (linksLength >= 700) ? 0.7: (linksLength<= 50) ? 0.05 : linksLength/2000;
-        charge = (linksLength >= 400) ? -350: (linksLength <= 100) ? -150 : linksLength*-0.2;
+        charge = (linksLength >= 400) ? -350: (linksLength <= 100) ? -150 : linksLength*-0.3;
         rig = (linksLength >= 1000) ? 0.95: (linksLength <= 100) ? 0.4 : linksLength/1000;
 
         var force = d3.layout.force()
-            .size([900, 700])
+            .size([900, 650])
             .charge(charge)     //sets the repulsion/attraction strength to the specified value. def=-30 myval = charge/4
             .chargeDistance(600)//sets the maximum distance over which charge forces are applied. def= inf myval= 750
             .theta(0.5)         //sets the Barnes–Hut approximation criterion to the specified value. def=0.8 myval = 0.5
-            .linkDistance(20)    //sets the target distance between linked nodes to the specified value. def=20 myval=3
+            .linkDistance(40)    //sets the target distance between linked nodes to the specified value. def=20 myval=3
             .linkStrength(0.5)  //sets the strength (rigidity) of links to the specified value in the range [0,1]. def=1 myval=rig
             .gravity(grav)      //sets the gravitational strength to the specified numerical value. def=0.1 myval=grav
             // .friction(0.9)      //sets the friction coefficient, approximates velocity decay. def= 0.9
@@ -338,9 +346,14 @@ jQuery(function($) {
             })
             .attr("r", function(d){
                 if (d.nucleus){
-                    return 9
+                    return 25
                 }
-                return 4
+                return 15
+            })
+            .style("opacity", function(d){
+              if(d.nucleus){
+                  return 1
+              } return 0.2
             })
             .on("click", toggle);
 
@@ -426,6 +439,7 @@ jQuery(function($) {
                 // self.manager.requestClusterDocs(IDs);
             }
         }
+            svg.selectAll("g#tombstone").remove()
     }
 
     var restoreResults = function(){
@@ -537,13 +551,16 @@ jQuery(function($) {
     };
 
     //search
-    $search.submit( function () {
+    $search.submit(function () {
         //reset pagination
         userSettDef["page"] = 1;
         var fetchDataURL = constructSearchURL();
         fetchData(fetchDataURL);
+        //real
         var fetchCLustersURL = constructSearchURL(undefined,true);
-        fetchClusters(fetchCLustersURL)
+        fetchClusters(fetchCLustersURL);
+        // var graphData = nodeify(dummyData);
+        // renderNodeGraph(graphData);
         return false;
     });
 
@@ -570,7 +587,6 @@ jQuery(function($) {
     };
 
     $('#tabs a').click(function (e) {
-        console.log("here")
         e.preventDefault();
         $(this).tab('show')
 

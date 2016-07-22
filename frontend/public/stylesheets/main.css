@@ -154,13 +154,14 @@ body{
 .nucleus{
     cursor: move;
     fill: #50c1cc;
-    stroke: #000;
-    stroke-width: 2px;
+    stroke: #5375cc;
+    stroke-width: 1px;
 }
 .node{
     cursor: move;
+    /*stroke: #252fcc;*/
+    /*stroke-width: 1px;*/
     fill: #50c1cc;
-    opacity: 0.9;
 }
 .tombstone{
     display: none;
