@@ -109,8 +109,15 @@ public class Main {
 //                break;
             default:
                 if (name.matches(".+_combined_unique\\.orf_rpkm\\.txt")){
-                    orfDocs = parser.parseRPKMTable(file);
+                    try {
+                        orfDocs = parser.parseRPKMTable(file);
+                    } catch (IllegalTableException e) {
+                        e.printStackTrace();
+                        System.out.println("File originating error: " + file.getName());
+                        System.out.println("Path: " + file.getAbsoluteFile());
+                    }
                     client.index(orfDocs);
+
                 }
                 break;
 

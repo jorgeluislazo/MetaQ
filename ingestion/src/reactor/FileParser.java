@@ -95,10 +95,9 @@ class FileParser {
         if(row[0] == null){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
-
         }
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("ORFID", row[0]);
+        doc.addField("ORFID", modifyID(row[0]));
         doc.addField("ORF_len", row[1]);
         doc.addField("start", row[2]);
         doc.addField("end", row[3]);
@@ -135,7 +134,7 @@ class FileParser {
 
         }
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("ORFID", row[0]);
+        doc.addField("ORFID",modifyID(row[0]));
 
         Map<String, String> cogID = new HashMap<>();
         cogID.put("set", row[2]);
@@ -145,30 +144,32 @@ class FileParser {
         keggID.put("set", row[3]);
         doc.addField("KEGGID", keggID);
 
-        //overwrite the product field if found, since its a bit more descriptive in this table
+        List<String> extendeDesc = new ArrayList<>();
+
+        //adds this table product description to extendedDesc as well
         if(row[4] != null){
-            Map<String, String> product = new HashMap<>();
-            product.put("set", row[4]);
-            doc.addField("product", product);
+            extendeDesc.add(row[4]);
+//            doc.addField("extended_desc", row[4]);
         }
 
-        Map<String, String> extended = new HashMap<>();
-        extended.put("set", row[6]);
-        doc.addField("extended_desc", extended);
+//        Map<String, String> extended = new HashMap<>();
+//        extended.put("set", row[6]);
+        extendeDesc.add(row[6]);
+        doc.addField("extended_desc", extendeDesc);
         return doc;
     }
 
-    List<SolrInputDocument> parseRPKMTable(File file){
+    List<SolrInputDocument> parseRPKMTable(File file) throws IllegalTableException{
         parser.beginParsing(file);
         String[] row;
         List<SolrInputDocument> documentBatch = new ArrayList<>();
         while((row = parser.parseNext()) != null){
             SolrInputDocument rpkmDoc = new SolrInputDocument();
             if(row[0].equals("")){
-                System.out.println("here");
+                throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
             }
 
-            rpkmDoc.addField("ORFID", row[0]);
+            rpkmDoc.addField("ORFID", modifyID(row[0]));
             Map<String, String> rpkmValue = new HashMap<>();
             rpkmValue.put("set", row[1]);
             rpkmDoc.addField("rpkm", rpkmValue);
@@ -202,6 +203,14 @@ class FileParser {
             result = result.append(words[0].replaceAll(",","").toLowerCase()).append("_kegg2");
             return result.toString();
         }
+    }
+
+    private String modifyID(String ID){
+        String[] list = ID.split("_");
+        if (list.length >= 5){
+            ID = list[0] + "_" + list[3] + "_" + list[4];
+        }
+        return ID;
     }
 
     private String prettyPrintRow(String[] row){
