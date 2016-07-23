@@ -154,7 +154,10 @@ class FileParser {
 
 //        Map<String, String> extended = new HashMap<>();
 //        extended.put("set", row[6]);
-        extendeDesc.add(row[6]);
+
+        if(row[6] != null) {
+            extendeDesc.add(row[6]);
+        }
         doc.addField("extended_desc", extendeDesc);
         return doc;
     }

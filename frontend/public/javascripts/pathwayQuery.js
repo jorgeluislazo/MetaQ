@@ -27,6 +27,7 @@ jQuery(function($) {
         cachedResponse =  null,
         currentFacetFilter = "",
         currentFacetField = "",
+        currentClusterFilter = "",
         dummyData = {
             "clusters": [
                 {"clust1": ["id1", "id2", "id3"]},
@@ -62,21 +63,29 @@ jQuery(function($) {
 
             documents.fadeOut("fast", function(){
                 documents.empty();
+                console.log(response);
 
-                if (response.isFilterSearch) { // keep the current search and update result section
+                if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
                     $('.filterGuide').remove();
                     $('.resultsInfo').remove();
-                    console.log("page: "+ userSettDef["page"] + " results/page: " + userSettDef["resultsPerPage"])
                     for (var j in response.results) {
                         var hit = parseOrfData(response.results[j], j);
                         documents.append(hit)
                     }
-                    var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
-                        a = $('<a>').css("margin-left","10px").css("cursor", "pointer").text("remove").prepend(glyph).click(function () {
-                            restoreResults()
-                        }),
-                        p = $('<p>').text("Current facet filter: ").append($('<b>').text(currentFacetFilter)),
-                        filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
+                    var constructFilterGuide = function(p){
+                        var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
+                            a = $('<a>').css("margin-left","10px").css("cursor", "pointer").text("remove").prepend(glyph).click(function () {restoreResults()}),
+                            filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
+                        return filterGuide;}
+
+                    if(response.isFilterSearch){
+                        var p = $('<p>').text("Current facet filter: ").append($('<b>').text(currentFacetFilter)),
+                        filterGuide = constructFilterGuide(p);
+                    }
+                    if(response.isClusterFilter){
+                        p = $('<p>').text("Current cluster filter: ").append($('<b>').text(currentClusterFilter));
+                        filterGuide = constructFilterGuide(p);
+                    }
 
                     var infoDiv = $('<div>').attr('class', "resultsInfo")
                         .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
@@ -104,15 +113,10 @@ jQuery(function($) {
                             hit = parseOrfData(cachedResponse.results[i], i);
                             documents.append(hit)
                         }
-
-                        // sidePanel.fadeOut("fast", function(){
                         sidePanel.empty();
                         displayFacets(cachedResponse.facetFields["COGID"], "COG");
                         displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
                         displayPager(response.start, response.noOfResults, false);
-                        // sidePanel.fadeIn("slow");
-                        // });
-
                         documents.fadeIn("slow");
                     }
                 }
@@ -463,17 +467,20 @@ jQuery(function($) {
             }
             else{
                 $("circle").css("fill", "#50c1cc");
-                var IDs = [];
+                var iDs = [];
                 for (var l = 0; l < d.cluster.length; l++) {
                     $("." + d.cluster[l]).css("fill", "#ff3c1f").each(function(){
                         var text =$(this).next().text();
                         if (text.length > 0){
-                            // self.manager.clusterLabels.push(text);
+                            currentClusterFilter = text;
                         }
-                        if(this.id)IDs.push(this.id);
+                        if(this.id)iDs.push(this.id);
+                        console.log(this);
                     });
                 }
-                // self.manager.requestClusterDocs(IDs);
+                // console.log(iDs)
+                var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
+                fetchData(url);
             }
         }
         svg.selectAll("g#tombstone").remove()
@@ -484,6 +491,8 @@ jQuery(function($) {
             sidePanel = $('#facetPanel'),
             resultsInfo = $('.resultsInfo'),
             documents = $('.documents');
+
+            $('circle').css("fill", "#50c1cc");
 
         $('.facet-selected').attr("class","facetList");
         documents.fadeOut("fast", function(){
@@ -620,6 +629,14 @@ jQuery(function($) {
         }
         return fetchDataURL
     };
+
+    var constructClusterFilterURL = function(idList, extraParam){
+        var idsString = idList.join(" OR "),
+            fetchDataURL =
+                $search.data('search') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
+        console.log(fetchDataURL);
+        return fetchDataURL;
+    }
 
     $('#tabs a').click(function (e) {
         e.preventDefault();

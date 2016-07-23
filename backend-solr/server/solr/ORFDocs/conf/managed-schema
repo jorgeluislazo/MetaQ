@@ -4,24 +4,36 @@
   <uniqueKey>ORFID</uniqueKey>
   <solrQueryParser defaultOperator="AND"/>
   <fieldType name="ORF_key" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
-  <fieldType name="extended_text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false"/>
+  <fieldType name="text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false">
+      <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+      </analyzer>
+    </fieldType>
+  <fieldType name="extended_text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="true">
+    <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.HyphenatedWordsFilterFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.ASCIIFoldingFilterFactory"/>
+      </analyzer>
+  </fieldType>
   <fieldType name="pathway_id" class="solr.StrField" indexed="true" stored="true"/>
   <fieldType name="simple_float" class="solr.TrieFloatField" omitNorms="false" indexed="true" stored="true"/>
   <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
   <fieldType name="simple_string" class="solr.StrField" indexed="true" stored="true"/>
-  <fieldType name="text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false">
-    <analyzer type="index">
-      <tokenizer class="solr.StandardTokenizerFactory"/>
-      <filter class="solr.HyphenatedWordsFilterFactory"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <filter class="solr.ASCIIFoldingFilterFactory"/>
-    </analyzer>
-    <analyzer type="query">
-      <tokenizer class="solr.StandardTokenizerFactory"/>
-      <filter class="solr.LowerCaseFilterFactory"/>
-      <filter class="solr.ASCIIFoldingFilterFactory"/>
-    </analyzer>
-  </fieldType>
   <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
   <field name="COGID" type="pathway_id"/>
   <field name="KEGGID" type="pathway_id"/>

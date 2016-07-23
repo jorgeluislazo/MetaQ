@@ -146,6 +146,7 @@ object SearchLib {
     var resultsInfo = List[JsObject]()
 
     val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
+    val isClusterFilter = if(request.getQueryString("clusterFilter").isEmpty) false else true
 
     results.documents.foreach {
       doc =>
@@ -179,7 +180,8 @@ object SearchLib {
       "start" -> results.start,
       "results" -> resultsInfo,
       "facetFields" -> results.facetFields,
-      "isFilterSearch" -> isFilterSearch)
+      "isFilterSearch" -> isFilterSearch,
+      "isClusterFilter" -> isClusterFilter)
     resultsJson
   }
 
