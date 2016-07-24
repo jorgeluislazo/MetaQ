@@ -75,7 +75,7 @@ jQuery(function($) {
                         return filterGuide;}
 
                     if(response.isFilterSearch){
-                        var p = $('<p>').text("Current facet filter: ").append($('<b>').text(currentFacetFilter)),
+                        var p = $('<p>').text("All results with filter facet: ").append($('<b>').text(currentFacetFilter)),
                         filterGuide = constructFilterGuide(p);
                     }
                     if(response.isClusterFilter){
@@ -512,8 +512,8 @@ jQuery(function($) {
     };
 
     var displayPager = function(start, totalResults, isFilterPager){
-        var backButton = $("<li>").append($("<a>").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
-            nextButton = $("<li>").append($("<a>").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
+        var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
+            nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
             minPage = Math.max(1, userSettDef["page"] - 5),
@@ -665,5 +665,7 @@ jQuery(function($) {
             $text("Hide more settings");
         }
     });
+
+    $('[data-toggle="tooltip"]').tooltip();
 
 });

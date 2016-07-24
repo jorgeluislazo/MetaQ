@@ -54,8 +54,11 @@
             <div class="main-container">
                 <div class="side-bar">
                     <ul class="nav nav-tabs " role="tablist"  id="tabs">
-                        <li role="presentation" class="active"><a data-target="#facetPanel" aria-controls="facetPanel" role="tab" data-toggle="tab"><b>Result Facets</b></a></li>
-                        <li role="presentation"><a data-target="#clusterPanel" aria-controls="clusterPanel" role="tab" data-toggle="tab"><b>Clusters</b></a></li>
+                        <li role="presentation" class="active"><a data-target="#facetPanel" aria-controls="facetPanel" role="tab" data-toggle="tab">
+                            <b>Result Facets  </b><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="This tab will group results based on common KEGG/COG ids throughout the proteins, selecting a group will filter the result, bigger IDs mean larger groups. "></i></a>
+                        </li>
+                        <li role="presentation"><a data-target="#clusterPanel" aria-controls="clusterPanel" role="tab" data-toggle="tab">
+                            <b>Clusters  </b><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="This tab will open a clustering graph which groups up results based on common keywords, selecting any of the cluster nodes will filter down the results to this group."></i></a></li>
                     </ul>
                     <div class="tab-content well">
                         <div role="tabpanel" class="tab-pane active" id="facetPanel"></div>

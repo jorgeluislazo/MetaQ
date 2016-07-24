@@ -253,10 +253,20 @@ body{
 
 /*footer and misc*/
 
+.glyphicon-info-sign{
+    cursor: help;
+}
+
 .loading-gif{
     padding: 30px;
 }
 
 .well{
     padding: 10px;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    /* If max-width does not work, try using width instead */
+    width: 350px;
 }
