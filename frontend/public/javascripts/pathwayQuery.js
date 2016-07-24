@@ -4,13 +4,17 @@
 jQuery(function($) {
 
     var $search = $('#search'),
+        $sidePanel = $('#facetPanel'),
+        $results = $('.results'),
+        $resultsInfo = $('.resultsInfo'),
+        $documents = $('.documents'),
     //mappings for parsing Solr field ids to readable text
         li_map2 = {
             "ORF_len"       : "ORF length",
             "start"         : "Start",
             "end"           : "End",
             "strand_sense"  : "Sense",
-            "extended_desc" : "Extended Description"
+            "extended_desc" : "Secondary Description"
         },
         li_map1= {
             "taxonomy"  : "Taxonomy",
@@ -24,20 +28,11 @@ jQuery(function($) {
             "page" : 1,
             "facetField" : ""
         },
+        //clientside variables to save
         cachedResponse =  null,
         currentFacetFilter = "",
         currentFacetField = "",
-        currentClusterFilter = "",
-        dummyData = {
-            "clusters": [
-                {"clust1": ["id1", "id2", "id3"]},
-                {"clust2": ["id2", "id4", "id5"]},
-                {"clust3": ["id2", "id3", "id6", "id7"]},
-                {"clust4": ["id8", "id9"]}
-            ],
-            "noOfResults": 4
-        };
-
+        currentClusterFilter = "";
 
     var fetchData = function(url){
 
@@ -47,26 +42,17 @@ jQuery(function($) {
             contentType: "application/json"
         });
 
-
         jqxhr.done(function (response) {
-            //before
-            var results = $('.results'),
-                resultsInfo = $('.resultsInfo'),
-                sidePanel = $('#facetPanel'),
-                documents = $('.documents');
+            if($.trim($documents.html())=='')$documents.append("<img src='images/loading.gif' class='loading-gif'>");
 
-            if($.trim(documents.html())==''){
-                documents.append("<img src='images/loading.gif' class='loading-gif'>");
-            }
-
-            documents.fadeOut("fast", function(){
-                documents.empty();
+            $documents.fadeOut("fast", function(){
+                $documents.empty();
                 if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
                     $('.filterGuide').remove();
                     $('.resultsInfo').remove();
                     for (var j in response.results) {
                         var hit = parseOrfData(response.results[j], j);
-                        documents.append(hit)
+                        $documents.append(hit)
                     }
                     var constructFilterGuide = function(p){
                         var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
@@ -85,35 +71,34 @@ jQuery(function($) {
 
                     var infoDiv = $('<div>').attr('class', "resultsInfo")
                         .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
-                    results.prepend(infoDiv).prepend(filterGuide);
-                    documents.fadeIn("slow", function(){
+                    $results.prepend(infoDiv).prepend(filterGuide);
+                    $documents.fadeIn("slow", function(){
                         displayPager(response.start, response.noOfResults, true)
                     });
                 } else {
                     //update the cached result and parse all the new information
                     cachedResponse = response;
-                    // console.log(cachedResponse);
                     $('.filterGuide').remove();
-                    resultsInfo.empty();
+                    $resultsInfo.empty();
 
                     if (cachedResponse.noOfResults == 0) {
                         var query = $('#searchBox').val(),
                             noResultsFound = $('<h4>').attr('class', "noResultsFound").text("No results found for the search: '" + query + "'.");
-                        sidePanel.empty();
-                        results.append(noResultsFound);
+                        $sidePanel.empty();
+                        $results.append(noResultsFound);
                     }
                     else {
-                        resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
+                        $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
                         for (var i in cachedResponse.results) {
                             hit = parseOrfData(cachedResponse.results[i], i);
-                            documents.append(hit)
+                            $documents.append(hit)
                         }
-                        sidePanel.empty();
+                        $sidePanel.empty();
                         displayFacets(cachedResponse.facetFields["COGID"], "COG");
                         displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
                         displayPager(response.start, response.noOfResults, false);
-                        documents.fadeIn("slow");
+                        $documents.fadeIn("slow");
                     }
                 }
             });
@@ -124,7 +109,6 @@ jQuery(function($) {
             message = data.responseText || data.statusText;
             console.log(message);
         });
-        // $('.documents').append("<img src='images/loading.gif'>");
     };
 
     var parseOrfData = function(data, i){
@@ -179,8 +163,6 @@ jQuery(function($) {
             ul = $('<ul>'),
             facetDiv = $('#facetPanel').append(h4);
 
-
-        //make a new scale for sizing the facets
         var oldMin = 99999999, oldMax = 0, oldRange, newMin = 1, newRange = 5, sizeList = 0;
         for (var facet in facetResults) {
             var value = facetResults[facet];
@@ -207,7 +189,7 @@ jQuery(function($) {
                     li.click(function () {
                         $('.facet-selected').attr("class","facetList");
                         li.attr("class","facetList facet-selected");
-                        //save variables and send data
+
                         userSettDef["page"] = 1;
                         currentFacetFilter = facet;
                         currentFacetField = fieldType;
@@ -237,38 +219,6 @@ jQuery(function($) {
             var graphData = nodeify(data);
             renderNodeGraph(graphData);
         });
-    }
-
-    var nodeify2 = function(data){
-        var graph = { "nodes": [], "links": []},
-            list = [],//for intersection
-            NucleiIndex = 0;
-
-        for(var i=0; i < data.noOfResults; i++){ // for each cluster
-            var label = Object.keys(data.clusters[i])[0],
-                clusterSize = data.clusters[i][label].length;
-
-            for(var k=0; k < clusterSize; k++){// for each doc inside a cluster
-                var child = {"name": data.clusters[i][label][k], "cluster": ["clust"+i], "selected": false}; //create a node
-                var intersection = list.indexOf(child.name); //is it found in any other cluster?
-
-                if(intersection > -1){//was found before
-                    graph["nodes"][intersection]["cluster"].push("clust" + i); //add the cluster id to the intersection's parents
-                    graph["links"].push({"source": intersection, "target": NucleiIndex + i + clusterSize}); // create link from intersection
-                    graph["nodes"].push({"fixed": true, "x": -30}); //tombstone node quick fix
-                    continue;
-                }else{
-                    list.push(child.name); //add that to be checked later
-                    graph["nodes"].push(child); //add the node to the results
-                    graph["links"].push({"source": NucleiIndex + i + clusterSize, "target": NucleiIndex + i+k}); //create link from nucleus to the doc
-                }
-            }
-            graph["nodes"].push({"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
-            NucleiIndex = NucleiIndex + clusterSize; //update the index
-        }
-        // console.log(graph);
-        // console.log(list);
-        return graph;
     }
 
     var nodeify = function(data){
@@ -306,8 +256,6 @@ jQuery(function($) {
             total++;
             index = total;
         }
-        // console.log(graph)
-        // console.log(list);
         return  graph;
     }
 
@@ -487,25 +435,19 @@ jQuery(function($) {
     }
 
     var restoreResults = function(){
-        var results = $('.results'),
-            sidePanel = $('#facetPanel'),
-            resultsInfo = $('.resultsInfo'),
-            documents = $('.documents');
-
-            $('circle').css("fill", "#50c1cc");
-
+         $('circle').css("fill", "#50c1cc");
         $('.facet-selected').attr("class","facetList");
-        documents.fadeOut("fast", function(){
+        $documents.fadeOut("fast", function(){
             $('.filterGuide').remove();
-            documents.empty();
-
-            resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+            var $resultsInfo = $('.resultsInfo');
+            $documents.empty();
+            $resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
 
             for (var i in cachedResponse.results) {
                 var hit = parseOrfData(cachedResponse.results[i], i);
-                documents.append(hit)
+                $documents.append(hit)
             }
-            documents.fadeIn("slow", function(){
+            $documents.fadeIn("slow", function(){
                 displayPager(cachedResponse.start, cachedResponse.noOfResults, false)
             });
         });
@@ -529,7 +471,6 @@ jQuery(function($) {
             filterOrEmpty = ""
         }
 
-        // disable/activate accordingly
         if(userSettDef["page"] == 1){
             backButton.attr("class", "disabled").css("cursor", "pointer");
         }else{
@@ -581,7 +522,6 @@ jQuery(function($) {
                 })(i,li)
                 container.append(li);
             }
-
         }
         container.append(nextButton);
     }
@@ -602,7 +542,6 @@ jQuery(function($) {
         userSettDef["page"] = 1;
         var fetchDataURL = constructSearchURL();
         fetchData(fetchDataURL);
-        //real
         var fetchCLustersURL = constructSearchURL(undefined,true);
         fetchClusters(fetchCLustersURL);
         return false;
@@ -621,11 +560,9 @@ jQuery(function($) {
         if(isClusterSearch){
             var fetchDataURL =
                 $('#clusterPanel').data("request") + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
-            console.log(fetchDataURL)
         }else {
             fetchDataURL =
                 $search.data('search') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
-            console.log(fetchDataURL);
         }
         return fetchDataURL
     };
@@ -634,7 +571,6 @@ jQuery(function($) {
         var idsString = idList.join(" OR "),
             fetchDataURL =
                 $search.data('search') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
-        // console.log(fetchDataURL);
         return fetchDataURL;
     }
 
