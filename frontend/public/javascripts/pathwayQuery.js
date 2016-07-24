@@ -49,7 +49,6 @@ jQuery(function($) {
 
 
         jqxhr.done(function (response) {
-
             //before
             var results = $('.results'),
                 resultsInfo = $('.resultsInfo'),
@@ -58,13 +57,10 @@ jQuery(function($) {
 
             if($.trim(documents.html())==''){
                 documents.append("<img src='images/loading.gif' class='loading-gif'>");
-
             }
 
             documents.fadeOut("fast", function(){
                 documents.empty();
-                console.log(response);
-
                 if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
                     $('.filterGuide').remove();
                     $('.resultsInfo').remove();
@@ -96,8 +92,8 @@ jQuery(function($) {
                 } else {
                     //update the cached result and parse all the new information
                     cachedResponse = response;
-                    console.log(cachedResponse);
-
+                    // console.log(cachedResponse);
+                    $('.filterGuide').remove();
                     resultsInfo.empty();
 
                     if (cachedResponse.noOfResults == 0) {
@@ -236,7 +232,7 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (data) {
-            console.log(data)
+            // console.log(data)
             $('.clusterGraph').empty();
             var graphData = nodeify(data);
             renderNodeGraph(graphData);
@@ -270,8 +266,8 @@ jQuery(function($) {
             graph["nodes"].push({"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
             NucleiIndex = NucleiIndex + clusterSize; //update the index
         }
-        console.log(graph);
-        console.log(list);
+        // console.log(graph);
+        // console.log(list);
         return graph;
     }
 
@@ -310,14 +306,14 @@ jQuery(function($) {
             total++;
             index = total;
         }
-        console.log(graph)
-        console.log(list);
+        // console.log(graph)
+        // console.log(list);
         return  graph;
     }
 
     var renderNodeGraph = function(graphData){
         var self = this;
-        var width = 900,
+        var width = 800,
             height = 850,
             ctrlKey,
             grav,
@@ -330,7 +326,7 @@ jQuery(function($) {
         rig = (links >= 1000) ? 0.95: (links <= 100) ? 0.4 : links/1000;
 
         var force = d3.layout.force()
-            .size([900, 800])
+            .size([width, height - 50])
             .charge(charge)     //sets the repulsion/attraction strength to the specified value. def=-30 myval = charge/4
             .chargeDistance(600)//sets the maximum distance over which charge forces are applied. def= inf myval= 750
             .theta(0.5)         //sets the Barnes–Hut approximation criterion to the specified value. def=0.8 myval = 0.5
@@ -388,19 +384,19 @@ jQuery(function($) {
             })
             .attr("r", function(d){
                 if (d.nucleus){
-                    return 25
+                    return 20
                 }
-                return 15
+                return 5
             })
             .style("opacity", function(d){
                 if(d.nucleus){
                     return 1
-                } return 0.2
+                } return 0.5
             })
             .on("click", toggle);
 
         node.append("text")
-            .attr("class", "cluster-text")
+            .attr("class","cluster-text")
             .attr("dx", function(d){
                 if (d.nucleus){
                     return (-4 * (d.nucleus.length));
@@ -412,10 +408,14 @@ jQuery(function($) {
                     return d.nucleus + " (" + d.weight + ")"
                 }
             })
-            .on("mouseover", function(d){d3.select(this).style("fill", "red")
+            .on("mouseover", function(d){d3.select(this).style("fill", "#18364b").style("font-weight","bold")
             })
-            .on("mouseout", function(d){d3.select(this).style("fill", "black")});
+            .on("mouseout", function(d){d3.select(this).style("fill", "black").style("font-weight", "normal")})
+            .on("click",function(d,i){
+                toggle(node[0][i].__data__); //small hack to activate toggle on node when clicking text
+            });
 
+        // console.log(node);
         /**
          * D3 Method, handles the movement behaviour of every node at each tick (every fraction of a second)
          */
@@ -469,13 +469,13 @@ jQuery(function($) {
                 $("circle").css("fill", "#50c1cc");
                 var iDs = [];
                 for (var l = 0; l < d.cluster.length; l++) {
-                    $("." + d.cluster[l]).css("fill", "#ff3c1f").each(function(){
-                        var text =$(this).next().text();
+                    $("." + d.cluster[l]).css("fill", "#18364b").each(function(){
+                        var text =$(this).next().text(); //gets text associated
                         if (text.length > 0){
                             currentClusterFilter = text;
                         }
                         if(this.id)iDs.push(this.id);
-                        console.log(this);
+                        // console.log(d);
                     });
                 }
                 // console.log(iDs)
@@ -634,7 +634,7 @@ jQuery(function($) {
         var idsString = idList.join(" OR "),
             fetchDataURL =
                 $search.data('search') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
-        console.log(fetchDataURL);
+        // console.log(fetchDataURL);
         return fetchDataURL;
     }
 
@@ -645,15 +645,13 @@ jQuery(function($) {
     })
 
     $('a[data-target="#facetPanel"]').click(function(e){
-        var w = $('.main-container').width() * 0.23
         $('.results').css("width",'74%');
-        $('.side-bar').width(w);
+        $('.side-bar').css("width",'23%');
     })
 
     $('a[data-target="#clusterPanel"]').click(function(e){
-        var w = $('.main-container').width() * 0.54
-        $('.results').css("width",'44%');
-        $('.side-bar').width(w);
+        $('.results').css("width",'52%');
+        $('.side-bar').css('width', "46%");
     })
 
     $('#settings-toggle').click(function(){

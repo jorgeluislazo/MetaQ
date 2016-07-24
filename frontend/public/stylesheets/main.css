@@ -11,6 +11,7 @@ body{
     -webkit-align-items: center;
     align-items: center;
     height: 150px;
+    min-width: 1600px;
     background-color: #2e6da4;
 }
 
@@ -70,11 +71,7 @@ body{
 /*sidebar left hand side*/
 .main-container{
     width: 100%;
-    min-width: 1400px;
-    /*display: -webkit-flex;*/
-    /*display: flex;*/
-    /*-webkit-justify-content: center;*/
-    /*justify-content: center;*/
+    min-width: 1600px;
 }
 
 .side-bar{
@@ -148,14 +145,14 @@ body{
     font-size: 110%;
 }
 .link {
-    stroke: #aaa7b4;
-    stroke-width: 0;
+    stroke: #50c1cc;
+    stroke-width: 0.3px;
 }
 .nucleus{
     cursor: move;
     fill: #50c1cc;
     stroke: #5375cc;
-    stroke-width: 1px;
+    stroke-width: 3px;
 }
 .node{
     cursor: move;
@@ -166,13 +163,6 @@ body{
 .tombstone{
     display: none;
 }
-.node.selected {
-    fill: #ff3c1f;
-}
-.nucleus.selected {
-    fill: #ff3c1f;
-}
-
 /*results right hand side*/
 
 .results{
