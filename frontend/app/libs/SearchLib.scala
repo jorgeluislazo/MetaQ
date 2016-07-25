@@ -30,20 +30,21 @@ object SearchLib {
     // Construct the solr query and handling the parameters
     val queryBuilder = this.buildSelectQuery(query, request)
     var resultsInfo = Json.obj(
-      "num_of_results" -> 0,
-      "results" -> List[JsString](),
-      "facetFields" -> Map[String, Map[String, Long]](),
-      "isFilterSearch" -> JsBoolean(false))
+      "EmptyResponse" -> true)
 
     try {
       // Get Results from Solr.
       val results = queryBuilder.getResultAsMap()
-
       // prepare results
       resultsInfo = this.prepareSearchResults(results, request)
     } catch {
       case e: Exception =>
-        println("exception caught: " + e);
+        println("query: " + query)
+        println("request URL:" + request)
+        println("exception caught: " + e)
+        resultsInfo = Json.obj(
+          "noOfResults" -> 0,
+          "error" -> e.toString)
     }
 
     resultsInfo
@@ -89,7 +90,9 @@ object SearchLib {
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
-    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+    //"http://localhost:8983/solr/ORFDocs"
+    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    val client = new SolrClient("http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs")
 
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
@@ -125,7 +128,7 @@ object SearchLib {
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
 
-    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+    val client = new SolrClient("http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs")
 
     var queryBuilder = client.query(searchSettings + query)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")

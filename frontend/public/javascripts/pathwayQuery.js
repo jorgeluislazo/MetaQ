@@ -43,13 +43,10 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (response) {
-            if($.trim($documents.html())=='')$documents.append("<img src='images/loading.gif' class='loading-gif'>");
-
-            $documents.fadeOut("fast", function(){
                 $documents.empty();
                 if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
                     $('.filterGuide').remove();
-                    $('.resultsInfo').remove();
+                    $resultsInfo.empty();
                     for (var j in response.results) {
                         var hit = parseOrfData(response.results[j], j);
                         $documents.append(hit)
@@ -69,9 +66,8 @@ jQuery(function($) {
                         filterGuide = constructFilterGuide(p);
                     }
 
-                    var infoDiv = $('<div>').attr('class', "resultsInfo")
-                        .text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
-                    $results.prepend(infoDiv).prepend(filterGuide);
+                    $resultsInfo.text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
+                    $results.prepend(filterGuide);
                     $documents.fadeIn("slow", function(){
                         displayPager(response.start, response.noOfResults, true)
                     });
@@ -82,12 +78,20 @@ jQuery(function($) {
                     $resultsInfo.empty();
 
                     if (cachedResponse.noOfResults == 0) {
-                        var query = $('#searchBox').val(),
-                            noResultsFound = $('<h4>').attr('class', "noResultsFound").text("No results found for the search: '" + query + "'.");
+                        var query = $('#searchBox').val();
+
+                        if(cachedResponse.error != undefined){
+                            var errorResponse = $('<h4>').attr('class', "noResultsFound").text("Query syntax error for the search term: '" + query + "'.");
+                        }else{
+                            errorResponse = $('<h4>').attr('class', "noResultsFound").text("No results found for the search term: '" + query + "'.");
+                        }
                         $sidePanel.empty();
-                        $results.append(noResultsFound);
+                        $resultsInfo.empty();
+                        $documents.append(errorResponse);
+                        $documents.fadeIn("fast");
                     }
                     else {
+                        console.log("here")
                         $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
                         for (var i in cachedResponse.results) {
@@ -101,7 +105,7 @@ jQuery(function($) {
                         $documents.fadeIn("slow");
                     }
                 }
-            });
+            // });
         });
 
         jqxhr.fail(function (data) {
@@ -195,7 +199,9 @@ jQuery(function($) {
                         currentFacetField = fieldType;
                         var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
                         var fetchDataURL = constructSearchURL(facetSearchParam);
-                        fetchData(fetchDataURL)
+                        $documents.fadeOut("slow", function(){
+                            fetchData(fetchDataURL)
+                        });
                     });
                 })(facet, li);
 
@@ -206,7 +212,6 @@ jQuery(function($) {
     };
 
     var fetchClusters = function(url){
-
         var jqxhr = $.ajax({
             type: "GET",
             url: url,
@@ -427,8 +432,10 @@ jQuery(function($) {
                     });
                 }
                 // console.log(iDs)
-                var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
-                fetchData(url);
+                $documents.fadeOut("fast", function(){
+                    var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
+                    fetchData(url);
+                });
             }
         }
         svg.selectAll("g#tombstone").remove()
@@ -441,7 +448,8 @@ jQuery(function($) {
             $('.filterGuide').remove();
             var $resultsInfo = $('.resultsInfo');
             $documents.empty();
-            $resultsInfo.text("Displaying " + cachedResponse.results.length + " result(s) out of " + cachedResponse.noOfResults + " results found.");
+            $resultsInfo.empty();
+            $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
             for (var i in cachedResponse.results) {
                 var hit = parseOrfData(cachedResponse.results[i], i);
@@ -477,7 +485,9 @@ jQuery(function($) {
             backButton.click(function(){
                 userSettDef["page"]--;
                 var fetchDataURL = constructSearchURL(filterOrEmpty);
-                fetchData(fetchDataURL);
+                $documents.fadeOut("slow", function(){
+                    fetchData(fetchDataURL);
+                });
             }).css("cursor", "pointer");
         }
         if(userSettDef["page"] == maxPage){
@@ -486,7 +496,9 @@ jQuery(function($) {
             nextButton.click(function(){
                 userSettDef["page"]++;
                 var fetchDataURL = constructSearchURL(filterOrEmpty);
-                fetchData(fetchDataURL);
+                $documents.fadeOut("slow", function(){
+                    fetchData(fetchDataURL);
+                });
             }).css("cursor", "pointer");
         }
 
@@ -502,7 +514,9 @@ jQuery(function($) {
                     b.click(function(){
                         userSettDef["page"] = a;
                         var fetchDataURL = constructSearchURL(filterOrEmpty);
-                        fetchData(fetchDataURL);
+                        $documents.fadeOut("slow", function(){
+                            fetchData(fetchDataURL);
+                        });
                     });
                 })(i,li)
                 container.append(li);
@@ -517,7 +531,9 @@ jQuery(function($) {
                     b.click(function(){
                         userSettDef["page"] = a;
                         var fetchDataURL = constructSearchURL(filterOrEmpty);
-                        fetchData(fetchDataURL);
+                        $documents.fadeOut("slow", function(){
+                            fetchData(fetchDataURL);
+                        });
                     });
                 })(i,li)
                 container.append(li);
@@ -538,10 +554,14 @@ jQuery(function($) {
 
     //search
     $search.submit(function () {
+        if($.trim($documents.html())=='')$documents.append("<img src='images/loading.gif' class='loading-gif'>");
         //reset pagination
         userSettDef["page"] = 1;
         var fetchDataURL = constructSearchURL();
-        fetchData(fetchDataURL);
+        $documents.fadeOut("slow", function(){
+            fetchData(fetchDataURL);
+        });
+
         var fetchCLustersURL = constructSearchURL(undefined,true);
         fetchClusters(fetchCLustersURL);
         return false;
@@ -564,6 +584,7 @@ jQuery(function($) {
             fetchDataURL =
                 $search.data('search') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
         }
+        console.log(fetchDataURL);
         return fetchDataURL
     };
 
