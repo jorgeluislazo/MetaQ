@@ -3,7 +3,10 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET     /                           controllers.Application.homePage
+
+# Search genes
+GET     /geneExplorer/:query        controllers.Application.geneExplorer(query: String)
 
 # Search API 
 GET     /search                     controllers.Application.simpleSearch(query: String)

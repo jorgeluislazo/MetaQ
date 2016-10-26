@@ -4,6 +4,7 @@
 jQuery(function($) {
 
     var $search = $('#search'),
+        $cache = $('.results').data('cache'),
         $sidePanel = $('#facetPanel'),
         $results = $('.results'),
         $resultsInfo = $('.resultsInfo'),
@@ -91,7 +92,6 @@ jQuery(function($) {
                         $documents.fadeIn("fast");
                     }
                     else {
-                        console.log("here")
                         $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
 
                         for (var i in cachedResponse.results) {
@@ -553,7 +553,7 @@ jQuery(function($) {
     };
 
     //search
-    $search.submit(function () {
+    var startQuery = function(){
         if($.trim($documents.html())=='')$documents.append("<img src='images/loading.gif' class='loading-gif'>");
         //reset pagination
         userSettDef["page"] = 1;
@@ -561,11 +561,10 @@ jQuery(function($) {
         $documents.fadeOut("slow", function(){
             fetchData(fetchDataURL);
         });
-
         var fetchCLustersURL = constructSearchURL(undefined,true);
         fetchClusters(fetchCLustersURL);
         return false;
-    });
+    };
 
     var constructSearchURL = function(extraParam, isClusterSearch){
         var query = $('#searchBox').val(),
@@ -582,8 +581,9 @@ jQuery(function($) {
                 $('#clusterPanel').data("request") + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
         }else {
             fetchDataURL =
-                $search.data('search') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
+                $search.data('searchurl') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
         }
+        console.log($cache)
         console.log(fetchDataURL);
         return fetchDataURL
     };
@@ -593,7 +593,12 @@ jQuery(function($) {
             fetchDataURL =
                 $search.data('search') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
         return fetchDataURL;
-    }
+    };
+
+    $search.on("submit", function(){
+        startQuery();
+        return false;
+    });
 
     $('#tabs a').click(function (e) {
         e.preventDefault();
@@ -623,6 +628,7 @@ jQuery(function($) {
         }
     });
 
+    fetchData($search.data('searchurl') + $cache);
     $('[data-toggle="tooltip"]').tooltip();
 
 });

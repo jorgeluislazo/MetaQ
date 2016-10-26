@@ -23,16 +23,19 @@ class FileParser {
         //the line separator sequence is defined here to ensure systems such as MacOS and Windows
         //are able to process this file correctly (MacOS uses '\r'; and Windows uses '\r\n').
         settings.getFormat().setLineSeparator("\n");
+        settings.setMaxCharsPerColumn(200000); //how big can this list be...???!
 
         // creates a TSV parser
         parser = new TsvParser(settings);
     }
 
+    //unused
     Quartet parseCogStats1(File file){
         List<String[]> allRows = parser.parseAll(file);
         return new Quartet<>(allRows.get(1)[1],allRows.get(2)[1], allRows.get(3)[1], allRows.get(4)[1]);
     }
 
+    //unused
     List<Pair> parseCogStats2(File file){
         List<Pair> result = new ArrayList<>();
         List<String[]> allRows = parser.parseAll(file);
@@ -45,6 +48,7 @@ class FileParser {
         return result;
     }
 
+    //unused
     Sextet parseKeggStats1(File file){
         List<String[]> allRows = parser.parseAll(file);
         return new Sextet<>(
@@ -57,6 +61,7 @@ class FileParser {
         );
     }
 
+    //unused
     List<Pair> parseKeggStats2(File file){
         List<Pair> result = new ArrayList<>();
         List<String[]> allRows = parser.parseAll(file);
@@ -181,6 +186,32 @@ class FileParser {
         return documentBatch;
     }
 
+    List<SolrInputDocument> parsePwayTable(File file) throws IllegalTableException{
+        parser.beginParsing(file);
+        String[] row;
+        List<SolrInputDocument> documentBatch = new ArrayList<>();
+        parser.parseNext(); //skip the titles...
+        while ((row = parser.parseNext()) != null){
+            SolrInputDocument pwayDoc = new SolrInputDocument();
+            if(row[1].equals("")){
+                throw new IllegalTableException("No pwayID found in this row:\n" + prettyPrintRow(row));
+            }
+            pwayDoc.addField("pway_id",row[1]);
+            pwayDoc.addField("pway_name",row[2].replaceAll("^\"|\"$", ""));
+            pwayDoc.addField("rxn_total", row[3]);
+            Map<String, ArrayList<String>> orfs = new HashMap<>();
+            orfs.put("add", convertToList(row[9]));
+            pwayDoc.addField("orfs",  orfs);
+            Map<String, String> sample_run = new HashMap<>();
+            sample_run.put("add", row[0]);
+            pwayDoc.addField("sample_runs", sample_run);
+
+            documentBatch.add(pwayDoc);
+        }
+
+        return documentBatch;
+    }
+
 
     private String modifyName(String title){
         StringBuilder result = new StringBuilder();
@@ -214,6 +245,12 @@ class FileParser {
             ID = list[0] + "_" + list[3] + "_" + list[4];
         }
         return ID;
+    }
+
+    //helper funciton, converts [A,B,C] string to an array list.
+    private ArrayList<String> convertToList(String listString){
+        listString = listString.substring(1, listString.length() -1);
+        return new ArrayList<>(Arrays.asList(listString.split(",")));
     }
 
     private String prettyPrintRow(String[] row){

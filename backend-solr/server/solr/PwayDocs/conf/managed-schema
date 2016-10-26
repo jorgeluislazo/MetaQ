@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solr managed schema - automatically generated - DO NOT EDIT -->
+<schema name="PwayDocs" version="1.5">
+  <uniqueKey>pway_id</uniqueKey>
+  <solrQueryParser defaultOperator="AND"/>
+  <fieldType name="ID" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true"/>
+  <fieldType name="long" class="solr.TrieLongField" positionIncrementGap="0" docValues="true" precisionStep="0"/>
+  <fieldType name="multivaluedText" class="solr.TextField" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
+  <fieldType name="text" class="solr.TextField" omitNorms="false" indexed="true" stored="true" termPositions="true" termVectors="true" multiValued="false">
+    <analyzer type="index">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.HyphenatedWordsFilterFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+      <filter class="solr.ASCIIFoldingFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.StandardTokenizerFactory"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+      <filter class="solr.ASCIIFoldingFilterFactory"/>
+    </analyzer>
+  </fieldType>
+  <field name="_version_" type="long" indexed="true" stored="false"/>
+  <field name="orfs" type="multivaluedText"/>
+  <field name="pway_id" type="ID"/>
+  <field name="pway_name" type="text" default="unknown"/>
+  <field name="rxn_total" type="simple_number"/>
+  <field name="sample_runs" type="multivaluedText"/>
+</schema>

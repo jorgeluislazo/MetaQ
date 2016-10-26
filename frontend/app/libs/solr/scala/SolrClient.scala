@@ -1,6 +1,5 @@
 package libs.solr.scala
 
-import org.apache.solr.client.solrj.SolrQuery.ORDER
 import org.apache.solr.client.solrj.impl.HttpSolrServer
 import org.apache.solr.client.solrj.SolrServer
 import libs.solr.scala.query._

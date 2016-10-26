@@ -6,11 +6,16 @@ import play.api.mvc._
 
 class Application extends Controller {
 
-  def index = Action {
-    Ok(views.html.index())
+  def homePage = Action {
+    Ok(views.html.home())
+  }
+
+  def geneExplorer(query: String) = Action {
+    Ok(views.html.index(query))
   }
   
   def simpleSearch(query: String): Action[AnyContent] = Action { implicit request =>
+    println(query)
     val results = SearchLib.get(query,request)
     Ok(results)
   }

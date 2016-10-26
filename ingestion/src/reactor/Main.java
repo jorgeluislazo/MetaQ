@@ -22,6 +22,7 @@ public class Main {
     private static SolrLink client;
     private static FileParser parser;
     private static List<SolrInputDocument> orfDocs;
+    private static List<SolrInputDocument> pwayDocs;
 
     public static void main(String[] args) throws IOException, SolrServerException {
         if(args[0].equals("del")){
@@ -29,6 +30,7 @@ public class Main {
             client.deleteRecords();
             return;
         }
+        Long start = System.currentTimeMillis();
 
         boolean isDirectory = (new File(args[0]).isDirectory());
         if (!isDirectory){
@@ -39,25 +41,23 @@ public class Main {
 
         //initializations
         File baseDir = new File(args[0]);
-        client = new SolrLink("pathwayRuns");
+        client = new SolrLink("ORFDocs");
         parser = new FileParser();
 
-        //for each pathway run
+        //for each ORFDoc
         System.out.println("Indexing files...\nWorking directory: " + args[0]);
-        Long start = System.currentTimeMillis();
-        for( File pathwayRun : Files.fileTreeTraverser().children(baseDir)){
-            if(!pathwayRun.isDirectory()){
+        for( File metaGenomeRun : Files.fileTreeTraverser().children(baseDir)){
+            if(!metaGenomeRun.isDirectory()){
                 continue;
             }
-            String runID = pathwayRun.getName().substring(0, pathwayRun.getName().indexOf("_"));
-            SolrInputDocument pathwayRunDoc = new SolrInputDocument();
+            String runID = metaGenomeRun.getName().substring(0, metaGenomeRun.getName().indexOf("_"));
+            SolrInputDocument ORFDoc = new SolrInputDocument();
             orfDocs = new ArrayList<>();
 
-            for (File f : Files.fileTreeTraverser().preOrderTraversal(pathwayRun)){
-                importFile(f, pathwayRunDoc);
+            for (File f : Files.fileTreeTraverser().preOrderTraversal(metaGenomeRun)){
+                importFile(f, ORFDoc);
             }
-            pathwayRunDoc.addField("runID", runID);
-            client.indexSingle(pathwayRunDoc);
+//            ORFDoc.addField("runID", runID);
         }
         System.out.println("Total time taken in seconds: " + (System.currentTimeMillis() - start)/1000);
     }
@@ -66,34 +66,6 @@ public class Main {
         String name = file.getName();
 
         switch (name){
-            case "COG_stats_1.txt":
-                Quartet cogStats1 = parser.parseCogStats1(file);
-                pathwayRunDoc.addField("poorly_char_cog1", cogStats1.getValue0());
-                pathwayRunDoc.addField("info_process_cog1", cogStats1.getValue1());
-                pathwayRunDoc.addField("metabolism_cog1", cogStats1.getValue2());
-                pathwayRunDoc.addField("cell_signal_cog1", cogStats1.getValue3());
-                break;
-            case "COG_stats_2.txt":
-                List<Pair> cogStats2 = parser.parseCogStats2(file);
-                for (Pair tuple : cogStats2){
-                    pathwayRunDoc.addField((String) tuple.getValue0(), tuple.getValue1());
-                }
-                break;
-            case "KEGG_stats_1.txt":
-                Sextet keggStats1 = parser.parseKeggStats1(file);
-                pathwayRunDoc.addField("cell_process_kegg1", keggStats1.getValue0());
-                pathwayRunDoc.addField("human_disease_kegg1", keggStats1.getValue1());
-                pathwayRunDoc.addField("gene_info_kegg1", keggStats1.getValue2());
-                pathwayRunDoc.addField("environmental_info_kegg1", keggStats1.getValue3());
-                pathwayRunDoc.addField("organism_sys_kegg1", keggStats1.getValue4());
-                pathwayRunDoc.addField("metabolism_kegg1", keggStats1.getValue5());
-                break;
-            case "KEGG_stats_2.txt":
-                List<Pair> keggStats2 = parser.parseKeggStats2(file);
-                for (Pair tuple : keggStats2){
-                    pathwayRunDoc.addField((String) tuple.getValue0(), tuple.getValue1());
-                }
-                break;
             case "functional_and_taxonomic_table.txt":
                 client.changeTargetCore("ORFDocs");
                 orfDocs = parser.parseFuncTable(file);
@@ -118,6 +90,17 @@ public class Main {
                     }
                     client.index(orfDocs);
 
+                }
+                if(name.matches(".+_combined_unique\\.pwy\\.txt")){
+                    client.changeTargetCore("PwayDocs");
+                    try {
+                        pwayDocs = parser.parsePwayTable(file);
+                    } catch (IllegalTableException e) {
+                        e.printStackTrace();
+                        System.out.println("File originating error: " + file.getName());
+                        System.out.println("Path: " + file.getAbsoluteFile());
+                    }
+                    client.index(pwayDocs);
                 }
                 break;
 

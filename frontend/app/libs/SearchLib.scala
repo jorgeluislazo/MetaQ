@@ -92,7 +92,7 @@ object SearchLib {
 
     //"http://localhost:8983/solr/ORFDocs"
     //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
-    val client = new SolrClient("http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs")
+    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {

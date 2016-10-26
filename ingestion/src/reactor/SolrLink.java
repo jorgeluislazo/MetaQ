@@ -16,7 +16,7 @@ import java.util.Collection;
 public class SolrLink {
     // http://localhost:8983/solr/
     // http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/
-    private static final String BASE_URL = "http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/";
+    private static final String BASE_URL = "http://localhost:8983/solr/";
     private SolrClient solrClient;
 
     /**
@@ -27,8 +27,8 @@ public class SolrLink {
      * @param coreName: the name of the Solr core to point to.
      */
     public SolrLink(String coreName){
-        // http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/#/ORFDocs
-        // http://localhost:8983/solr/#/pathwayRuns
+        // http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/#/
+        // http://localhost:8983/solr/#/
         this.solrClient = new HttpSolrClient(BASE_URL + coreName);
     }
 
@@ -82,14 +82,17 @@ public class SolrLink {
      * @throws IOException
      * @throws SolrServerException
      */
-    public void deleteRecords() throws IOException, SolrServerException {
+    void deleteRecords() throws IOException, SolrServerException {
+        solrClient.deleteByQuery("*:*");
+        solrClient.commit();
+        changeTargetCore("PwayDocs");
         solrClient.deleteByQuery("*:*");
         solrClient.commit();
         System.out.println("Deleting all records...Done");
     }
 
-    public void changeTargetCore(String newTarget){
-        // http://localhost:8983/solr/#/pathwayRuns
+    void changeTargetCore(String newTarget){
+        // http://localhost:8983/solr/#/PwayDocs
         this.solrClient = new HttpSolrClient(BASE_URL + newTarget);
     }
 

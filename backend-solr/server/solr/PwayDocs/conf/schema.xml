@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema name="PwayDocs" version="1.5">
+    <types>
+        <fieldType name="ID" class="solr.StrField" indexed="true" stored="true" multiValued="false" required="true">
+        <!--<filter class="solr.RemoveDuplicatesTokenFilterFactory"/>-->
+        </fieldType>
+        <!--<fieldType name="signatureString" class="solr.StrField" stored="true" indexed="true" multiValued="false"/>-->
+        <fieldType name="simple_number" class="solr.TrieIntField" indexed="false" stored="true"/>
+        <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+        <fieldType name="multivaluedText" class="solr.TextField" indexed="true" stored="true" multiValued="true">
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
+        </fieldType>
+        <fieldType name="text" class="solr.TextField" indexed="true" stored="true" multiValued="false" omitNorms="false"
+                   termVectors="true" termPositions="true">
+              <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.HyphenatedWordsFilterFactory"/><!--Eg when querying TNFα, "TNF-α" will be a hit as well -->
+                <filter class="solr.LowerCaseFilterFactory"/>      <!--Eg when querying "tnf-α", "TNF-α" will be a hit as well -->
+            <filter class="solr.ASCIIFoldingFilterFactory"/>   <!--Eg when querying "TNF-a", "TNF-α" will be a hit  as well -->
+              </analyzer>
+              <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
+              </analyzer>
+        </fieldType>
+    </types>
+
+    <fields>
+        <!--functional_and_taxonomic_table.txt-->
+        <field name="pway_id" type="ID"/>
+        <field name="pway_name" type="text" default="unknown"/>
+        <field name="orfs" type="multivaluedText"/>
+        <field name="sample_runs" type="multivaluedText"/>
+        <field name="rxn_total" type="simple_number"/>
+        <!--to remove duplicates-->
+        <!--<field name="signatureField" type="signatureString"/>-->
+        <field name="_version_" type="long" indexed="true" stored="false"/>
+    </fields>
+
+    <uniqueKey>pway_id</uniqueKey>
+
+    <solrQueryParser defaultOperator="AND"/>
+
+</schema>
