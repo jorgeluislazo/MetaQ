@@ -18,13 +18,23 @@ jQuery(function($) {
         console.log(fetchDataURL);
         return fetchDataURL
     };
-
-
     //search
     $search.submit(function () {
         var fetchDataURL = constructSearchURL();
         $(location).attr('href',fetchDataURL);
         return false;
+    });
+
+    $('#settings-toggle').click(function(){
+        var $settings = $('.settings'),
+            $text = function(a){$("#settings-toggle").text(a)};
+        if($settings.css("display") == "flex"){
+            $settings.css("display", "none");
+            $text("Advanced search...");
+        }else{
+            $settings.css("display", "flex");
+            $text("Hide more settings");
+        }
     });
 
 });

@@ -406,7 +406,7 @@ jQuery(function($) {
         }
 
         /**
-         * D3 Method, handles a click to a node (both css effects, as well as initiating a manager.doRequest
+         * D3 Method, handles a click to a node (both css effects, as well as initiating a query
          * @param d a single data point.
          */
         function toggle(d) {
@@ -434,6 +434,7 @@ jQuery(function($) {
                 // console.log(iDs)
                 $documents.fadeOut("fast", function(){
                     var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
+                    console.log(url);
                     fetchData(url);
                 });
             }
@@ -552,36 +553,23 @@ jQuery(function($) {
         return "#"
     };
 
-    //search
-    var startQuery = function(){
-        if($.trim($documents.html())=='')$documents.append("<img src='images/loading.gif' class='loading-gif'>");
-        //reset pagination
-        userSettDef["page"] = 1;
-        var fetchDataURL = constructSearchURL();
-        $documents.fadeOut("slow", function(){
-            fetchData(fetchDataURL);
-        });
-        var fetchCLustersURL = constructSearchURL(undefined,true);
-        fetchClusters(fetchCLustersURL);
-        return false;
-    };
+    var constructSearchURL = function(extraParam, isClusterSearch, ajax){
+        if(highQualOnly === undefined){ highQualOnly = "false" }
+        if(extraParam == undefined){ extraParam = ""} //any extra params such as facetSearch
+        if(isClusterSearch == undefined){isClusterSearch = false} //do we need a double query for the cluster?
+        if(ajax == undefined){ajax = true} //unless specified, do the search as an ajax (no reload)
 
-    var constructSearchURL = function(extraParam, isClusterSearch){
         var query = $('#searchBox').val(),
             searchType = $('input:radio[name=df]:checked').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
-
-        if(highQualOnly === undefined){ highQualOnly = "false" }
-        if(extraParam == undefined){ extraParam = ""}
-        if(isClusterSearch == undefined){isClusterSearch = false}
 
         if(isClusterSearch){
             var fetchDataURL =
                 $('#clusterPanel').data("request") + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
         }else {
             fetchDataURL =
-                $search.data('searchurl') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
+                (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
         }
         console.log($cache)
         console.log(fetchDataURL);
@@ -591,12 +579,13 @@ jQuery(function($) {
     var constructClusterFilterURL = function(idList, extraParam){
         var idsString = idList.join(" OR "),
             fetchDataURL =
-                $search.data('search') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
+                $search.data('searchurl') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
         return fetchDataURL;
     };
 
     $search.on("submit", function(){
-        startQuery();
+        var fetchDataURL = constructSearchURL(undefined, undefined, false);
+        $(location).attr('href',fetchDataURL);
         return false;
     });
 
@@ -627,8 +616,9 @@ jQuery(function($) {
             $text("Hide more settings");
         }
     });
-
+    $('#searchBox').val($cache.match(/^.*?(?=&)/));
     fetchData($search.data('searchurl') + $cache);
+    fetchClusters($('#clusterPanel').data("request") + $cache)
     $('[data-toggle="tooltip"]').tooltip();
 
 });

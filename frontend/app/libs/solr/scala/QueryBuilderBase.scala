@@ -104,7 +104,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
   
   /**
-   * Sets sort facet [count,index].
+   * Sets sort facet [count,geneExplorer].
    *
    * @param field field names
    */
@@ -115,7 +115,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
   
   /**
-   * Sets sort facet [count,index].
+   * Sets sort facet [count,geneExplorer].
    *
    * @param field field names
    */

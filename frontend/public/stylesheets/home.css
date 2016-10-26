@@ -1,0 +1,125 @@
+body{
+    background-color: #66afe9;
+}
+/*header and tabs*/
+.title{
+    background-color: #f8fcf1;
+    padding-top: 60px;
+    text-align: center;
+    padding-bottom: 50px;
+}
+
+.choose-button{
+    padding-top: 30px;
+    margin: 0 auto;
+    width: 800px;
+}
+
+ul[role=tablist]{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+li[role=presentation]{
+    width: 300px;
+}
+
+.tab-content{
+    height: 350px;
+    /*background-color: #66afe9;*/
+}
+
+.nav-tabs>li>a {
+    color: black;
+    background-color: #4c76b4; /* 9abeca */
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus{
+    text-decoration: underline;
+    background-color: #f8fcf1;
+}
+
+.nav-tabs>li>a:hover{
+    cursor: pointer;
+}
+
+/*nav / search bars*/
+.nav-bar{
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+    height: 150px;
+}
+
+.search{
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: center;
+    justify-content: center;
+    padding-top: 25px;
+}
+
+#searchBox{
+    top: 50px;
+    width: 500px;
+    font-size: 15px;
+}
+
+#settings-toggle{
+    position: relative;
+    top: 4px;
+    font-size: 85%;
+    color: #4c76b4;
+    cursor: pointer;
+}
+
+.settings{
+    display: -webkit-flex;
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    width: 700px;
+}
+
+.settings div{
+    color: #4c76b4;
+    padding-left: 15px;
+    padding-right: 10px;
+}
+
+#sizing-addon3{
+    height: 10px;
+    padding: 0 0;
+    color: black;
+}
+.radio-inline{
+
+}
+
+.filterGuide a{
+    display: inline;
+}
+.filterGuide p{
+    display: inline;
+}
+
+/*footer and misc*/
+
+.glyphicon-info-sign{
+    cursor: help;
+}
+
+
+.well{
+    padding: 10px;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    /* If max-width does not work, try using width instead */
+    width: 350px;
+}

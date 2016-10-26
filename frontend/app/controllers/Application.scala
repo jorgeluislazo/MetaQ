@@ -11,7 +11,11 @@ class Application extends Controller {
   }
 
   def geneExplorer(query: String) = Action {
-    Ok(views.html.index(query))
+    Ok(views.html.geneExplorer(query))
+  }
+
+  def pwayExplorer(query: String) = Action {
+    Ok(views.html.pwayExplorer(query))
   }
   
   def simpleSearch(query: String): Action[AnyContent] = Action { implicit request =>

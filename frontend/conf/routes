@@ -8,6 +8,9 @@ GET     /                           controllers.Application.homePage
 # Search genes
 GET     /geneExplorer/:query        controllers.Application.geneExplorer(query: String)
 
+# Search pathways
+GET     /pwayExplorer/:query        controllers.Application.pwayExplorer(query: String)
+
 # Search API 
 GET     /search                     controllers.Application.simpleSearch(query: String)
 
