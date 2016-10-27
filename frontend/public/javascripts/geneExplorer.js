@@ -9,6 +9,7 @@ jQuery(function($) {
         $results = $('.results'),
         $resultsInfo = $('.resultsInfo'),
         $documents = $('.documents'),
+        $exportButton = $('#exportButton'),
     //mappings for parsing Solr field ids to readable text
         li_map2 = {
             "ORF_len"       : "ORF length",
@@ -219,7 +220,6 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (data) {
-            // console.log(data)
             $('.clusterGraph').empty();
             var graphData = nodeify(data);
             renderNodeGraph(graphData);
@@ -549,9 +549,36 @@ jQuery(function($) {
     };
 
 
+
     var addIdLink = function(id){
         return "#"
     };
+
+    $exportButton.on("click", function(){
+        var baseUrl = $exportButton.data("url"),
+            query = $cache.match(/^.*?(?=&)/) + ""; //extract query from the cached URL
+
+        $(location).attr('href',baseUrl + query);
+
+        console.log(baseUrl + query)
+        return false;
+    });
+
+
+    // var fetchClusters = function(url){
+    //     var jqxhr = $.ajax({
+    //         type: "GET",
+    //         url: url,
+    //         contentType: "application/json"
+    //     });
+    //
+    //     jqxhr.done(function (data) {
+    //         // console.log(data)
+    //         $('.clusterGraph').empty();
+    //         var graphData = nodeify(data);
+    //         renderNodeGraph(graphData);
+    //     });
+    // }
 
     var constructSearchURL = function(extraParam, isClusterSearch, ajax){
         if(highQualOnly === undefined){ highQualOnly = "false" }
