@@ -1,25 +1,42 @@
 package libs.solr.scala
 
 /**
- * The result of query which is executed by QueryBuilder#getResultAsMap().
- *
- * @param numFound the total number of hits
- * @param documents the list of documents which are matched to the query
- * @param facetFields the facet count of fields which were specified by QueryBuilder#facetFields()
- */
-case class MapQueryResult(
-    numFound: Long,
-    documents: List[Map[String, Any]],
-    facetFields: Map[String, Map[String, Long]],
-    facetDates: Map[String, Map[String, Long]],
-    start: Int)
+  * The result of query which is executed by QueryBuilder#getResultAsMap().
+  *
+  * @param numFound the total number of hits
+  * @param documents the list of documents which are matched to the query
+  */
+
+abstract class MapQueryResults{
+  def numFound: Long
+  def documents: List[Map[String, Any]]
+  def facetFields: Map[String, Map[String, Long]]
+  def facetDates: Map[String, Map[String, Long]]
+  def start: Int
+}
+
+
+case class MapGeneQueryResults(
+                                numFound: Long,
+                                documents: List[Map[String, Any]],
+                                facetFields: Map[String, Map[String, Long]],
+                                facetDates: Map[String, Map[String, Long]],
+                                start: Int) extends MapQueryResults
+
+case class MapPwayQueryResults(
+                                numFound: Long,
+                                documents: List[Map[String, Any]],
+                                start: Int) extends MapQueryResults {
+  override def facetFields: Map[String, Map[String, Long]] = null
+  override def facetDates: Map[String, Map[String, Long]] = null
+}
 
 case class MapClusterQueryResult(
-    numOfClusters: Int,
-    clusters : List[Map[String , List[String]]])
+                                  numOfClusters: Int,
+                                  clusters : List[Map[String , List[String]]])
 
 case class CaseClassQueryResult[T](
-    numFound: Long,
-    documents: List[T],
-    facetFields: Map[String, Map[String, Long]],
-    facetDates: Map[String, Map[String, Long]])
+                                    numFound: Long,
+                                    documents: List[T],
+                                    facetFields: Map[String, Map[String, Long]],
+                                    facetDates: Map[String, Map[String, Long]])

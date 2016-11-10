@@ -3,24 +3,40 @@
  */
 jQuery(function($) {
 
-    var $search = $('#search');
+    var $searchGene = $('#searchGene');
+    var $searchPway = $('#searchPway');
 
-    var constructSearchURL = function(){
-        var query = $('#searchBox').val(),
+    var constructSearchGeneURL = function(){
+        var query = $('#searchGeneBox').val(),
             searchType = $('input:radio[name=df]:checked').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
 
         if(highQualOnly === undefined){ highQualOnly = "false" }
 
-        var fetchDataURL = $search.data('submit') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=1";
+        var fetchDataURL = $searchGene.data('submit') + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=1";
+
+        console.log(fetchDataURL);
+        return fetchDataURL
+    };
+
+    var constructSearchPwayURL = function(){
+        var query = $('#searchPwayBox').val(),
+            searchType = "pway_name";
+        var fetchDataURL = $searchPway.data('submit') + query + "&searchField="+searchType + "&page=1";
 
         console.log(fetchDataURL);
         return fetchDataURL
     };
     //search
-    $search.submit(function () {
-        var fetchDataURL = constructSearchURL();
+    $searchGene.submit(function () {
+        var fetchDataURL = constructSearchGeneURL();
+        $(location).attr('href',fetchDataURL);
+        return false;
+    });
+
+    $searchPway.submit(function () {
+        var fetchDataURL = constructSearchPwayURL();
         $(location).attr('href',fetchDataURL);
         return false;
     });

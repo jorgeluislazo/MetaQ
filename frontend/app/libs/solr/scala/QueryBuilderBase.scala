@@ -188,13 +188,13 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
     ret
   }
 
-  protected def responseToMap(response: QueryResponse): MapQueryResult = {
-//    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
+  protected def geneResponseToMap(response: QueryResponse): MapQueryResults = {
+    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
 
     val highlight = response.getHighlighting
 
     def toList(docList: SolrDocumentList): List[Map[String, Any]] = {
-      (for(i <- 0 to docList.size() - 1) yield {
+      (for(i <- 0 until docList.size()) yield {
         val doc = docList.get(i)
         val map = doc.getFieldNames.asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
         if(solrQuery.getHighlight){
@@ -216,7 +216,7 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
       docs.asScala.map { doc =>
         doc.getFieldNames.asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
       }.toList
-    } else { 
+    } else {
       solrQuery.getParams("group") match {
         case null => toList(response.getResults)
         case _ => toList(response.getResults)
@@ -239,8 +239,44 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
       )}.toMap
     }
 
-//    println(facetResult)
-    MapQueryResult(response.getResults.getNumFound, queryResult, facetResult,facetDates, solrQuery.getStart)
+    MapGeneQueryResults(response.getResults.getNumFound, queryResult, facetResult,facetDates, solrQuery.getStart)
+  }
+
+  protected def pwayResponseToMap(response: QueryResponse): MapQueryResults = {
+    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
+
+    val highlight = response.getHighlighting
+
+    def toList(docList: SolrDocumentList): List[Map[String, Any]] = {
+      (for(i <- 0 until docList.size()) yield {
+        val doc = docList.get(i)
+        val map = doc.getFieldNames.asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
+        if(solrQuery.getHighlight){
+          val id = doc.getFieldValue(this.id)
+          if(id != null && highlight.get(id) != null && highlight.get(id).get(highlightField) != null){
+            map + ("highlight" -> highlight.get(id).get(highlightField).get(0))
+          } else {
+            map + ("highlight" -> "")
+          }
+        } else {
+          map
+        }
+      }).toList
+    }
+
+    val queryResult = if(recommendFlag){
+      val mlt = response.getResponse.get("moreLikeThis").asInstanceOf[NamedList[Object]]
+      val docs = mlt.getVal(0).asInstanceOf[java.util.List[SolrDocument]]
+      docs.asScala.map { doc =>
+        doc.getFieldNames.asScala.map { key => (key, doc.getFieldValue(key)) }.toMap
+      }.toList
+    } else {
+      solrQuery.getParams("group") match {
+        case null => toList(response.getResults)
+        case _ => toList(response.getResults)
+      }
+    }
+    MapPwayQueryResults(response.getResults.getNumFound,queryResult, solrQuery.getStart)
   }
 
   protected def clustersToMap(response: QueryResponse): MapClusterQueryResult = {
@@ -260,9 +296,9 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
     clusters = clusters.reverse
     MapClusterQueryResult(allData.size, clusters)
   }
-  
+
   def responseToObject[T](response: QueryResponse)(implicit m: Manifest[T]): CaseClassQueryResult[T] = {
-    val result = responseToMap(response)
+    val result = geneResponseToMap(response)
 
     CaseClassQueryResult[T](
       result.numFound,

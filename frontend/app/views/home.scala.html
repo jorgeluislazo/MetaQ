@@ -24,12 +24,13 @@
         </li>
       </ul>
       <div class="tab-content well">
+
         <div role="tabpanel" class="tab-pane active" id="genePanel">
           <div class="nav-bar">
             <div class="search">
-              <form class="navbar-form" id="search" data-submit="@routes.Application.geneExplorer("")">
+              <form class="navbar-form" id="searchGene" data-submit="@routes.Application.geneExplorer("")">
                 <div class="input-group add-on">
-                  <input class="form-control" id="searchBox" placeholder="Search protein products" type="text">
+                  <input class="form-control" id="searchGeneBox" placeholder="Search protein products" type="text">
                   <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                 </div>
               </form>
@@ -64,11 +65,22 @@
             </div>
           </div>
         </div>
+
         <div role="tabpanel" class="tab-pane" id="pwayPanel">
-          <div class="clusterGraph"><h4>Pathway Explorer</h4></div>
+          <div class="nav-bar">
+            <div class="search">
+              <form class="navbar-form" id="searchPway" data-submit="@routes.Application.pwayExplorer("")">
+                <div class="input-group add-on">
+                  <input class="form-control" id="searchPwayBox" placeholder="Search pathways" type="text">
+                  <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                </div>
+              </form>
+            </div>
+            </div>
+          </div>
+
         </div>
       </div>
-    </div>
 
   </body>
 </html>

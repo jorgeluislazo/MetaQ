@@ -1,7 +1,8 @@
 package libs
 import libs.solr.scala.QueryBuilder
 import libs.solr.scala.SolrClient
-import libs.solr.scala.MapQueryResult
+import libs.solr.scala.MapGeneQueryResults
+import libs.solr.scala.MapQueryResults
 import libs.solr.scala.MapClusterQueryResult
 import play.api.libs.json.JsObject
 import play.api.libs.json.Json
@@ -14,29 +15,30 @@ import scala.collection.immutable.ListMap
 
 /**
   * Class Search performs many functions about information retrieval .
-  *
-  * @version 0.1
   */
 object SearchLib {
-
   /**
     * is a main function that handling search process.
-    *
-    * @param query
-    * @param request
-    * @version 0.1
     */
-  def get(query: String,request: Request[AnyContent]): JsObject = {
-    // Construct the solr query and handling the parameters
-    val queryBuilder = this.buildSelectQuery(query, request)
+  def select(query: String, request: Request[AnyContent], selectType: String): JsObject = {
+    // Construct the solr query depending on the type and handling the parameters
+    val queryBuilder = if(selectType == "gene")
+      this.buildGeneSelectQuery(query, request)
+    else
+      this.buildPwaySelectQuery(query, request)
+
     var resultsInfo = Json.obj(
       "EmptyResponse" -> true)
 
     try {
       // Get Results from Solr.
-      val results = queryBuilder.getResultAsMap()
+      val results = queryBuilder.getResultAsMap(selectType)
       // prepare results
-      resultsInfo = this.prepareSearchResults(results, request)
+      resultsInfo = if(selectType == "gene")
+        this.prepareGeneSearchResults(results, request)
+      else
+        this.prepareGeneSearchResults(results, request)
+
     } catch {
       case e: Exception =>
         println("query: " + query)
@@ -46,12 +48,11 @@ object SearchLib {
           "noOfResults" -> 0,
           "error" -> e.toString)
     }
-
     resultsInfo
   }
 
   def cluster(query: String, request: Request[AnyContent]) : JsObject = {
-    val queryBuilder = this.buildClusterQuery(query, request)
+    val queryBuilder = this.buildGeneClusterQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_clusters" -> 0,
       "clusters" -> List[JsString]())
@@ -61,7 +62,7 @@ object SearchLib {
       val results = queryBuilder.getClustersAsMap()
 
       // prepare results
-      resultsInfo = this.prepareClusterResults(results, request)
+      resultsInfo = this.prepareGeneClusterResults(results, request)
     } catch {
       case e: Exception =>
         println("exception caught: " + e);
@@ -72,14 +73,10 @@ object SearchLib {
   }
 
   /**
-    *
-    * constructQuery : constructs the query and handling the user params
-    *
-    * @param  query
-    * @param  request
+    * constructQuery : constructs the gene query and handling the user params
     */
 
-  def buildSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+  def buildGeneSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     // Checking URL Parameters
     val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
@@ -119,33 +116,35 @@ object SearchLib {
       val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
       queryBuilder = queryBuilder.addFilterQuery(fq)
     }
-
     queryBuilder
   }
 
-  def buildClusterQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
-    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
-    val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
-    val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
+  def buildPwaySelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("pway_name") + "}"
+    val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
+    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
-    val client = new SolrClient("http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs")
+    //"http://localhost:8983/solr/ORFDocs"
+    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    val client = new SolrClient("http://localhost:8983/solr/PwayDocs")
 
-    var queryBuilder = client.query(searchSettings + query)
-      .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
-      .setParameter("qt", "/clustering")
-
-    if(highQualOnly.equals("true")){
-      val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
-      queryBuilder = queryBuilder.addFilterQuery(fq)
+    var offset: Int = 0
+    if (request.getQueryString("offset").isDefined) {
+      offset = Integer.parseInt(request.getQueryString("offset").getOrElse(0).toString)
+    } else {
+      offset = (page - 1) * resultsPerPage
     }
 
+    val queryBuilder = client.query(searchSettings + query)
+      .start(offset)
+      .rows(resultsPerPage)
+
     queryBuilder
   }
-
   /**
     * Prepare the results and build mapping between Solr and Application Level
     */
-  def prepareSearchResults(results: MapQueryResult, request: Request[AnyContent]): JsObject = {
+  def prepareGeneSearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {
     var resultsInfo = List[JsObject]()
 
     val isFilterSearch = if(request.getQueryString("facetFilter").isEmpty) false else true
@@ -188,7 +187,28 @@ object SearchLib {
     resultsJson
   }
 
-  def prepareClusterResults(results: MapClusterQueryResult, request: Request[AnyContent]): JsObject = {
+
+  def buildGeneClusterQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
+    val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
+
+    //"http://localhost:8983/solr/ORFDocs"
+    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+
+    var queryBuilder = client.query(searchSettings + query)
+      .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
+      .setParameter("qt", "/clustering")
+
+    if(highQualOnly.equals("true")){
+      val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
+      queryBuilder = queryBuilder.addFilterQuery(fq)
+    }
+    queryBuilder
+  }
+
+  def prepareGeneClusterResults(results: MapClusterQueryResult, request: Request[AnyContent]): JsObject = {
     val resultsJson = Json.obj(
       "noOfResults" -> results.numOfClusters,
       "clusters" -> results.clusters)

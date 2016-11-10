@@ -63,11 +63,17 @@ li[role=presentation]{
     padding-top: 25px;
 }
 
-#searchBox{
+#searchGeneBox{
     top: 50px;
     width: 500px;
     font-size: 15px;
 }
+#searchPwayBox{
+    top: 50px;
+    width: 500px;
+    font-size: 15px;
+}
+
 
 #settings-toggle{
     position: relative;

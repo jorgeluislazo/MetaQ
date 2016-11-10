@@ -12,10 +12,12 @@ GET     /geneExplorer/:query        controllers.Application.geneExplorer(query: 
 GET     /pwayExplorer/:query        controllers.Application.pwayExplorer(query: String)
 
 # Search APIs
-GET     /search                     controllers.Application.simpleSearch(query: String)
+GET     /searchGene                 controllers.Application.geneSearch(query: String)
+
+GET     /searchPway                 controllers.Application.pwaySearch(query: String)
 
 # get cluster data
-GET     /cluster                    controllers.Application.clusterSearch(query: String)
+GET     /clusterGene                controllers.Application.clusterGeneSearch(query: String)
 
 #export data
 GET     /export/:query              controllers.Application.exportData(query: String)

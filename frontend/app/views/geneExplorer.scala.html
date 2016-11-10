@@ -16,10 +16,10 @@
         <div>
             <div class="nav-bar">
                 <div class="search">
-                    <form class="navbar-form" id="search" data-submit="@routes.Application.geneExplorer("")" data-searchurl="@routes.Application.simpleSearch("")">
+                    <form class="navbar-form" id="search" data-submit="@routes.Application.geneExplorer("")" data-searchurl="@routes.Application.geneSearch("")">
                         <div class="input-group add-on">
-                        <input class="form-control" id="searchBox" placeholder="Search protein products" type="text">
-                        <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                            <input class="form-control" id="searchBox" placeholder="Search protein products" type="text">
+                            <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                         </div>
                     </form>
                     <div style="height:20px;width:70px">
@@ -64,7 +64,7 @@
                     </ul>
                     <div class="tab-content well">
                         <div role="tabpanel" class="tab-pane active" id="facetPanel"><h4>Use the search bar to make a query</h4></div>
-                        <div role="tabpanel" class="tab-pane" id="clusterPanel" data-request="@routes.Application.clusterSearch("")">
+                        <div role="tabpanel" class="tab-pane" id="clusterPanel" data-request="@routes.Application.clusterGeneSearch("")">
                             <div class="clusterSettings"></div>
                             <div class="clusterGraph"><h4>Use the search bar to make a query</h4></div>
                         </div>

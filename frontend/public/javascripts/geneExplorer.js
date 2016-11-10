@@ -556,29 +556,12 @@ jQuery(function($) {
 
     $exportButton.on("click", function(){
         var baseUrl = $exportButton.data("url"),
-            query = $cache.match(/^.*?(?=&)/) + ""; //extract query from the cached URL
+            // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
+            query = window.location.pathname.split("/")[2]; //TODO: remember its always the 3rd bucket, this could change in the future
 
         $(location).attr('href',baseUrl + query);
-
-        console.log(baseUrl + query)
         return false;
     });
-
-
-    // var fetchClusters = function(url){
-    //     var jqxhr = $.ajax({
-    //         type: "GET",
-    //         url: url,
-    //         contentType: "application/json"
-    //     });
-    //
-    //     jqxhr.done(function (data) {
-    //         // console.log(data)
-    //         $('.clusterGraph').empty();
-    //         var graphData = nodeify(data);
-    //         renderNodeGraph(graphData);
-    //     });
-    // }
 
     var constructSearchURL = function(extraParam, isClusterSearch, ajax){
         if(highQualOnly === undefined){ highQualOnly = "false" }
@@ -643,6 +626,7 @@ jQuery(function($) {
             $text("Hide more settings");
         }
     });
+    //init the search upon loading the page
     $('#searchBox').val($cache.match(/^.*?(?=&)/));
     fetchData($search.data('searchurl') + $cache);
     fetchClusters($('#clusterPanel').data("request") + $cache)

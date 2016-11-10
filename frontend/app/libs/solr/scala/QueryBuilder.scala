@@ -12,14 +12,19 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
 
   /**
    * Returns the search result of this query as List[Map[String, Any]].
-   *
-   * @param params the parameter map or case class which would be given to the query
    * @return the search result
    */
-  def getResultAsMap(params: Any = null): MapQueryResult = {
-      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
-//      println("query= " + solrQuery.toString + " | line 22 of QueryBuilder.scala")
-      responseToMap(server.query(solrQuery))
+  def getResultAsMap(selectType: String): MapQueryResults = {
+      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(null)))
+      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
+    if(selectType.equals("gene")){
+      geneResponseToMap(server.query(solrQuery)) match{
+        case g1: MapGeneQueryResults => g1
+      }
+    }else{
+      pwayResponseToMap(server.query(solrQuery))
+    }
+
   }
 
   def getClustersAsMap(params: Any = null): MapClusterQueryResult = {

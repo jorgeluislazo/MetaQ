@@ -203,7 +203,7 @@ class FileParser {
             orfs.put("add", convertToList(row[9]));
             pwayDoc.addField("orfs",  orfs);
             Map<String, String> sample_run = new HashMap<>();
-            sample_run.put("add", row[0]);
+            sample_run.put("add", modifyRun(row[0]));
             pwayDoc.addField("sample_runs", sample_run);
 
             documentBatch.add(pwayDoc);
@@ -239,6 +239,14 @@ class FileParser {
         }
     }
 
+    private String modifyRun(String run){
+        String[] list = run.split("_");
+        if (list.length >= 3){
+            run = list[0];
+        }
+        return run;
+    }
+
     private String modifyID(String ID){
         String[] list = ID.split("_");
         if (list.length >= 5){
@@ -249,8 +257,12 @@ class FileParser {
 
     //helper funciton, converts [A,B,C] string to an array list.
     private ArrayList<String> convertToList(String listString){
-        listString = listString.substring(1, listString.length() -1);
-        return new ArrayList<>(Arrays.asList(listString.split(",")));
+        String[] arrayID = listString.substring(1, listString.length() -1).split(",");
+        for(int i=0; i < arrayID.length; i++){
+            arrayID[i] = modifyID(arrayID[i]);
+        }
+        List<String> resultList = new ArrayList<>(Arrays.asList(arrayID));
+       return (ArrayList<String>) resultList;
     }
 
     private String prettyPrintRow(String[] row){
