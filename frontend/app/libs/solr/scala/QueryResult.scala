@@ -2,10 +2,8 @@ package libs.solr.scala
 
 /**
   * The result of query which is executed by QueryBuilder#getResultAsMap().
-  *
-  * @param numFound the total number of hits
-  * @param documents the list of documents which are matched to the query
-  */
+  * and similar functions
+*/
 
 abstract class MapQueryResults{
   def numFound: Long

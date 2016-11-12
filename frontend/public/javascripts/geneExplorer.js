@@ -106,7 +106,6 @@ jQuery(function($) {
                         $documents.fadeIn("slow");
                     }
                 }
-            // });
         });
 
         jqxhr.fail(function (data) {
@@ -595,6 +594,7 @@ jQuery(function($) {
 
     $search.on("submit", function(){
         var fetchDataURL = constructSearchURL(undefined, undefined, false);
+        alert(fetchDataURL)
         $(location).attr('href',fetchDataURL);
         return false;
     });

@@ -25,7 +25,6 @@ body{
 }
 
 #searchBox{
-    top: 50px;
     width: 500px;
     font-size: 15px;
 }
@@ -188,13 +187,12 @@ body{
 .filterGuide{
     margin-left: 50px;
 }
+.documents{
+    padding-left: 5px;
+}
 .documents ul{
     margin: 5px;
     padding: 0;
-}
-
-.documents{
-    padding-left: 5px;
 }
 .documents ul li {
     margin-left: 17px;
@@ -248,6 +246,11 @@ body{
     text-decoration: underline;
 }
 
+.sampleRun{
+    display: inline;
+    font-weight: bold;
+}
+
 .noResultsFound{
     margin: 30px;
 }
@@ -257,6 +260,10 @@ body{
 }
 
 /*footer and misc*/
+
+.btn-info{
+    margin-left: 10px
+}
 
 .glyphicon-info-sign{
     cursor: help;

@@ -16,11 +16,9 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
    */
   def getResultAsMap(selectType: String): MapQueryResults = {
       solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(null)))
-      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
+//      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
     if(selectType.equals("gene")){
-      geneResponseToMap(server.query(solrQuery)) match{
-        case g1: MapGeneQueryResults => g1
-      }
+      geneResponseToMap(server.query(solrQuery))
     }else{
       pwayResponseToMap(server.query(solrQuery))
     }
