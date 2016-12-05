@@ -77,15 +77,21 @@ jQuery(function($) {
             h4 = $('<h4>').prepend(rank).append(pwayTitle).append("&nbsp;&nbsp;").append(idTitle).append(" ").append($('<small>').attr("class", "glyphicon glyphicon-new-window")),
             pwayDiv = $("<div>").attr('class', 'hit').append(h4);
 
-        //TODO parse rxn_total, orfs and sampleruns as expandible lists
-
         var rxnTotal = $('<p>').text(data.rxn_total).attr("class", "hit-data").prepend($("<b>").text("Total reactions:\t").attr("style", "margin-left:17px"));
         var sampleRuns = $('<ul>').append($("<b>").text("Associated library runs:").attr("style", "margin-left:11px"))
+
         for (var a in data.sample_runs){
             var run = $('<li>').append($('<p>').text(data.sample_runs[a]).attr("class", "sampleRun"))
             sampleRuns.append(run)
         }
         var orfs = $('<button>').attr("class", "btn btn-info").attr("type", "button").text("explore associated ORFs (" + data.orfs.length + ")")
+        orfs.click(function(){
+            var pwayid = data.pway_id
+            var fetchDataURL = constructORFsearchURL(pwayid)
+            window.open(fetchDataURL, "_blank")
+            return false;
+
+        })
 
         return pwayDiv.append(rxnTotal).append(sampleRuns).append(orfs)
     };
@@ -107,7 +113,7 @@ jQuery(function($) {
         }else{
             backButton.click(function(){
                 userSettDef["page"]--;
-                var fetchDataURL = constructSearchURL();
+                var fetchDataURL = constructPwaySearchURL();
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
                 });
@@ -118,7 +124,7 @@ jQuery(function($) {
         }else{
             nextButton.click(function(){
                 userSettDef["page"]++;
-                var fetchDataURL = constructSearchURL();
+                var fetchDataURL = constructPwaySearchURL();
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
                 });
@@ -136,7 +142,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructSearchURL();
+                        var fetchDataURL = constructPwaySearchURL();
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL);
                         });
@@ -153,7 +159,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructSearchURL();
+                        var fetchDataURL = constructPwaySearchURL();
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL);
                         });
@@ -165,7 +171,8 @@ jQuery(function($) {
         container.append(nextButton);
     }
 
-    var constructSearchURL = function(extraParam, isClusterSearch, ajax){
+    //default for this module
+    var constructPwaySearchURL = function(extraParam, isClusterSearch, ajax){
         if(highQualOnly === undefined){ highQualOnly = "false" }
         if(extraParam == undefined){ extraParam = ""} //any extra params such as facetSearch
         if(isClusterSearch == undefined){isClusterSearch = false} //do we need a double query for the cluster?
@@ -188,8 +195,13 @@ jQuery(function($) {
         return fetchDataURL
     };
 
+    //link to Genes
+    var constructORFsearchURL = function(pwayid){
+        return $search.data("jumpurl") + pwayid +  "&searchField=pway" + "&highQualOnly=false" +"&page=1"
+    };
+
     $search.on("submit", function(){
-        var fetchDataURL = constructSearchURL(undefined, undefined, false);
+        var fetchDataURL = constructPwaySearchURL(undefined, undefined, false);
         $(location).attr('href',fetchDataURL);
         return false;
     });

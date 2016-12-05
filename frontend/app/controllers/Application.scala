@@ -20,6 +20,7 @@ class Application extends Controller {
   }
 
   def geneSearch(query: String): Action[AnyContent] = Action { implicit request =>
+    println("" + request.getQueryString("searchField").get)
     val results = SearchLib.select(query,request, "gene")
     Ok(results)
   }

@@ -75,7 +75,11 @@ object SearchLib {
 
   def buildGeneSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     // Checking URL Parameters
-    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    // if its a module linking search, do search for IDs (list has been passed)
+    val searchType = if(request.getQueryString("searchField").getOrElse("product") == "pway")
+      "ORFID" else request.getQueryString("searchField").getOrElse("product")
+
+    val searchSettings = "{!df=" + searchType + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
     val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true
@@ -85,7 +89,8 @@ object SearchLib {
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
     //"http://localhost:8983/solr/ORFDocs"
-    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    // ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
+    //"OLD: http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
     var offset: Int = 0

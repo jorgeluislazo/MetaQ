@@ -198,7 +198,7 @@ jQuery(function($) {
                         currentFacetFilter = facet;
                         currentFacetField = fieldType;
                         var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
-                        var fetchDataURL = constructSearchURL(facetSearchParam);
+                        var fetchDataURL = constructORFsearchURL(facetSearchParam);
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL)
                         });
@@ -484,7 +484,7 @@ jQuery(function($) {
         }else{
             backButton.click(function(){
                 userSettDef["page"]--;
-                var fetchDataURL = constructSearchURL(filterOrEmpty);
+                var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
                 });
@@ -495,7 +495,7 @@ jQuery(function($) {
         }else{
             nextButton.click(function(){
                 userSettDef["page"]++;
-                var fetchDataURL = constructSearchURL(filterOrEmpty);
+                var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
                 });
@@ -513,7 +513,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructSearchURL(filterOrEmpty);
+                        var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL);
                         });
@@ -530,7 +530,7 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructSearchURL(filterOrEmpty);
+                        var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL);
                         });
@@ -562,7 +562,8 @@ jQuery(function($) {
         return false;
     });
 
-    var constructSearchURL = function(extraParam, isClusterSearch, ajax){
+    //default for this module
+    var constructORFsearchURL = function(extraParam, isClusterSearch, ajax){
         if(highQualOnly === undefined){ highQualOnly = "false" }
         if(extraParam == undefined){ extraParam = ""} //any extra params such as facetSearch
         if(isClusterSearch == undefined){isClusterSearch = false} //do we need a double query for the cluster?
@@ -593,8 +594,7 @@ jQuery(function($) {
     };
 
     $search.on("submit", function(){
-        var fetchDataURL = constructSearchURL(undefined, undefined, false);
-        alert(fetchDataURL)
+        var fetchDataURL = constructORFsearchURL(undefined, undefined, false);
         $(location).attr('href',fetchDataURL);
         return false;
     });
