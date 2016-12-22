@@ -16,7 +16,8 @@ import java.util.Collection;
 public class SolrLink {
     // http://localhost:8983/solr/
     // http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/
-    private static final String BASE_URL = "http://localhost:8983/solr/";
+    //new : http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/
+    private static final String BASE_URL = "http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/";
     private SolrClient solrClient;
 
     /**
@@ -27,6 +28,7 @@ public class SolrLink {
      * @param coreName: the name of the Solr core to point to.
      */
     public SolrLink(String coreName){
+        // new: http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/
         // http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/#/
         // http://localhost:8983/solr/#/
         this.solrClient = new HttpSolrClient(BASE_URL + coreName);

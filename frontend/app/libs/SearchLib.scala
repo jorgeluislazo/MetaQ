@@ -1,11 +1,9 @@
 package libs
 import libs.solr.scala.QueryBuilder
 import libs.solr.scala.SolrClient
-import libs.solr.scala.MapGeneQueryResults
 import libs.solr.scala.MapQueryResults
 import libs.solr.scala.MapClusterQueryResult
 import play.api.libs.json._
-import play.api._
 import play.api.mvc._
 
 import scala.collection.immutable.ListMap
@@ -15,14 +13,16 @@ import scala.collection.immutable.ListMap
   */
 object SearchLib {
   /**
-    * is a main function that handling search process.
+    * is a main function that handling search /select process.
     */
   def select(query: String, request: Request[AnyContent], selectType: String): JsObject = {
     // Construct the solr query depending on the type and handling the parameters
-    val queryBuilder = if (selectType == "gene")
-      this.buildGeneSelectQuery(query, request)
-    else
-      this.buildPwaySelectQuery(query, request)
+    println(s"searchLib - queryString: $query, requestURI: $request, selectType: $selectType)")
+    val queryBuilder = if (selectType == "gene"){
+      buildGeneSelectQuery(query, request)}
+    else {
+      buildPwaySelectQuery(query, request)
+    }
 
     var resultsInfo = Json.obj(
       "EmptyResponse" -> true)
@@ -30,6 +30,7 @@ object SearchLib {
     try {
       // Get Results from Solr.
       val results = queryBuilder.getResultAsMap(selectType)
+      println("Solr results: " + results)
       // prepare results
       resultsInfo = if (selectType == "gene")
         this.prepareGeneSearchResults(results, request)
@@ -48,7 +49,9 @@ object SearchLib {
     resultsInfo
   }
 
+  // main function that handles /clustering searches
   def cluster(query: String, request: Request[AnyContent]): JsObject = {
+    println(s"searchLib - queryString: $query, requestURI: $request)")
     val queryBuilder = this.buildGeneClusterQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_clusters" -> 0,
@@ -62,11 +65,9 @@ object SearchLib {
       resultsInfo = this.prepareGeneClusterResults(results, request)
     } catch {
       case e: Exception =>
-        println("exception caught: " + e);
+        println("exception caught from clustering: " + e);
     }
-
     resultsInfo
-
   }
 
   /**
@@ -75,11 +76,10 @@ object SearchLib {
 
   def buildGeneSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     // Checking URL Parameters
-    // if its a module linking search, do search for IDs (list has been passed)
-    val searchType = if(request.getQueryString("searchField").getOrElse("product") == "pway")
-      "ORFID" else request.getQueryString("searchField").getOrElse("product")
+    // if its a module linking search, do search for IDs (list has been passed as query)
 
-    val searchSettings = "{!df=" + searchType + "}"
+    val searchSettings = if(request.getQueryString("searchField").getOrElse("product") == "pway")
+      "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
     val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true
@@ -88,11 +88,11 @@ object SearchLib {
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
-    //"http://localhost:8983/solr/ORFDocs"
-    // ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
-    //"OLD: http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    // http://localhost:8983/solr/ORFDocs
+    // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
+    //set the offset
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
       offset = Integer.parseInt(request.getQueryString("offset").getOrElse(0).toString)
@@ -126,8 +126,8 @@ object SearchLib {
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
-    //"http://localhost:8983/solr/ORFDocs"
-    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    // http://localhost:8983/solr/ORFDocs
+    // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
     val client = new SolrClient("http://localhost:8983/solr/PwayDocs")
 
     var offset: Int = 0
@@ -148,7 +148,6 @@ object SearchLib {
     * Prepare the results and build mapping between Solr and Application Level
     */
   def prepareGeneSearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {
-//    println(results)
     var resultsInfo = List[JsObject]()
 
     val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true
@@ -192,7 +191,6 @@ object SearchLib {
   }
 
   def preparePwaySearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {
-//    println(results)
     var resultsInfo = List[JsObject]()
 
     results.documents.foreach {
@@ -217,12 +215,13 @@ object SearchLib {
 
 
   def buildGeneClusterQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
-    val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
+    val searchSettings = if(request.getQueryString("searchField").getOrElse("product") == "pway")
+      "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
 
-    //"http://localhost:8983/solr/ORFDocs"
-    //"http://ec2-54-153-99-252.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs"
+    // http://localhost:8983/solr/ORFDocs
+    // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
     var queryBuilder = client.query(searchSettings + query)

@@ -189,8 +189,6 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
 
   protected def geneResponseToMap(response: QueryResponse): MapQueryResults = {
-//    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
-
     val highlight = response.getHighlighting
 
     val queryResult = if(recommendFlag){
@@ -226,8 +224,6 @@ trait QueryBuilderBase[Repr <: QueryBuilderBase[Repr]] {
   }
 
   protected def pwayResponseToMap(response: QueryResponse): MapQueryResults = {
-    println("Solr Response: " + response + " | line 191 of QueryBuilderBase.scala")
-
     val highlight = response.getHighlighting
 
     val queryResult = if(recommendFlag){

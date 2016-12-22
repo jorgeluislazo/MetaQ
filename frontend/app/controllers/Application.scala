@@ -2,10 +2,16 @@ package controllers
 
 import libs.SearchLib
 import java.io._
+import javax.inject.Inject
+
 import play.api.libs.json.JsObject
 import play.api.mvc._
+import play.api.libs.ws._
 
-class Application extends Controller {
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+
+class Application @Inject() (ws: WSClient) extends Controller {
 
   def homePage = Action {
     Ok(views.html.home())
@@ -20,9 +26,18 @@ class Application extends Controller {
   }
 
   def geneSearch(query: String): Action[AnyContent] = Action { implicit request =>
-    println("" + request.getQueryString("searchField").get)
-    val results = SearchLib.select(query,request, "gene")
-    Ok(results)
+    if (request.getQueryString("searchField").get == "pway"){
+      // first find list of orfs associated with that pathway
+      // through a 1 time blocking search to pway explorer
+      val orfs = getOrfsAssociatedWithPway(query)
+      //now call the data for those orfs, return them to client
+      val results = SearchLib.select(orfs,request, "gene")
+      Ok(results)
+    }else{
+      //get the ORFs associated with this search
+      val results = SearchLib.select(query,request, "gene")
+      Ok(results)
+    }
   }
 
   def pwaySearch(query: String): Action[AnyContent] = Action { implicit request =>
@@ -31,13 +46,30 @@ class Application extends Controller {
   }
 
   def clusterGeneSearch(query: String): Action[AnyContent] = Action{ implicit request =>
-    val results = SearchLib.cluster(query,request)
-    Ok(results)
+    if (request.getQueryString("searchField").get == "pway") {
+      // first find list of orfs associated with that pathway
+      // through a 1 time blocking search to pway explorer
+      val orfs = getOrfsAssociatedWithPway(query)
+      //now call the data for those orfs, return them to client
+      val results = SearchLib.cluster(orfs,request)
+      Ok(results)
+    }else{
+      val results = SearchLib.cluster(query,request)
+      Ok(results)
+    }
+  }
+
+  def getOrfsAssociatedWithPway(pwayID: String) : String = {
+    implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
+    val url = "http://localhost:9000/searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
+    val result = Await.result(ws.url(url).get(), 3 second) //wait up to 3 seconds for this response to return
+    val orfs = ((result.json \ "results") (0) \ "orfs").as[Array[String]].mkString(",").replaceAll("\\s", "") //extract orfs
+    orfs
   }
 
   def exportData(query: String): Action[AnyContent] = Action{ implicit request =>
     println(request)
-   val queryValue = query.substring(0,query.indexOf("&"))
+    val queryValue = query.substring(0,query.indexOf("&"))
     val file = new java.io.File("/tmp/request")
     try{
       val writer = new PrintWriter(file) //prepare the file + writer

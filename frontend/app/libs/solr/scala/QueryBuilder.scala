@@ -11,12 +11,12 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
   protected def createCopy = new QueryBuilder(server, query)(parser)
 
   /**
-   * Returns the search result of this query as List[Map[String, Any]].
-   * @return the search result
-   */
+    * Returns the search result of this query as List[Map[String, Any]].
+    * @return the search result
+    */
   def getResultAsMap(selectType: String): MapQueryResults = {
-      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(null)))
-//      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
+
+    solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(null)))
     if(selectType.equals("gene")){
       geneResponseToMap(server.query(solrQuery))
     }else{
@@ -26,18 +26,17 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
   }
 
   def getClustersAsMap(params: Any = null): MapClusterQueryResult = {
-      solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
-//      println("query= " + solrQuery.toString + " | line 26 of QueryBuilder.scala")
-      clustersToMap(server.query(solrQuery))
+    solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
+    clustersToMap(server.query(solrQuery))
   }
 
 
   /**
-   * Returns the search result of this query as the case class.
-   *
-   * @param params the parameter map or case class which would be given to the query
-   * @return the search result
-   */
+    * Returns the search result of this query as the case class.
+    *
+    * @param params the parameter map or case class which would be given to the query
+    * @return the search result
+    */
   def getResultAs[T](params: Any = null)(implicit m: Manifest[T]): CaseClassQueryResult[T] = {
     solrQuery.setQuery(new QueryTemplate(query).merge(CaseClassMapper.toMap(params)))
     responseToObject[T](server.query(solrQuery))
@@ -45,7 +44,7 @@ class QueryBuilder(server: SolrServer, query: String)(implicit parser: Expressio
 
 
   override def toString: String = {
-      this.query + "\n" + this.solrQuery.getRequestHandler
+    this.query + "\n" + this.solrQuery.getRequestHandler
   }
 
 }

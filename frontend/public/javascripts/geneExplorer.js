@@ -3,6 +3,17 @@
  */
 jQuery(function($) {
 
+    //helper function for extracting URL params
+    $.urlParam = function(name){
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results==null){
+            return null;
+        }
+        else{
+            return results[1] || 0;
+        }
+    }
+
     var $search = $('#search'),
         $cache = $('.results').data('cache'),
         $sidePanel = $('#facetPanel'),
@@ -30,11 +41,21 @@ jQuery(function($) {
             "page" : 1,
             "facetField" : ""
         },
-        //clientside variables to save
+    //clientside variables to save
         cachedResponse =  null,
         currentFacetFilter = "",
         currentFacetField = "",
         currentClusterFilter = "";
+
+    // upon loading the page, extract URI settings and save them on client page settings.
+    // a new search will get the client page settings
+    if($.trim($documents.html())=='')$documents.append("<img src='http://i.imgur.com/ZWZZBYz.gif' class='loading-gif'>");
+    // save/update the searchField, query box and page #
+    userSettDef["searchField"] = $.urlParam("searchField");
+    $('input:radio[name="df"]').filter('[value="' + userSettDef["searchField"] + '"]').attr('checked', true);
+    userSettDef["page"] = $.urlParam("page");
+    $('#searchBox').val($cache.match(/^.*?(?=&)/));
+
 
     var fetchData = function(url){
 
@@ -45,67 +66,67 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (response) {
-                $documents.empty();
-                if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
-                    $('.filterGuide').remove();
+            $documents.empty();
+            if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
+                $('.filterGuide').remove();
+                $resultsInfo.empty();
+                for (var j in response.results) {
+                    var hit = parseOrfData(response.results[j], j);
+                    $documents.append(hit)
+                }
+                var constructFilterGuide = function(p){
+                    var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
+                        a = $('<a>').css("margin-left","10px").css("cursor", "pointer").text("remove").prepend(glyph).click(function () {restoreResults()}),
+                        filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
+                    return filterGuide;}
+
+                if(response.isFilterSearch){
+                    var p = $('<p>').text("All results with filter facet: ").append($('<b>').text(currentFacetFilter)),
+                        filterGuide = constructFilterGuide(p);
+                }
+                if(response.isClusterFilter){
+                    p = $('<p>').text("Current cluster filter: ").append($('<b>').text(currentClusterFilter));
+                    filterGuide = constructFilterGuide(p);
+                }
+
+                $resultsInfo.text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
+                $results.prepend(filterGuide);
+                $documents.fadeIn("slow", function(){
+                    displayPager(response.start, response.noOfResults, true)
+                });
+            } else {
+                //update the cached result and parse all the new information
+                cachedResponse = response;
+                $('.filterGuide').remove();
+                $resultsInfo.empty();
+
+                if (cachedResponse.noOfResults == 0) {
+                    var query = $('#searchBox').val();
+
+                    if(cachedResponse.error != undefined){
+                        var errorResponse = $('<h4>').attr('class', "noResultsFound").text("Query syntax error for the search term: '" + query + "'.");
+                    }else{
+                        errorResponse = $('<h4>').attr('class', "noResultsFound").text("No results found for the search term: '" + query + "'.");
+                    }
+                    $sidePanel.empty();
                     $resultsInfo.empty();
-                    for (var j in response.results) {
-                        var hit = parseOrfData(response.results[j], j);
+                    $documents.append(errorResponse);
+                    $documents.fadeIn("fast");
+                }
+                else {
+                    $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
+
+                    for (var i in cachedResponse.results) {
+                        hit = parseOrfData(cachedResponse.results[i], i);
                         $documents.append(hit)
                     }
-                    var constructFilterGuide = function(p){
-                        var glyph = $('<i>').attr("class", "glyphicon glyphicon-remove"),
-                            a = $('<a>').css("margin-left","10px").css("cursor", "pointer").text("remove").prepend(glyph).click(function () {restoreResults()}),
-                            filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
-                        return filterGuide;}
-
-                    if(response.isFilterSearch){
-                        var p = $('<p>').text("All results with filter facet: ").append($('<b>').text(currentFacetFilter)),
-                        filterGuide = constructFilterGuide(p);
-                    }
-                    if(response.isClusterFilter){
-                        p = $('<p>').text("Current cluster filter: ").append($('<b>').text(currentClusterFilter));
-                        filterGuide = constructFilterGuide(p);
-                    }
-
-                    $resultsInfo.text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
-                    $results.prepend(filterGuide);
-                    $documents.fadeIn("slow", function(){
-                        displayPager(response.start, response.noOfResults, true)
-                    });
-                } else {
-                    //update the cached result and parse all the new information
-                    cachedResponse = response;
-                    $('.filterGuide').remove();
-                    $resultsInfo.empty();
-
-                    if (cachedResponse.noOfResults == 0) {
-                        var query = $('#searchBox').val();
-
-                        if(cachedResponse.error != undefined){
-                            var errorResponse = $('<h4>').attr('class', "noResultsFound").text("Query syntax error for the search term: '" + query + "'.");
-                        }else{
-                            errorResponse = $('<h4>').attr('class', "noResultsFound").text("No results found for the search term: '" + query + "'.");
-                        }
-                        $sidePanel.empty();
-                        $resultsInfo.empty();
-                        $documents.append(errorResponse);
-                        $documents.fadeIn("fast");
-                    }
-                    else {
-                        $resultsInfo.text("Page  " + userSettDef["page"] + " — Total of " + cachedResponse.noOfResults + " open reading frames found.");
-
-                        for (var i in cachedResponse.results) {
-                            hit = parseOrfData(cachedResponse.results[i], i);
-                            $documents.append(hit)
-                        }
-                        $sidePanel.empty();
-                        displayFacets(cachedResponse.facetFields["COGID"], "COG");
-                        displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
-                        displayPager(response.start, response.noOfResults, false);
-                        $documents.fadeIn("slow");
-                    }
+                    $sidePanel.empty();
+                    displayFacets(cachedResponse.facetFields["COGID"], "COG");
+                    displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
+                    displayPager(response.start, response.noOfResults, false);
+                    $documents.fadeIn("slow");
                 }
+            }
         });
 
         jqxhr.fail(function (data) {
@@ -367,7 +388,6 @@ jQuery(function($) {
                 toggle(node[0][i].__data__); //small hack to activate toggle on node when clicking text
             });
 
-        // console.log(node);
         /**
          * D3 Method, handles the movement behaviour of every node at each tick (every fraction of a second)
          */
@@ -427,11 +447,11 @@ jQuery(function($) {
                             currentClusterFilter = text;
                         }
                         if(this.id)iDs.push(this.id);
-                        // console.log(d);
                     });
                 }
-                // console.log(iDs)
+                //todo do the {!term f=ORFID}query syntax instead
                 $documents.fadeOut("fast", function(){
+                    userSettDef["page"] = 1;
                     var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
                     console.log(url);
                     fetchData(url);
@@ -442,7 +462,7 @@ jQuery(function($) {
     }
 
     var restoreResults = function(){
-         $('circle').css("fill", "#50c1cc");
+        $('circle').css("fill", "#50c1cc");
         $('.facet-selected').attr("class","facetList");
         $documents.fadeOut("fast", function(){
             $('.filterGuide').remove();
@@ -467,9 +487,12 @@ jQuery(function($) {
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
             minPage = Math.max(1, userSettDef["page"] - 5),
-            maxPage = Math.min(Math.max(userSettDef["page"] + 4, 10) , allPages),
+            maxPage = Math.min(Math.max(parseInt(userSettDef["page"]) + 4, 10) , allPages),
             numPages = maxPage - minPage + 1; // to render
         //renew pages and set handlers
+        console.log(userSettDef["page"])
+        console.log(allPages)
+        console.log(maxPage)
         container.empty()
 
         var filterOrEmpty
@@ -555,7 +578,7 @@ jQuery(function($) {
 
     $exportButton.on("click", function(){
         var baseUrl = $exportButton.data("url"),
-            // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
+        // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
             query = window.location.pathname.split("/")[2]; //TODO: remember its always the 3rd bucket, this could change in the future
 
         $(location).attr('href',baseUrl + query);
@@ -567,19 +590,18 @@ jQuery(function($) {
         if(highQualOnly === undefined){ highQualOnly = "false" }
         if(extraParam == undefined){ extraParam = ""} //any extra params such as facetSearch
         if(isClusterSearch == undefined){isClusterSearch = false} //do we need a double query for the cluster?
-        if(ajax == undefined){ajax = true} //unless specified, do the search as an ajax (no reload)
+        if(ajax == undefined){ajax = true} //unless specified, do the search as an ajax (no URL reload)
 
         var query = $('#searchBox').val(),
-            searchType = $('input:radio[name=df]:checked').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
 
         if(isClusterSearch){
             var fetchDataURL =
-                $('#clusterPanel').data("request") + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
+                $('#clusterPanel').data("request") + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
         }else {
             fetchDataURL =
-                (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+searchType + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
+                (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
         }
         console.log($cache)
         console.log(fetchDataURL);
@@ -592,29 +614,30 @@ jQuery(function($) {
                 $search.data('searchurl') + idsString + "&searchField=ORFID" + "&page=" + userSettDef["page"] + extraParam;
         return fetchDataURL;
     };
-
+    // do a search (reload required)
     $search.on("submit", function(){
         var fetchDataURL = constructORFsearchURL(undefined, undefined, false);
         $(location).attr('href',fetchDataURL);
         return false;
     });
-
+    //initialize tabs
     $('#tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show')
 
     })
 
+    // display selected pannel
     $('a[data-target="#facetPanel"]').click(function(e){
         $('.results').css("width",'74%');
         $('.side-bar').css("width",'23%');
     })
-
     $('a[data-target="#clusterPanel"]').click(function(e){
         $('.results').css("width",'52%');
         $('.side-bar').css('width', "46%");
     })
 
+    //display/hide settings
     $('#settings-toggle').click(function(){
         var $settings = $('.settings'),
             $text = function(a){$("#settings-toggle").text(a)};
@@ -626,8 +649,13 @@ jQuery(function($) {
             $text("Hide more settings");
         }
     });
-    //init the search upon loading the page
-    $('#searchBox').val($cache.match(/^.*?(?=&)/));
+
+    //if settings change, save it
+    $('input:radio[name=df]').change(function(){
+        userSettDef["searchField"] = $('input:radio[name=df]:checked').val()
+    });
+
+    //do the ajax search
     fetchData($search.data('searchurl') + $cache);
     fetchClusters($('#clusterPanel').data("request") + $cache)
     $('[data-toggle="tooltip"]').tooltip();
