@@ -15,6 +15,29 @@ body{
     background-color: #2e6da4;
 }
 
+.home-link{
+    font-family: "Liberation Sans";
+    position: absolute;
+    left: 40px;
+}
+.home-link h2{
+    margin-right: 30px;
+    display: inline;
+}
+.home-link h2 a{
+    color: white;
+}
+.home-link h2 a:hover{
+    text-decoration: none;
+}
+.home-link h3{
+    margin-left: 60px;
+    font-weight: bold;
+    color: white;
+    display: inline;
+}
+
+
 .search{
     display: -webkit-flex;
     display: flex;
@@ -49,6 +72,9 @@ body{
     color: white;
     padding-left: 15px;
     padding-right: 10px;
+}
+input#rpkm{
+    color: black;
 }
 
 #sizing-addon3{
