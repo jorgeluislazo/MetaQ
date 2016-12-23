@@ -12,7 +12,7 @@ body{
 .choose-button{
     padding-top: 30px;
     margin: 0 auto;
-    width: 800px;
+    width: 950px;
 }
 
 ul[role=tablist]{
@@ -26,7 +26,7 @@ li[role=presentation]{
 }
 
 .tab-content{
-    height: 350px;
+    height: 250px;
     /*background-color: #66afe9;*/
 }
 
@@ -114,6 +114,28 @@ li[role=presentation]{
 }
 
 /*footer and misc*/
+
+.demo-info{
+    font-size: 16px;
+    text-align: justify;
+    background-color: #eceaff;
+    padding: 30px;
+    margin: 30px auto 30px;
+    width: 950px;
+}
+
+.author{
+    font-size: 16px;
+    background-color: #eceaff;
+    padding: 30px;
+    margin: 30px auto 30px;
+    width: 950px;
+}
+.author h4{
+    display: inline;
+    /*float: left;*/
+    margin-right: 25px;
+}
 
 .glyphicon-info-sign{
     cursor: help;

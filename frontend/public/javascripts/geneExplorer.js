@@ -23,7 +23,6 @@ jQuery(function($) {
         $exportButton = $('#exportButton'),
     //mappings for parsing Solr field ids to readable text
         li_map2 = {
-            "ORF_len"       : "ORF length",
             "start"         : "Start",
             "end"           : "End",
             "strand_sense"  : "Sense",
@@ -33,7 +32,8 @@ jQuery(function($) {
             "taxonomy"  : "Taxonomy",
             "COGID"     : "COG id",
             "KEGGID"    : "KEGG id",
-            "rpkm"      : "rpkm"
+            "rpkm"      : "rpkm",
+            "ORF_len"       : "ORF length"
         },
         userSettDef ={
             "searchField" : "product",
@@ -66,6 +66,11 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (response) {
+            //fix the URL to the current page if changed
+            var oldURL = window.location.pathname.split(/&page=\d*/); //0 is before page param, 1 is after.
+            var newURL = oldURL[0] + "&page=" + userSettDef["page"] + oldURL[1];
+            window.history.pushState("object or string", "changePage", newURL);
+            //clear the results, and update them
             $documents.empty();
             if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
                 $('.filterGuide').remove();
@@ -286,7 +291,7 @@ jQuery(function($) {
 
     var renderNodeGraph = function(graphData){
         var self = this;
-        var width = 800,
+        var width = 750,
             height = 850,
             ctrlKey,
             grav,
@@ -357,7 +362,7 @@ jQuery(function($) {
             })
             .attr("r", function(d){
                 if (d.nucleus){
-                    return 20
+                    return 15
                 }
                 return 5
             })
@@ -490,9 +495,6 @@ jQuery(function($) {
             maxPage = Math.min(Math.max(parseInt(userSettDef["page"]) + 4, 10) , allPages),
             numPages = maxPage - minPage + 1; // to render
         //renew pages and set handlers
-        console.log(userSettDef["page"])
-        console.log(allPages)
-        console.log(maxPage)
         container.empty()
 
         var filterOrEmpty
@@ -633,8 +635,8 @@ jQuery(function($) {
         $('.side-bar').css("width",'23%');
     })
     $('a[data-target="#clusterPanel"]').click(function(e){
-        $('.results').css("width",'52%');
-        $('.side-bar').css('width', "46%");
+        $('.results').css("width",'58%'); //52
+        $('.side-bar').css('width', "41%"); //46
     })
 
     //display/hide settings
@@ -659,5 +661,6 @@ jQuery(function($) {
     fetchData($search.data('searchurl') + $cache);
     fetchClusters($('#clusterPanel').data("request") + $cache)
     $('[data-toggle="tooltip"]').tooltip();
+
 
 });

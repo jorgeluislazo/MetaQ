@@ -17,7 +17,7 @@ object SearchLib {
     */
   def select(query: String, request: Request[AnyContent], selectType: String): JsObject = {
     // Construct the solr query depending on the type and handling the parameters
-    println(s"searchLib - queryString: $query, requestURI: $request, selectType: $selectType)")
+    println(s"searchLib select - queryString: $query, requestURI: $request, selectType: $selectType)")
     val queryBuilder = if (selectType == "gene"){
       buildGeneSelectQuery(query, request)}
     else {
@@ -30,7 +30,7 @@ object SearchLib {
     try {
       // Get Results from Solr.
       val results = queryBuilder.getResultAsMap(selectType)
-      println("Solr results: " + results)
+      println("Solr select/ results: " + results)
       // prepare results
       resultsInfo = if (selectType == "gene")
         this.prepareGeneSearchResults(results, request)
@@ -51,7 +51,7 @@ object SearchLib {
 
   // main function that handles /clustering searches
   def cluster(query: String, request: Request[AnyContent]): JsObject = {
-    println(s"searchLib - queryString: $query, requestURI: $request)")
+    println(s"searchLib cluster - queryString: $query, requestURI: $request)")
     val queryBuilder = this.buildGeneClusterQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_clusters" -> 0,
@@ -60,6 +60,7 @@ object SearchLib {
     try {
       // Get Results from Solr.
       val results = queryBuilder.getClustersAsMap()
+      println("Solr cluster/ results: " + results)
 
       // prepare results
       resultsInfo = this.prepareGeneClusterResults(results, request)

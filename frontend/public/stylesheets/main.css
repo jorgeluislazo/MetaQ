@@ -10,7 +10,7 @@ body{
     justify-content: center;
     -webkit-align-items: center;
     align-items: center;
-    height: 150px;
+    height: 220px;
     min-width: 1600px;
     background-color: #2e6da4;
 }
@@ -76,7 +76,7 @@ body{
 .side-bar{
     float: left;
     /*23 for small*/
-    width: 46%;
+    width: 41%;
     min-width: 300px;
     margin-right: 12px;
     height: 1000px;
@@ -168,11 +168,11 @@ body{
 .results{
     float: left;
     /* big is 74*/
-    width: 52%;
+    width: 58%;
     min-width: 300px;
     min-height: 900px;
     position: relative;
-    margin: 7px 10px 20px 10px;
+    margin: 7px 2px 15px 2px;
 
 
 }
@@ -206,14 +206,15 @@ body{
     border-left: 1px dotted #a0a0a0;
     margin-left: 30px;
     margin-bottom: 10px;
+    margin-top: 15px;
     padding-left: 5px;
 }
 
 .rank{
     position: absolute;
     left: 2px;
-    width: 1.8em;
-    font-weight: bold;
+    width: 1.2em;
+    /*font-weight: bold;*/
     color: #a0a0a0;
     text-align: right;
 }
