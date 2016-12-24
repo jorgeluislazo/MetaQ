@@ -103,11 +103,25 @@ class FileParser {
         }
         SolrInputDocument doc = new SolrInputDocument();
         doc.addField("ORFID", modifyID(row[0]));
+        doc.addField("runID", getRunID(row[0]));
         doc.addField("ORF_len", row[1]);
         doc.addField("start", row[2]);
         doc.addField("end", row[3]);
         doc.addField("strand_sense", row[6]);
-        doc.addField("taxonomy", row[8]);
+        String taxonomyName = row[8].replaceAll("unclassified ", "").replaceAll(" \\(miscellaneous\\)", "");
+        String taxonomyID = taxonomyName;
+        if(row[8].indexOf("(") > 0){
+            taxonomyName =taxonomyName.substring(0, taxonomyName.indexOf("(") -1);
+            taxonomyID = taxonomyID.substring(taxonomyID.indexOf("(") + 1, taxonomyID.length() - 1);
+        }else{
+            if (taxonomyName.equals("Monera")){
+                taxonomyID = "2";
+            }else{
+                taxonomyID = "none";
+            }
+        }
+        doc.addField("taxonomy", taxonomyName);
+        doc.addField("taxonomyID", taxonomyID);
         doc.addField("product", row[9]);
         return doc;
     }
@@ -210,6 +224,10 @@ class FileParser {
         }
 
         return documentBatch;
+    }
+
+    private String getRunID(String idString){
+        return idString.substring(0, idString.indexOf("_"));
     }
 
 
