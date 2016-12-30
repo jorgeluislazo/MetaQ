@@ -83,7 +83,8 @@ object SearchLib {
       "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
-    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true
+    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true //facet COG/KEGG filter upon click
+    val isTaxonomyBuilder = if (request.getQueryString("treeBuilder").isEmpty) false else true //Taxonomy builder (for tree)
     val filterSearchQuery = request.getQueryString("facetFilter").getOrElse("")
 
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
@@ -107,12 +108,21 @@ object SearchLib {
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
 
     if (isFilterSearch) {
+      //clicked on a facet, or taxonomy node, add the filter query
       queryBuilder = queryBuilder.addFilterQuery(filterSearchQuery)
     } else {
-      queryBuilder = queryBuilder.facetFields("COGID")
-        .facetFields("KEGGID")
-        .setParameter("facet.limit", "25")
-        .setParameter("facet.mincount", "1")
+      if(isTaxonomyBuilder){
+        //is it a taxonomy tree builder query?
+        queryBuilder = queryBuilder.facetFields("taxonomyID")
+          .setParameter("facet.limit", "20")
+          .setParameter("facet.mincount", "1") //todo: set to log(numCountResults)*2
+      }else{
+        //normal query with COGID KEGGID facets returned
+        queryBuilder = queryBuilder.facetFields("COGID")
+          .facetFields("KEGGID")
+          .setParameter("facet.limit", "25")
+          .setParameter("facet.mincount", "1")
+      }
     }
 
     if (highQualOnly.equals("true")) {
@@ -127,8 +137,8 @@ object SearchLib {
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
 
-    // http://localhost:8983/solr/ORFDocs
-    // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
+    // http://localhost:8983/solr/PwayDocs
+    // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/PwayDocs
     val client = new SolrClient("http://localhost:8983/solr/PwayDocs")
 
     var offset: Int = 0
@@ -151,44 +161,69 @@ object SearchLib {
   def prepareGeneSearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {
     var resultsInfo = List[JsObject]()
 
-    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true
-    val isClusterFilter = if (request.getQueryString("clusterFilter").isEmpty) false else true
+    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true //facet COG/KEGG filter upon click
+    val isTaxonomyBuilder = if (request.getQueryString("treeBuilder").isEmpty) false else true //Taxonomy builder (for tree)
+    val isClusterFilter = if (request.getQueryString("clusterFilter").isEmpty) false else true //clicked on cluster
 
-    results.documents.foreach {
-      doc =>
-        var resultJsonDoc = Json.obj(
-          "ORFID" -> doc("ORFID").toString,
-          "ORF_len" -> doc("ORF_len").toString,
-          "start" -> doc("start").toString,
-          "end" -> doc("end").toString,
-          "strand_sense" -> doc("strand_sense").toString,
-          "taxonomy" -> doc("taxonomy").toString,
-          "product" -> doc("product").toString,
-          "rpkm" -> doc("rpkm").toString,
-          "COGID" -> doc.getOrElse("COGID", "N/A").toString,
-          "KEGGID" -> doc.getOrElse("KEGGID", "N/A").toString,
-          "extended_desc" -> doc.getOrElse("extended_desc", "N/A").toString
-        )
-        resultsInfo ::= resultJsonDoc
+    if(isTaxonomyBuilder){
+        //only ask for ORFIDs
+      results.documents.foreach {
+        doc =>
+          var resultJsonDoc = Json.obj(
+            "ORFID" -> doc("ORFID").toString
+          )
+          resultsInfo ::= resultJsonDoc
+      }
+
+      val resultsJson = Json.obj(
+        "noOfResults" -> results.numFound,
+        "start" -> results.start,
+        "results" -> resultsInfo,
+        "facetFields" -> results.facetFields,
+        "isFilterSearch" -> isFilterSearch,
+        "isClusterFilter" -> isClusterFilter)
+
+      resultsJson
+
+    }else{
+      //normal search, include all information
+      results.documents.foreach {
+        doc =>
+          var resultJsonDoc = Json.obj(
+            "ORFID" -> doc("ORFID").toString,
+            "ORF_len" -> doc("ORF_len").toString,
+            "start" -> doc("start").toString,
+            "end" -> doc("end").toString,
+            "strand_sense" -> doc("strand_sense").toString,
+            "taxonomy" -> doc("taxonomy").toString,
+            "product" -> doc("product").toString,
+            "rpkm" -> doc("rpkm").toString,
+            "COGID" -> doc.getOrElse("COGID", "N/A").toString,
+            "KEGGID" -> doc.getOrElse("KEGGID", "N/A").toString,
+            "extended_desc" -> doc.getOrElse("extended_desc", "N/A").toString
+          )
+          resultsInfo ::= resultJsonDoc
+      }
+
+      resultsInfo = resultsInfo.reverse
+
+      if (!isFilterSearch) {
+        //sort the facet fields and add them back
+        val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2): _*)
+        val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2): _*)
+        val sortedFacets = Map("COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
+      }
+
+      val resultsJson = Json.obj(
+        "noOfResults" -> results.numFound,
+        "start" -> results.start,
+        "results" -> resultsInfo,
+        "facetFields" -> results.facetFields,
+        "isFilterSearch" -> isFilterSearch,
+        "isClusterFilter" -> isClusterFilter)
+
+      resultsJson
     }
-
-    resultsInfo = resultsInfo.reverse
-
-    if (!isFilterSearch) {
-      //sort the facet fields and add them back
-      val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2): _*)
-      val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2): _*)
-      val sortedFacets = Map("COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
-    }
-
-    val resultsJson = Json.obj(
-      "noOfResults" -> results.numFound,
-      "start" -> results.start,
-      "results" -> resultsInfo,
-      "facetFields" -> results.facetFields,
-      "isFilterSearch" -> isFilterSearch,
-      "isClusterFilter" -> isClusterFilter)
-    resultsJson
   }
 
   def preparePwaySearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {

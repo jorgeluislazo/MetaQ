@@ -298,10 +298,10 @@ jQuery(function($) {
             charge,
             rig;
 
-        var links = graphData.links.length;
-        grav = (links >= 700) ? 0.7: (links<= 50) ? 0.05 : links/1200;
-        charge = (links >= 400) ? -350: (links <= 100) ? -150 : links*-0.5;
-        rig = (links >= 1000) ? 0.95: (links <= 100) ? 0.4 : links/1000;
+        var numLinks = graphData.links.length;
+        grav = (numLinks >= 700) ? 0.7: (numLinks<= 50) ? 0.05 : numLinks/1200;
+        charge = (numLinks >= 400) ? -350: (numLinks <= 100) ? -150 : numLinks*-0.5;
+        rig = (numLinks >= 1000) ? 0.95: (numLinks <= 100) ? 0.4 : numLinks/1000;
 
         var force = d3.layout.force()
             .size([width, height - 50])
@@ -465,6 +465,19 @@ jQuery(function($) {
         }
         svg.selectAll("g#tombstone").remove()
     }
+
+    var fetchTaxonomyTree = function(url){
+        var jqxhr = $.ajax({
+            type: "GET",
+            url: url,
+            contentType: "application/json"
+        });
+
+        jqxhr.done(function (data) {
+            console.log(data)
+        });
+    }
+
 
     var restoreResults = function(){
         $('circle').css("fill", "#50c1cc");
@@ -657,9 +670,10 @@ jQuery(function($) {
         userSettDef["searchField"] = $('input:radio[name=df]:checked').val()
     });
 
-    //do the ajax search
+    //do the ajax searches
     fetchData($search.data('searchurl') + $cache);
     fetchClusters($('#clusterPanel').data("request") + $cache)
+    fetchTaxonomyTree($search.data('searchurl') + $cache + "&treeBuilder=t")
     $('[data-toggle="tooltip"]').tooltip();
 
 

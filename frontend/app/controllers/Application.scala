@@ -4,12 +4,14 @@ import libs.SearchLib
 import java.io._
 import javax.inject.Inject
 
-import play.api.libs.json.JsObject
+import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.ws._
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.io.Source
+import sys.process._
 
 class Application @Inject() (ws: WSClient) extends Controller {
 
@@ -34,9 +36,77 @@ class Application @Inject() (ws: WSClient) extends Controller {
       val results = SearchLib.select(orfs,request, "gene")
       Ok(results)
     }else{
-      //get the ORFs associated with this search
-      val results = SearchLib.select(query,request, "gene")
-      Ok(results)
+      if(request.getQueryString("treeBuilder").nonEmpty){
+        //get taxonomy IDs as facets and write taxonomy tree lineages
+        val solrSresults = SearchLib.select(query,request, "gene")
+        val taxonomyMap = (solrSresults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
+        val fileIDs = new File("exampleTaxIDs")
+        val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
+
+        for (id <- taxonomyMap.keySet){
+          buffWriter.write("^"+ id + "\n")
+        }
+        buffWriter.close()
+        println("H1 - TaxIDs written")
+        val runScript = "bash script".! //todo: add params, concurrency
+        //final JS Array result to send back to client
+        var jsFinalResult = JsArray()
+        //we will discard lineages seen before
+        var seenLineageSet : Set[String] = Set()
+        //for each lineage we find in our list
+        println("H2 - Lineages obtained")
+        for(line <- Source.fromFile("exampleTaxLineages.txt").getLines()){
+          var jsBranchResult = JsArray()
+          //extract as a tuple (lineageString, count)
+          val tuple = line.split("\t")
+          val lineageString = tuple(0)
+          //add the unseen lineage to the set
+          if(!seenLineageSet.contains(lineageString)){
+            seenLineageSet = seenLineageSet + lineageString
+            //add the species
+            val jsEntry : JsValue = Json.obj(
+              "id" -> tuple(0).replace("(miscellaneous)", ""),
+              "taxid" -> tuple(1),
+              "count" -> taxonomyMap.get(tuple(1)).get
+            )
+            jsBranchResult = jsBranchResult.+:(jsEntry)
+
+            //now we prepend all the parent branches lineages we havent seen
+            val lineageBranches = lineageString.split("\\.")
+            var i = lineageBranches.length
+            var break = 0
+            //work upwards from leaves to root
+            while(i > 0){
+              val branchSet = lineageBranches.take(i)
+              val branchString = branchSet.mkString(".")
+                //add that branch if we havent seen it before, otherwise break
+              if(!seenLineageSet.contains(branchString)) {
+                seenLineageSet = seenLineageSet + branchString
+                val jsEntry : JsValue = Json.obj(
+                  "id" -> branchString,
+                  "taxid" -> 0,
+                  "count" -> -1
+                )
+                jsBranchResult = jsBranchResult.+:(jsEntry) //prepend
+              }else{
+                break = 1
+              }
+              i -= 1
+            }
+            jsFinalResult = jsFinalResult.++(jsBranchResult)
+//            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
+          }
+        }
+        //this might be required for D3.js
+        val columns : JsValue = Json.arr("id")
+//        jsFinalResult = jsFinalResult.:+(columns)
+//        seenLineageSet.foreach{println}
+        Ok(jsFinalResult)
+      }else{
+        //Normal search: get the ORFs associated with this search
+        val results = SearchLib.select(query,request, "gene")
+        Ok(results)
+      }
     }
   }
 
@@ -103,9 +173,15 @@ class Application @Inject() (ws: WSClient) extends Controller {
     )
   }
 
+  def dendogram: Action[AnyContent] = Action {
+    Ok(views.html.dendogram())
+  }
+
   def test(): Action[AnyContent] = Action { implicit request =>
     val results = SearchLib.select( "product:protein" ,request, "gene")
     Ok(results)
   }
+
+  def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
 
 }
