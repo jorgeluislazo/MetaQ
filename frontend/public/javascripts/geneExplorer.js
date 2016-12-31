@@ -260,7 +260,8 @@ jQuery(function($) {
 
         for (var i=0; i< data.noOfResults; i++){ //for each cluster
             label = Object.keys(data.clusters[i])[0]
-            graph["nodes"].push( {"nucleus": label, "cluster": ["clust"+ i], "selected": false}); //push its nucleus
+            graph["nodes"].push( {"nucleus": label, "cluster": ["clust"+ i],
+                "weight": data.clusters[i][label].length, "selected": false}); //push its nucleus
             // graph["nuclei"].push({"name":label, index: total});
             list["docs"].push(i);
             list["group"].push(index);
@@ -290,6 +291,7 @@ jQuery(function($) {
     }
 
     var renderNodeGraph = function(graphData){
+        console.log(graphData);
         var self = this;
         var width = 750,
             height = 850,
@@ -303,44 +305,30 @@ jQuery(function($) {
         charge = (numLinks >= 400) ? -350: (numLinks <= 100) ? -150 : numLinks*-0.5;
         rig = (numLinks >= 1000) ? 0.95: (numLinks <= 100) ? 0.4 : numLinks/1000;
 
-        var force = d3.layout.force()
-            .size([width, height - 50])
-            .charge(charge)     //sets the repulsion/attraction strength to the specified value. def=-30 myval = charge/4
-            .chargeDistance(600)//sets the maximum distance over which charge forces are applied. def= inf myval= 750
-            .theta(0.5)         //sets the Barnes–Hut approximation criterion to the specified value. def=0.8 myval = 0.5
-            .linkDistance(20)    //sets the target distance between linked nodes to the specified value. def=20 myval=3
-            .linkStrength(1)  //sets the strength (rigidity) of links to the specified value in the range [0,1]. def=1 myval=rig
-            .gravity(grav)      //sets the gravitational strength to the specified numerical value. def=0.1 myval=grav
-            // .friction(0.9)      //sets the friction coefficient, approximates velocity decay. def= 0.9
-            .alpha(0.01)         //cooling parameter, if >0 restarts force layout, if <0 ends it. def=0.1
-            .on("tick", tick);
-
         var svg = d3.select(".clusterGraph").append("svg")
             .attr("id", "cluster-svg")
             .attr("width", width)
             .attr("height", height);
 
-        force
-            .nodes(graphData.nodes)
-            .links(graphData.links)
-            .start();
+        var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink()) // .id(function(d) { return d.id; }))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2));
 
-        var link = svg.selectAll(".link").data(graphData.links)
-            .enter().append("line")
+        var link = svg.selectAll("line")
+            .data(graphData.links)
+            .enter()
+            .append("line")
             .attr("class", "link");
 
-
-        var  node = svg.selectAll(".node")
+        var gnodes = svg.selectAll('g.gnode')
             .data(graphData.nodes)
-            .enter().append("g")
-            .attr("class", "cluster")
-            .attr("id", function(d){
-                if (d.name) return d.name;
-                if (d.cluster) return d.cluster;
-                else return "tombstone"})
-            .call(force.drag);
+            .enter()
+            .append('g')
+            .classed('gnode', true);
 
-        node.append("circle")
+        var node = gnodes
+            .append("circle")
             .attr("class", function(d){
                 if (d.nucleus && d.cluster){
                     return "nucleus " + d.cluster[0]
@@ -371,9 +359,14 @@ jQuery(function($) {
                     return 1
                 } return 0.5
             })
-            .on("click", toggle);
+            .on("click", toggle)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
 
-        node.append("text")
+        var label = gnodes
+            .append("text")
             .attr("class","cluster-text")
             .attr("dx", function(d){
                 if (d.nucleus){
@@ -392,6 +385,13 @@ jQuery(function($) {
             .on("click",function(d,i){
                 toggle(node[0][i].__data__); //small hack to activate toggle on node when clicking text
             });
+
+        simulation
+            .nodes(graphData.nodes)
+            .on("tick", tick);
+
+        simulation.force("link")
+            .links(graphData.links);
 
         /**
          * D3 Method, handles the movement behaviour of every node at each tick (every fraction of a second)
@@ -417,8 +417,8 @@ jQuery(function($) {
                     if (d.target.y > (height - 10)) {return (height - 10);}
                     return d.target.y;
                 });
-
-            node.attr("transform", function(d) {
+            
+            gnodes.attr("transform", function(d) {
                 var d_x = d.x,
                     d_y = d.y;
                 if (d.x < 20){ d_x = 20;}
@@ -427,6 +427,23 @@ jQuery(function($) {
                 if (d.y > (height - 100)) {d_y = height - 100;}
                 return "translate(" +  d_x + "," + d_y + ")";
             });
+        }
+
+        function dragstarted(d) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+
+        function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
         }
 
         /**
