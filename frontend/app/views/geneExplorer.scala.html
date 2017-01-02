@@ -63,7 +63,8 @@
                     <ul class="nav nav-tabs " role="tablist"  id="tabs">
                         <li role="presentation" class="active"><a data-target="#clusterPanel" aria-controls="clusterPanel" role="tab" data-toggle="tab">
                             <b>Clusters  </b><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="This tab will open a clustering graph which groups up results based on common keywords, selecting any of the cluster nodes will filter down the results to this group."></i></a></li>
-
+                        <li role="presentation"><a data-target="#taxonomyPanel" aria-controls="taxonomyPanel" role="tab" data-toggle="tab">
+                            <b>Taxonomy Tree  </b><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title=""></i></a></li>
                         <li role="presentation" ><a data-target="#facetPanel" aria-controls="facetPanel" role="tab" data-toggle="tab">
                             <b>Result Facets  </b><i class="glyphicon glyphicon-info-sign" data-toggle="tooltip" title="This tab will group results based on common KEGG/COG ids throughout the proteins, selecting a group will filter the result, bigger IDs mean larger groups. "></i></a>
                         </li>
@@ -73,8 +74,11 @@
                             <div class="clusterSettings"></div>
                             <div class="clusterGraph"><h4>Use the search bar to make a query</h4></div>
                         </div>
-                        <div role="tabpanel" class="tab-pane" id="facetPanel" ><h4>Use the search bar to make a query</h4>
-                        </div>
+                        <div role="tabpanel" class="tab-pane" id="taxonomyPanel" >
+
+                            <div class="taxonomyTree"><img src='http://i.imgur.com/ZWZZBYz.gif' class='loading-gif'>waiting for data</div>
+                            </div>
+                        <div role="tabpanel" class="tab-pane" id="facetPanel" ><h4>Use the search bar to make a query</h4></div>
                     </div>
                 </div>
 

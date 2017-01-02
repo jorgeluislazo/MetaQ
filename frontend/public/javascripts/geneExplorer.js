@@ -21,6 +21,8 @@ jQuery(function($) {
         $resultsInfo = $('.resultsInfo'),
         $documents = $('.documents'),
         $exportButton = $('#exportButton'),
+        panelWidth = 850,
+        panelHeight = 850,
     //mappings for parsing Solr field ids to readable text
         li_map2 = {
             "start"         : "Start",
@@ -252,7 +254,7 @@ jQuery(function($) {
     }
 
     var nodeify = function(data){
-        var graph = { "nodes": [], "links": []};//results
+        var graph = { "nodes": [], "links": [], "clusters": data.clusters.length};//results
         var list = { "docs": [], "group": []}, //for intersection
             index = 0, //for nucleus
             total = 0, // nodes
@@ -293,33 +295,36 @@ jQuery(function($) {
     var renderNodeGraph = function(graphData){
         console.log(graphData);
         var self = this;
-        var width = 750,
-            height = 850,
-            ctrlKey,
+        var ctrlKey,
             grav,
-            charge,
-            rig;
+            charge;
 
-        var numLinks = graphData.links.length;
-        grav = (numLinks >= 700) ? 0.7: (numLinks<= 50) ? 0.05 : numLinks/1200;
-        charge = (numLinks >= 400) ? -350: (numLinks <= 100) ? -150 : numLinks*-0.5;
-        rig = (numLinks >= 1000) ? 0.95: (numLinks <= 100) ? 0.4 : numLinks/1000;
+        var numNodes = graphData.nodes.length;
+        grav = (numNodes/graphData.clusters >= 20) ? 160:
+            (numNodes/graphData.clusters <= 10) ? 500 : 200;
+        charge = (numNodes/graphData.clusters >= 20) ? -20:
+            (numNodes/graphData.clusters <= 10) ? -70 : -30;
+        // console.log(grav);
+        // console.log(charge);
 
         var svg = d3.select(".clusterGraph").append("svg")
             .attr("id", "cluster-svg")
-            .attr("width", width)
-            .attr("height", height);
+            .attr("width", panelWidth)
+            .attr("height", panelHeight);
 
         var simulation = d3.forceSimulation()
-            .force("link", d3.forceLink()) // .id(function(d) { return d.id; }))
-            .force("charge", d3.forceManyBody())
-            .force("center", d3.forceCenter(width / 2, height / 2));
+            .force("link", d3.forceLink())
+            .force("charge", d3.forceManyBody()
+                .strength(charge)
+                .distanceMin(1)
+                .distanceMax(grav))
+            .force("center", d3.forceCenter(panelWidth / 2, panelHeight / 2));
 
         var link = svg.selectAll("line")
             .data(graphData.links)
             .enter()
             .append("line")
-            .attr("class", "link");
+            .attr("class", "cluster-link");
 
         var gnodes = svg.selectAll('g.gnode')
             .data(graphData.nodes)
@@ -331,11 +336,11 @@ jQuery(function($) {
             .append("circle")
             .attr("class", function(d){
                 if (d.nucleus && d.cluster){
-                    return "nucleus " + d.cluster[0]
+                    return "cluster-nucleus " + d.cluster[0]
                 }
                 if (d.cluster){
                     var l = d.cluster.length,
-                        result = "node";
+                        result = "cluster-node";
                     while(l > 0){
                         result+= " " + d.cluster[l-1];
                         l--;
@@ -399,32 +404,32 @@ jQuery(function($) {
         function tick() {
             link.attr("x1", function(d) {
                     if (d.source.x < 8){ return 10;}
-                    if (d.source.x > (width * 1.2)){ return (width * 1.2);}
+                    if (d.source.x > (panelWidth * 1.2)){ return (panelWidth * 1.2);}
                     return d.source.x;
                 })
                 .attr("y1", function(d) {
                     if (d.source.y < 8){ return 8;}
-                    if (d.source.y > (height - 10)) {return (height - 10);}
+                    if (d.source.y > (panelHeight - 10)) {return (panelHeight - 10);}
                     return d.source.y;
                 })
                 .attr("x2", function(d) {
                     if (d.target.x < 8){ return 10;}
-                    if (d.target.x > (width * 1.2)){ return (width * 1.2);}
+                    if (d.target.x > (panelWidth * 1.2)){ return (panelWidth * 1.2);}
                     return d.target.x;
                 })
                 .attr("y2", function(d) {
                     if (d.target.y < 8){ return 8;}
-                    if (d.target.y > (height - 10)) {return (height - 10);}
+                    if (d.target.y > (panelHeight - 10)) {return (panelHeight - 10);}
                     return d.target.y;
                 });
-            
+
             gnodes.attr("transform", function(d) {
                 var d_x = d.x,
                     d_y = d.y;
                 if (d.x < 20){ d_x = 20;}
-                if (d.x > (width - 20)){ d_x = width - 20;}
+                if (d.x > (panelWidth - 20)){ d_x = panelWidth - 20;}
                 if (d.y < 30){ d_y = 30;}
-                if (d.y > (height - 100)) {d_y = height - 100;}
+                if (d.y > (panelHeight - 10)) {d_y = panelHeight - 10;}
                 return "translate(" +  d_x + "," + d_y + ")";
             });
         }
@@ -491,7 +496,55 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (data) {
+            $('.taxonomyTree').empty();
             console.log(data)
+
+            var svg = d3.select(".taxonomyTree").append("svg")
+                .attr("id", "taxonomy-svg")
+                .attr("width", panelWidth)
+                .attr("height", panelHeight),
+                g = svg.append("g").attr("transform", "translate(40,0)");
+
+            var tree = d3.cluster()
+                .size([panelHeight, panelWidth - 160]);
+
+            var stratify = d3.stratify()
+                .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
+            
+            var root = stratify(data);
+            tree(root)
+                .sort(function(a, b) { return (a.height - b.height) || a.id.localeCompare(b.id); });
+
+            var link = g.selectAll(".taxonomy-link")
+                .data(root.descendants().slice(1))
+                .enter().append("path")
+                .attr("class", "taxonomy-link")
+                .attr("d", function(d) {
+                    return "M" + d.y + "," + d.x
+                        + "C" + (d.parent.y + 100) + "," + d.x
+                        + " " + (d.parent.y + 100) + "," + d.parent.x
+                        + " " + d.parent.y + "," + d.parent.x;
+                });
+
+            var node = g.selectAll(".taxonomy-node")
+                .data(root.descendants())
+                .enter().append("g")
+                .attr("class", function(d) { return "taxonomy-node" + (d.children ? " taxonomy-node-internal" : " taxonomy-node-leaf"); })
+                .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+            node.append("circle")
+                .attr("r", 2.5);
+
+            node.append("text")
+                .attr("dy", 3)
+                .attr("x", function(d) { return d.children ? -8 : 8; })
+                .attr("y", function(d) { return d.children ? -8 : 8; })
+                .style("text-anchor", function(d) { return d.children ? "end" : "middle"; })
+                .text(function(d) { return (d.data.count > 0) ?
+                d.id.substring(d.id.lastIndexOf(".") + 1) + " (" + d.data.count + ")"
+                    :  d.id.substring(d.id.lastIndexOf(".") + 1); });
+
+            $(".container").scrollLeft(600)
         });
     }
 

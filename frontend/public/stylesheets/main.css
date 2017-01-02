@@ -118,7 +118,7 @@ input#rpkm{
 }
 
 .tab-content{
-    height: 800px;
+    height: 900px;
 }
 
 .facetList{
@@ -170,17 +170,17 @@ input#rpkm{
 .cluster-text {
     font-size: 110%;
 }
-.link {
+.cluster-link {
     stroke: #50c1cc;
     stroke-width: 0.3px;
 }
-.nucleus{
+.cluster-nucleus{
     cursor: move;
     fill: #50c1cc;
     stroke: #5375cc;
     stroke-width: 3px;
 }
-.node{
+.cluster-node{
     cursor: move;
     /*stroke: #252fcc;*/
     /*stroke-width: 1px;*/
@@ -188,6 +188,33 @@ input#rpkm{
 }
 .tombstone{
     display: none;
+}
+
+/*Taxonomy*/
+.taxonomy-node circle {
+    fill: #999;
+}
+
+.taxonomy-node text {
+    font: 10px sans-serif;
+}
+
+.taxonomy-node-internal circle {
+    fill: #555;
+}
+
+.taxonomy-node-internal text {
+    text-shadow: 0 1px 0 #fff,
+    0 -1px 0 #fff,
+    1px 0 0 #fff,
+    -1px 0 0 #fff;
+}
+
+.taxonomy-link {
+    fill: none;
+    stroke: #555;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5px;
 }
 /*results right hand side*/
 
