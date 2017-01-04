@@ -20,6 +20,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def geneExplorer(query: String) = Action {
+    println("query: " + query)
     Ok(views.html.geneExplorer(query))
   }
 

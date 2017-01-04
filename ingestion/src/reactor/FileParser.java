@@ -108,7 +108,10 @@ class FileParser {
         doc.addField("start", row[2]);
         doc.addField("end", row[3]);
         doc.addField("strand_sense", row[6]);
-        String taxonomyName = row[8].replaceAll("unclassified ", "").replaceAll(" \\(miscellaneous\\)", "");
+        doc.addField("rpkm", 3.02012); //todo default
+        String taxonomyName = row[8].replaceAll("unclassified ", "")
+                .replaceAll(" \\(miscellaneous\\)", "")
+                .replaceAll("sp\\.","sp");
         String taxonomyID = taxonomyName;
         if(row[8].indexOf("(") > 0){
             taxonomyName =taxonomyName.substring(0, taxonomyName.indexOf("(") -1);

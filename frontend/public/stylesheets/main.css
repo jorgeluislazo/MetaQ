@@ -118,7 +118,11 @@ input#rpkm{
 }
 
 .tab-content{
-    height: 900px;
+    height: 1500px;
+}
+
+.taxonomyTree{
+    overflow: scroll;
 }
 
 .facetList{
@@ -192,15 +196,15 @@ input#rpkm{
 
 /*Taxonomy*/
 .taxonomy-node circle {
-    fill: #999;
+    fill: #3a9953;
 }
 
 .taxonomy-node text {
-    font: 10px sans-serif;
+    font: 12px sans-serif;
 }
 
 .taxonomy-node-internal circle {
-    fill: #555;
+    fill: #3a9953;
 }
 
 .taxonomy-node-internal text {

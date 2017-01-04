@@ -364,7 +364,7 @@ jQuery(function($) {
                     return 1
                 } return 0.5
             })
-            .on("click", toggle)
+            .on("click", toggleCluster)
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
@@ -388,7 +388,7 @@ jQuery(function($) {
             })
             .on("mouseout", function(d){d3.select(this).style("fill", "black").style("font-weight", "normal")})
             .on("click",function(d,i){
-                toggle(node[0][i].__data__); //small hack to activate toggle on node when clicking text
+                toggleCluster(node[0][i].__data__); //small hack to activate toggle on node when clicking text
             });
 
         simulation
@@ -455,7 +455,7 @@ jQuery(function($) {
          * D3 Method, handles a click to a node (both css effects, as well as initiating a query
          * @param d a single data point.
          */
-        function toggle(d) {
+        function toggleCluster(d) {
             ctrlKey = d3.event.ctrlKey;
             if (ctrlKey){
                 if (d.fixed){
@@ -465,7 +465,9 @@ jQuery(function($) {
                     for (var i = 0; i< d.cluster.length; i++){d3.selectAll("." + d.cluster[i]).classed( d.fixed = true);}}
             }
             else{
-                $("circle").css("fill", "#50c1cc");
+                //reset
+                $(".cluster-nucleus").css("fill", "#50c1cc");
+                $(".cluster-node").css("fill", "#50c1cc");
                 var iDs = [];
                 for (var l = 0; l < d.cluster.length; l++) {
                     $("." + d.cluster[l]).css("fill", "#18364b").each(function(){
@@ -501,12 +503,12 @@ jQuery(function($) {
 
             var svg = d3.select(".taxonomyTree").append("svg")
                 .attr("id", "taxonomy-svg")
-                .attr("width", panelWidth)
-                .attr("height", panelHeight),
+                .attr("width", panelWidth + 400)
+                .attr("height", panelHeight + 500),
                 g = svg.append("g").attr("transform", "translate(40,0)");
 
             var tree = d3.cluster()
-                .size([panelHeight, panelWidth - 160]);
+                .size([panelHeight + 400, panelWidth + 200]);
 
             var stratify = d3.stratify()
                 .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
@@ -515,13 +517,14 @@ jQuery(function($) {
             tree(root)
                 .sort(function(a, b) { return (a.height - b.height) || a.id.localeCompare(b.id); });
 
+            console.log(root);
             var link = g.selectAll(".taxonomy-link")
                 .data(root.descendants().slice(1))
                 .enter().append("path")
                 .attr("class", "taxonomy-link")
                 .attr("d", function(d) {
                     return "M" + d.y + "," + d.x
-                        + "C" + (d.parent.y + 100) + "," + d.x
+                        + "C" + (d.parent.y + 50) + "," + d.x
                         + " " + (d.parent.y + 100) + "," + d.parent.x
                         + " " + d.parent.y + "," + d.parent.x;
                 });
@@ -530,21 +533,56 @@ jQuery(function($) {
                 .data(root.descendants())
                 .enter().append("g")
                 .attr("class", function(d) { return "taxonomy-node" + (d.children ? " taxonomy-node-internal" : " taxonomy-node-leaf"); })
-                .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+                .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
+                .on("click", toggleTax);
 
             node.append("circle")
-                .attr("r", 2.5);
+                .attr("class", function(d){
+                    return d.id.substring(d.id.lastIndexOf(".") + 1).replace(/ /g,"_")
+                })
+                .attr("r", 7);
 
             node.append("text")
-                .attr("dy", 3)
+                .attr("dy", 4)
                 .attr("x", function(d) { return d.children ? -8 : 8; })
                 .attr("y", function(d) { return d.children ? -8 : 8; })
-                .style("text-anchor", function(d) { return d.children ? "end" : "middle"; })
+                .style("text-anchor", function(d) {
+                    return (d.parent == null) ?"start" :
+                    d.children ? "end" : "middle"; })
                 .text(function(d) { return (d.data.count > 0) ?
                 d.id.substring(d.id.lastIndexOf(".") + 1) + " (" + d.data.count + ")"
                     :  d.id.substring(d.id.lastIndexOf(".") + 1); });
 
-            $(".container").scrollLeft(600)
+            function toggleTax(d){
+                //reset
+                $(".taxonomy-node circle").css("fill", "#3a9953");
+                var facetFilterString = "&facetFilter=taxonomyID:(",
+                    taxIDs = [];
+
+                var getID = function(node){
+                    console.log(node)
+                    $("." + node.id.substring(node.id.lastIndexOf(".") + 1).replace(/ /g,"_")).css("fill", "#50c1cc");
+                    if(!node.children){
+                        taxIDs.push(node.data.taxid);
+                        // console.log(node.data.taxid);
+                    }else{
+                        var i;
+                        for(i in node.children){
+                            (function(child, func){
+                                func(child);
+                            })(node.children[i], getID)
+                        }
+                    }
+                }
+                getID(d);
+               facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
+                var fetchDataURL = constructORFsearchURL(facetFilterString);
+                $documents.fadeOut("slow", function(){
+                    fetchData(fetchDataURL);
+                });
+            }
+
+            $("#taxonomy-svg").scrollLeft(200);
         });
     }
 
@@ -680,6 +718,7 @@ jQuery(function($) {
         var query = $('#searchBox').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
+        console.log("rpkm: " + rpkm )
 
         if(isClusterSearch){
             var fetchDataURL =
@@ -742,8 +781,8 @@ jQuery(function($) {
 
     //do the ajax searches
     fetchData($search.data('searchurl') + $cache);
-    fetchClusters($('#clusterPanel').data("request") + $cache)
-    fetchTaxonomyTree($search.data('searchurl') + $cache + "&treeBuilder=t")
+    fetchClusters($('#clusterPanel').data("request") + $cache);
+    fetchTaxonomyTree($search.data('searchurl') + $cache + "&treeBuilder=t");
     $('[data-toggle="tooltip"]').tooltip();
 
 
