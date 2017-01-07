@@ -195,16 +195,29 @@ input#rpkm{
 }
 
 /*Taxonomy*/
+
 .taxonomy-node circle {
     fill: #3a9953;
+}
+.taxonomy-node circle:hover{
+    cursor:pointer;
 }
 
 .taxonomy-node text {
     font: 12px sans-serif;
 }
 
+.taxonomy-node text:hover {
+    cursor:pointer;
+    font-weight: bold;
+}
+
 .taxonomy-node-internal circle {
     fill: #3a9953;
+}
+
+.taxonomy-node-internal circle:hover {
+    cursor:pointer;
 }
 
 .taxonomy-node-internal text {
@@ -212,6 +225,11 @@ input#rpkm{
     0 -1px 0 #fff,
     1px 0 0 #fff,
     -1px 0 0 #fff;
+}
+
+.taxonomy-node-internal text:hover {
+    cursor:pointer;
+    font-weight: bold;
 }
 
 .taxonomy-link {

@@ -48,7 +48,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
           buffWriter.write("^"+ id + "\n")
         }
         buffWriter.close()
-        println("H1 - TaxIDs written")
+        println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
         val runScript = "bash script".! //todo: add params, concurrency
         //final JS Array result to send back to client
         var jsFinalResult = JsArray()

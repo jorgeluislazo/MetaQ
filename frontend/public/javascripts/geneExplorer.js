@@ -302,13 +302,11 @@ jQuery(function($) {
             grav,
             charge;
 
-        var numNodes = graphData.nodes.length;
-        grav = (numNodes/graphData.clusters >= 20) ? 160:
-            (numNodes/graphData.clusters <= 10) ? 500 : 200;
-        charge = (numNodes/graphData.clusters >= 20) ? -20:
-            (numNodes/graphData.clusters <= 10) ? -70 : -30;
-        // console.log(grav);
-        // console.log(charge);
+        var ratio = graphData.clusters/graphData.nodes.length;
+        grav = 933.3*ratio + 100 //arbitrary formulas
+        charge = -600*ratio -10
+        console.log(grav);
+        console.log(charge);
 
         var svg = d3.select(".clusterGraph").append("svg")
             .attr("id", "cluster-svg")
@@ -318,9 +316,9 @@ jQuery(function($) {
         var simulation = d3.forceSimulation()
             .force("link", d3.forceLink())
             .force("charge", d3.forceManyBody()
-                .strength(charge)
                 .distanceMin(1)
-                .distanceMax(grav))
+                .distanceMax(grav)
+                .strength(charge))
             .force("center", d3.forceCenter(panelWidth / 2, panelHeight / 2));
 
         var link = svg.selectAll("line")
@@ -515,7 +513,7 @@ jQuery(function($) {
 
             var stratify = d3.stratify()
                 .parentId(function(d) { return d.id.substring(0, d.id.lastIndexOf(".")); });
-            
+
             var root = stratify(data);
             tree(root)
                 .sort(function(a, b) { return (a.height - b.height) || a.id.localeCompare(b.id); });
@@ -551,7 +549,7 @@ jQuery(function($) {
                 .attr("y", function(d) { return d.children ? -8 : 8; })
                 .style("text-anchor", function(d) {
                     return (d.parent == null) ?"start" :
-                    d.children ? "end" : "middle"; })
+                        d.children ? "end" : "middle"; })
                 .text(function(d) { return (d.data.count > 0) ?
                 d.id.substring(d.id.lastIndexOf(".") + 1) + " (" + d.data.count + ")"
                     :  d.id.substring(d.id.lastIndexOf(".") + 1); });
@@ -565,21 +563,22 @@ jQuery(function($) {
                 var getID = function(node){
                     console.log(node)
                     $("." + node.id.substring(node.id.lastIndexOf(".") + 1).replace(/ /g,"_")).css("fill", "#50c1cc");
-                    if(!node.children){
+                    if(node.data.taxid != 0){
                         taxIDs.push(node.data.taxid);
                         // console.log(node.data.taxid);
-                    }else{
-                        var i;
-                        for(i in node.children){
-                            (function(child, func){
-                                func(child);
-                            })(node.children[i], getID)
-                        }
                     }
+
+                    var i;
+                    for(i in node.children){
+                        (function(child, func){
+                            func(child);
+                        })(node.children[i], getID)
+                    }
+
                 }
                 getID(d);
                 currentFacetFilter = d.id.substring(d.id.lastIndexOf(".") + 1);
-               facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
+                facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
                 var fetchDataURL = constructORFsearchURL(facetFilterString);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
