@@ -74,7 +74,7 @@ jQuery(function($) {
             window.history.pushState("object or string", "changePage", newURL);
             //clear the results, and update them
             $documents.empty();
-            if (response.isFilterSearch || response.isClusterFilter) { // keep the current search and update result section
+            if (response.isFilterSearch != "empty") { // keep the current search and update result section
                 $('.filterGuide').remove();
                 $resultsInfo.empty();
                 for (var j in response.results) {
@@ -87,11 +87,14 @@ jQuery(function($) {
                         filterGuide = $('<div>').attr('class', 'filterGuide').append(p).append(a);
                     return filterGuide;}
 
-                if(response.isFilterSearch){
+                if(response.isFilterSearch == "facetFilter"){
                     var p = $('<p>').text("All results with filter facet: ").append($('<b>').text(currentFacetFilter)),
                         filterGuide = constructFilterGuide(p);
                 }
-                if(response.isClusterFilter){
+                if(response.isFilterSearch == "taxonomyFilter"){
+                    console.log("taxonomyFilter")
+                }
+                if(response.isFilterSearch == "clusterFilter"){
                     p = $('<p>').text("Current cluster filter: ").append($('<b>').text(currentClusterFilter));
                     filterGuide = constructFilterGuide(p);
                 }
@@ -556,7 +559,7 @@ jQuery(function($) {
             function toggleTax(d){
                 //reset
                 $(".taxonomy-node circle").css("fill", "#3a9953");
-                var facetFilterString = "&facetFilter=taxonomyID:(",
+                var facetFilterString = "&taxonomyFilter=taxonomyID:(",
                     taxIDs = [];
 
                 var getID = function(node){
@@ -575,14 +578,14 @@ jQuery(function($) {
                     }
                 }
                 getID(d);
+                currentFacetFilter = d.id.substring(d.id.lastIndexOf(".") + 1);
                facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
                 var fetchDataURL = constructORFsearchURL(facetFilterString);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
                 });
             }
-
-            $("#taxonomy-svg").scrollLeft(200);
+            // $("#taxonomy-svg").scrollLeft(200);
         });
     }
 
@@ -718,7 +721,6 @@ jQuery(function($) {
         var query = $('#searchBox').val(),
             highQualOnly = $('input:checkbox[name=hq]:checked').val(),
             rpkm = $('#rpkm').val();
-        console.log("rpkm: " + rpkm )
 
         if(isClusterSearch){
             var fetchDataURL =

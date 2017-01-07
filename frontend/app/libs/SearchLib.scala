@@ -83,9 +83,9 @@ object SearchLib {
       "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
     val minRPKM = request.getQueryString("minRPKM").getOrElse("0")
-    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true //facet COG/KEGG filter upon click
     val isTaxonomyBuilder = if (request.getQueryString("treeBuilder").isEmpty) false else true //Taxonomy builder (for tree)
-    val filterSearchQuery = request.getQueryString("facetFilter").getOrElse("")
+    val filterSearchQuery = request.getQueryString("facetFilter") //facet COG/KEGG filter upon click
+        .getOrElse(request.getQueryString("taxonomyFilter").getOrElse("")) //taxonomy filter
 
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
@@ -94,6 +94,7 @@ object SearchLib {
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
     val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
 
+//    println(request + " " + isFilterSearch)
     //set the offset
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
@@ -107,7 +108,7 @@ object SearchLib {
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
 
-    if (isFilterSearch) {
+    if (filterSearchQuery != "") {
       //clicked on a facet, or taxonomy node, add the filter query
       queryBuilder = queryBuilder.addFilterQuery(filterSearchQuery)
     } else {
@@ -161,12 +162,14 @@ object SearchLib {
   def prepareGeneSearchResults(results: MapQueryResults, request: Request[AnyContent]): JsObject = {
     var resultsInfo = List[JsObject]()
 
-    val isFilterSearch = if (request.getQueryString("facetFilter").isEmpty) false else true //facet COG/KEGG filter upon click
+    val isFilterSearch = if (request.getQueryString("facetFilter").isDefined) "facetFilter" //tell client is facet filter
+      else if (request.getQueryString("taxonomyFilter").isDefined) "taxonomyFilter" //tell client is taxonomy  filter
+      else if (request.getQueryString("clusterFilter").isDefined) "clusterFilter" // tell client is cluster filter
+      else "empty" //facet COG/KEGG filter upon click
     val isTaxonomyBuilder = if (request.getQueryString("treeBuilder").isEmpty) false else true //Taxonomy builder (for tree)
-    val isClusterFilter = if (request.getQueryString("clusterFilter").isEmpty) false else true //clicked on cluster
 
     if(isTaxonomyBuilder){
-        //only ask for ORFIDs
+      //only ask for ORFIDs
       results.documents.foreach {
         doc =>
           var resultJsonDoc = Json.obj(
@@ -180,8 +183,7 @@ object SearchLib {
         "start" -> results.start,
         "results" -> resultsInfo,
         "facetFields" -> results.facetFields,
-        "isFilterSearch" -> isFilterSearch,
-        "isClusterFilter" -> isClusterFilter)
+        "isFilterSearch" -> isFilterSearch)
 
       resultsJson
 
@@ -207,20 +209,19 @@ object SearchLib {
 
       resultsInfo = resultsInfo.reverse
 
-      if (!isFilterSearch) {
-        //sort the facet fields and add them back
-        val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2): _*)
-        val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2): _*)
-        val sortedFacets = Map("COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
-      }
+//      if (isFilterSearch == "facetFilter") {
+//        //sort the facet fields and add them back
+//        val sortedKEGG = ListMap(results.facetFields("KEGGID").toSeq.sortWith(_._2 > _._2): _*)
+//        val sortedCOG = ListMap(results.facetFields("COGID").toSeq.sortWith(_._2 > _._2): _*)
+//        val sortedFacets = Map("COGID" -> sortedCOG, "KEGGID" -> sortedKEGG)
+//      }
 
       val resultsJson = Json.obj(
         "noOfResults" -> results.numFound,
         "start" -> results.start,
         "results" -> resultsInfo,
         "facetFields" -> results.facetFields,
-        "isFilterSearch" -> isFilterSearch,
-        "isClusterFilter" -> isClusterFilter)
+        "isFilterSearch" -> isFilterSearch)
 
       resultsJson
     }
