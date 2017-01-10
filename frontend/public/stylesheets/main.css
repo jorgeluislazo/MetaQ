@@ -197,6 +197,7 @@ input#rpkm{
 /*Taxonomy*/
 
 .taxonomy-node circle {
+    stroke-width: 3px;
     fill: #3a9953;
 }
 .taxonomy-node circle:hover{
@@ -213,6 +214,7 @@ input#rpkm{
 }
 
 .taxonomy-node-internal circle {
+    stroke-width: 3px;
     fill: #3a9953;
 }
 

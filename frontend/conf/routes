@@ -20,7 +20,7 @@ GET     /searchPway                 controllers.Application.pwaySearch(query: St
 GET     /clusterGene                controllers.Application.clusterGeneSearch(query: String)
 
 #export data
-GET     /export/:query              controllers.Application.exportData(query: String)
+GET     /export                      controllers.Application.exportData(query: String)
 
 GET     /dendogram/                 controllers.Application.dendogram
 

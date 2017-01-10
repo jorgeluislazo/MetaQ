@@ -140,12 +140,12 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   def exportData(query: String): Action[AnyContent] = Action{ implicit request =>
     println(request)
-    val queryValue = query.substring(0,query.indexOf("&"))
+    val query = request.getQueryString("query").get
     val file = new java.io.File("/tmp/request")
     try{
       val writer = new PrintWriter(file) //prepare the file + writer
 
-      val data = SearchLib.select(queryValue,request, "gene")
+      val data = SearchLib.select(query,request, "gene")
       val results = (data\"results").get.as[List[JsObject]] //get results
       writer.write("ORFID" + "\tstart" + "\tend" + "\tstrand_sense" + "\ttaxonomy" + "\trpkm" + "\tCOGID" + "\tKEGGID" + "\textended_desc" + "\n")
       for(result <- results){ //can loop through results, but not for each field, would need a matcher
@@ -169,7 +169,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
     Ok.sendFile( //send the file back to the user
       content = file,
-      fileName = _ => "MetaQ_" + queryValue + "_search.txt",
+      fileName = _ => "MetaQ_" + query + "_search.txt",
       inline = false
     )
   }

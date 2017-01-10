@@ -79,6 +79,7 @@ object SearchLib {
     // Checking URL Parameters
     // if its a module linking search, do search for IDs (list has been passed as query)
 
+
     val searchSettings = if(request.getQueryString("searchField").getOrElse("product") == "pway")
       "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
@@ -88,7 +89,7 @@ object SearchLib {
         .getOrElse(request.getQueryString("taxonomyFilter").getOrElse("")) //taxonomy filter
 
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
-    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
+    val resultsPerPage = Integer.parseInt(request.getQueryString("rows").getOrElse(100).toString)
 
     // http://localhost:8983/solr/ORFDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
@@ -102,6 +103,8 @@ object SearchLib {
     } else {
       offset = (page - 1) * resultsPerPage
     }
+
+    println(resultsPerPage)
 
     var queryBuilder = client.query(searchSettings + query)
       .start(offset)

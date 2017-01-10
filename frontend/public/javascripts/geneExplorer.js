@@ -47,7 +47,8 @@ jQuery(function($) {
         cachedResponse =  null,
         currentFacetFilter = "",
         currentFacetField = "",
-        currentClusterFilter = "";
+        currentClusterFilter = "",
+        currentTaxonomyFilter = "";
 
     // upon loading the page, extract URI settings and save them on client page settings.
     // a new search will get the client page settings
@@ -92,7 +93,8 @@ jQuery(function($) {
                         filterGuide = constructFilterGuide(p);
                 }
                 if(response.isFilterSearch == "taxonomyFilter"){
-                    console.log("taxonomyFilter")
+                    p = $('<p>').text("Taxonomy Filter: ").append($('<b>').text(currentTaxonomyFilter));
+                    filterGuide = constructFilterGuide(p);
                 }
                 if(response.isFilterSearch == "clusterFilter"){
                     p = $('<p>').text("Current cluster filter: ").append($('<b>').text(currentClusterFilter));
@@ -296,15 +298,15 @@ jQuery(function($) {
     }
 
     var renderNodeGraph = function(graphData){
-        console.log(graphData);
+        // console.log(graphData);
         var self = this;
         var ctrlKey,
             grav,
             charge;
 
         var ratio = graphData.clusters/graphData.nodes.length;
-        grav = 933.3*ratio + 100 //arbitrary formulas
-        charge = -600*ratio -10
+        grav = 1300*ratio + 100 //arbitrary formulas [100 to 260]
+        charge = -600*ratio -10  // [-10 to -100]
         console.log(grav);
         console.log(charge);
 
@@ -500,7 +502,7 @@ jQuery(function($) {
 
         jqxhr.done(function (data) {
             $('.taxonomyTree').empty();
-            console.log(data)
+            // console.log(data)
 
             var svg = d3.select(".taxonomyTree").append("svg")
                 .attr("id", "taxonomy-svg")
@@ -558,14 +560,16 @@ jQuery(function($) {
                 //reset
                 $(".taxonomy-node circle").css("fill", "#3a9953");
                 var facetFilterString = "&taxonomyFilter=taxonomyID:(",
-                    taxIDs = [];
+                    taxIDs = [],
+                    taxNames =[]; //for filter guide
 
                 var getID = function(node){
-                    console.log(node)
-                    $("." + node.id.substring(node.id.lastIndexOf(".") + 1).replace(/ /g,"_")).css("fill", "#50c1cc");
+                    // console.log(node)
+                    $("." + node.id.substring(node.id.lastIndexOf(".") + 1)
+                            .replace(/ /g,"_")).css("fill", "#50c1cc").css("stroke", "#000000");
                     if(node.data.taxid != 0){
                         taxIDs.push(node.data.taxid);
-                        // console.log(node.data.taxid);
+                        taxNames.push(node.id.substring(node.id.lastIndexOf(".") + 1));
                     }
 
                     var i;
@@ -577,8 +581,9 @@ jQuery(function($) {
 
                 }
                 getID(d);
-                currentFacetFilter = d.id.substring(d.id.lastIndexOf(".") + 1);
+                currentTaxonomyFilter = taxNames.join(", ");
                 facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
+                userSettDef["page"] = 1;
                 var fetchDataURL = constructORFsearchURL(facetFilterString);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
@@ -590,7 +595,10 @@ jQuery(function($) {
 
 
     var restoreResults = function(){
-        $('circle').css("fill", "#50c1cc");
+        //reset
+        $(".cluster-nucleus").css("fill", "#50c1cc");
+        $(".cluster-node").css("fill", "#50c1cc");
+        $(".taxonomy-node circle").css("fill", "#3a9953");
         $('.facet-selected').attr("class","facetList");
         $documents.fadeOut("fast", function(){
             $('.filterGuide').remove();
@@ -704,10 +712,14 @@ jQuery(function($) {
     $exportButton.on("click", function(){
         var baseUrl = $exportButton.data("url"),
         // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
-            query = window.location.pathname.split("/")[2]; //TODO: remember its always the 3rd bucket, this could change in the future
+            query = $('#searchBox').val();
+
+        query = query + "&page=1&rows=2147483647" //select everything
+
+        // console.log(baseUrl +query)
 
         $(location).attr('href',baseUrl + query);
-        return false;
+        return false    ;
     });
 
     //default for this module
@@ -758,6 +770,10 @@ jQuery(function($) {
         $('.side-bar').css("width",'23%');
     })
     $('a[data-target="#clusterPanel"]').click(function(e){
+        $('.results').css("width",'58%'); //52
+        $('.side-bar').css('width', "41%"); //46
+    })
+    $('a[data-target="#taxonomyPanel"]').click(function(e){
         $('.results').css("width",'58%'); //52
         $('.side-bar').css('width', "41%"); //46
     })
