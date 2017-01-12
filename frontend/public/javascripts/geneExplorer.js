@@ -45,6 +45,7 @@ jQuery(function($) {
         },
     //clientside variables to save
         cachedResponse =  null,
+        lastFilterURL = undefined,
         currentFacetFilter = "",
         currentFacetField = "",
         currentClusterFilter = "",
@@ -69,13 +70,15 @@ jQuery(function($) {
         });
 
         jqxhr.done(function (response) {
+            console.log(url)
             //fix the URL to the current page if changed
             var oldURL = window.location.pathname.split(/&page=\d*/); //0 is before page param, 1 is after.
             var newURL = oldURL[0] + "&page=" + userSettDef["page"] + oldURL[1];
-            window.history.pushState("object or string", "changePage", newURL);
+            // window.history.pushState("object or string", "changePage", newURL);
             //clear the results, and update them
             $documents.empty();
             if (response.isFilterSearch != "empty") { // keep the current search and update result section
+                lastFilterURL = url; //save url in case of export
                 $('.filterGuide').remove();
                 $resultsInfo.empty();
                 for (var j in response.results) {
@@ -109,6 +112,7 @@ jQuery(function($) {
             } else {
                 //update the cached result and parse all the new information
                 cachedResponse = response;
+                lastFilterURL = undefined; //reset url since its a brand new search
                 $('.filterGuide').remove();
                 $resultsInfo.empty();
 
@@ -485,7 +489,6 @@ jQuery(function($) {
                 $documents.fadeOut("fast", function(){
                     userSettDef["page"] = 1;
                     var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
-                    console.log(url);
                     fetchData(url);
                 });
             }
@@ -558,7 +561,7 @@ jQuery(function($) {
 
             function toggleTax(d){
                 //reset
-                $(".taxonomy-node circle").css("fill", "#3a9953");
+                $(".taxonomy-node circle").css("fill", "#3a9953").css("stroke", "#3a9953");
                 var facetFilterString = "&taxonomyFilter=taxonomyID:(",
                     taxIDs = [],
                     taxNames =[]; //for filter guide
@@ -711,15 +714,20 @@ jQuery(function($) {
 
     $exportButton.on("click", function(){
         var baseUrl = $exportButton.data("url"),
-        // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
             query = $('#searchBox').val();
+        if(lastFilterURL == undefined){
+            // no filter applied
+            // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
 
-        query = query + "&page=1&rows=2147483647" //select everything
-
-        // console.log(baseUrl +query)
-
-        $(location).attr('href',baseUrl + query);
-        return false    ;
+            query = query + "&page=1&rows=2147483647" //select everything
+            console.log(baseUrl + query)
+        }else{
+            //filter search export data
+            //extract everything after query but before &page=
+            query = lastFilterURL.split(/query=/)[1].split(/&page=/)[0] + "&page=1&rows=2147483647&name=" + query
+            $(location).attr('href',baseUrl + query);
+        }
+        return false;
     });
 
     //default for this module
@@ -741,7 +749,6 @@ jQuery(function($) {
                 (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
         }
         console.log($cache)
-        console.log(fetchDataURL);
         return fetchDataURL
     };
 

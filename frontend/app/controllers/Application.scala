@@ -140,7 +140,12 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   def exportData(query: String): Action[AnyContent] = Action{ implicit request =>
     println(request)
-    val query = request.getQueryString("query").get
+    val query = if(request.getQueryString("name").isDefined){
+      request.getQueryString("name").get + "_filtered"
+    }else{
+      request.getQueryString("query").get
+    }
+//    val query = request.getQueryString("query").get
     val file = new java.io.File("/tmp/request")
     try{
       val writer = new PrintWriter(file) //prepare the file + writer
