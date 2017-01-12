@@ -79,7 +79,7 @@ object SearchLib {
     // Checking URL Parameters
     // if its a module linking search, do search for IDs (list has been passed as query)
 
-
+    val queryName = request.getQueryString("query").getOrElse(query)
     val searchSettings = if(request.getQueryString("searchField").getOrElse("product") == "pway")
       "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
@@ -106,7 +106,7 @@ object SearchLib {
 
     println(resultsPerPage)
 
-    var queryBuilder = client.query(searchSettings + query)
+    var queryBuilder = client.query(searchSettings + queryName)
       .start(offset)
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
@@ -137,6 +137,7 @@ object SearchLib {
   }
 
   def buildPwaySelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
+    val queryName = request.getQueryString("query").getOrElse(query)
     val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("pway_name") + "}"
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
     val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
@@ -152,7 +153,7 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-    val queryBuilder = client.query(searchSettings + query)
+    val queryBuilder = client.query(searchSettings + queryName)
       .start(offset)
       .rows(resultsPerPage)
 

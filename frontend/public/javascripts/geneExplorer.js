@@ -603,6 +603,7 @@ jQuery(function($) {
         $(".cluster-node").css("fill", "#50c1cc");
         $(".taxonomy-node circle").css("fill", "#3a9953");
         $('.facet-selected').attr("class","facetList");
+        lastFilterURL = undefined;
         $documents.fadeOut("fast", function(){
             $('.filterGuide').remove();
             var $resultsInfo = $('.resultsInfo');
@@ -720,7 +721,7 @@ jQuery(function($) {
             // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
 
             query = query + "&page=1&rows=2147483647" //select everything
-            console.log(baseUrl + query)
+            $(location).attr('href',baseUrl + query);
         }else{
             //filter search export data
             //extract everything after query but before &page=
@@ -746,7 +747,7 @@ jQuery(function($) {
                 $('#clusterPanel').data("request") + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam;
         }else {
             fetchDataURL =
-                (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + "&page=" + userSettDef["page"] + extraParam;
+                (ajax ? $search.data('searchurl') : $search.data('submit')) + query + "&searchField="+userSettDef["searchField"] + "&highQualOnly="+highQualOnly + "&minRPKM="+rpkm + extraParam +  "&page=" + userSettDef["page"];
         }
         console.log($cache)
         return fetchDataURL

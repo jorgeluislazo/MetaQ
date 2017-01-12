@@ -41,7 +41,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
         //get taxonomy IDs as facets and write taxonomy tree lineages
         val solrSresults = SearchLib.select(query,request, "gene")
         val taxonomyMap = (solrSresults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
-        val fileIDs = new File("exampleTaxIDs")
+        val fileIDs = new java.io.File("/tmp/exampleTaxIDs")
         val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
 
         for (id <- taxonomyMap.keySet){
@@ -49,14 +49,14 @@ class Application @Inject() (ws: WSClient) extends Controller {
         }
         buffWriter.close()
         println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
-        val runScript = "bash script".! //todo: add params, concurrency
+        val runScript = "bash /tmp/script".! //todo: add params, concurrency
         //final JS Array result to send back to client
         var jsFinalResult = JsArray()
         //we will discard lineages seen before
         var seenLineageSet : Set[String] = Set()
         //for each lineage we find in our list
         println("H2 - Lineages obtained")
-        for(line <- Source.fromFile("exampleTaxLineages.txt").getLines()){
+        for(line <- Source.fromFile("tmp/exampleTaxLineages.txt").getLines()){
           var jsBranchResult = JsArray()
           //extract as a tuple (lineageString, count)
           val tuple = line.split("\t")
