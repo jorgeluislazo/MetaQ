@@ -1,0 +1,1 @@
+grep -wf /tmp/taxonomy/exampleTaxIDs /tmp/taxonomy/taxonomyLineage.txt | awk -F "\t" '{print $2"\t"$1}' > /tmp/taxonomy/exampleTaxLineages.txt
