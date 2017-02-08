@@ -41,7 +41,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
         //get taxonomy IDs as facets and write taxonomy tree lineages
         val solrSresults = SearchLib.select(query,request, "gene")
         val taxonomyMap = (solrSresults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
-        val fileIDs = new java.io.File("/tmp/taxonomy/exampleTaxIDs")
+        val fileIDs = new java.io.File("taxonomyData/exampleTaxIDs")
         val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
 
         for (id <- taxonomyMap.keySet){
@@ -49,14 +49,14 @@ class Application @Inject() (ws: WSClient) extends Controller {
         }
         buffWriter.close()
         println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
-        val runScript = "bash /tmp/taxonomy/script".! //todo: add params, concurrency
+        val runScript = "bash taxonomyData/script".! //todo: add params, concurrency
         //final JS Array result to send back to client
         var jsFinalResult = JsArray()
         //we will discard lineages seen before
         var seenLineageSet : Set[String] = Set()
         //for each lineage we find in our list
         println("H2 - Lineages obtained")
-        for(line <- Source.fromFile("/tmp/taxonomy/exampleTaxLineages.txt").getLines()){
+        for(line <- Source.fromFile("/tmp/exampleTaxLineages.txt").getLines()){
           var jsBranchResult = JsArray()
           //extract as a tuple (lineageString, count)
           val tuple = line.split("\t")
@@ -80,7 +80,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
             while(i > 0){
               val branchSet = lineageBranches.take(i)
               val branchString = branchSet.mkString(".")
-                //add that branch if we havent seen it before, otherwise break
+              //add that branch if we havent seen it before, otherwise break
               if(!seenLineageSet.contains(branchString)) {
                 seenLineageSet = seenLineageSet + branchString
                 val jsEntry : JsValue = Json.obj(
@@ -95,13 +95,13 @@ class Application @Inject() (ws: WSClient) extends Controller {
               i -= 1
             }
             jsFinalResult = jsFinalResult.++(jsBranchResult)
-//            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
+            //            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
           }
         }
         //this might be required for D3.js
         val columns : JsValue = Json.arr("id")
-//        jsFinalResult = jsFinalResult.:+(columns)
-//        seenLineageSet.foreach{println}
+        //        jsFinalResult = jsFinalResult.:+(columns)
+        //        seenLineageSet.foreach{println}
         Ok(jsFinalResult)
       }else{
         //Normal search: get the ORFs associated with this search
@@ -145,7 +145,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
     }else{
       request.getQueryString("query").get
     }
-//    val query = request.getQueryString("query").get
+    //    val query = request.getQueryString("query").get
     val file = new java.io.File("/tmp/request")
     try{
       val writer = new PrintWriter(file) //prepare the file + writer
@@ -177,10 +177,6 @@ class Application @Inject() (ws: WSClient) extends Controller {
       fileName = _ => "MetaQ_" + query + "_search.txt",
       inline = false
     )
-  }
-
-  def dendogram: Action[AnyContent] = Action {
-    Ok(views.html.dendogram())
   }
 
   def test(): Action[AnyContent] = Action { implicit request =>

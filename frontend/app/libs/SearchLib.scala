@@ -5,13 +5,12 @@ import libs.solr.scala.MapQueryResults
 import libs.solr.scala.MapClusterQueryResult
 import play.api.libs.json._
 import play.api.mvc._
-
-import scala.collection.immutable.ListMap
-
 /**
   * Class Search performs many functions about information retrieval .
   */
 object SearchLib {
+
+  val baseURL = "http://localhost:8983/solr/"
   /**
     * is a main function that handling search /select process.
     */
@@ -93,7 +92,7 @@ object SearchLib {
 
     // http://localhost:8983/solr/ORFDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
-    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+    val client = new SolrClient(baseURL + "ORFDocs")
 
 //    println(request + " " + isFilterSearch)
     //set the offset
@@ -144,7 +143,7 @@ object SearchLib {
 
     // http://localhost:8983/solr/PwayDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/PwayDocs
-    val client = new SolrClient("http://localhost:8983/solr/PwayDocs")
+    val client = new SolrClient(baseURL + "PwayDocs")
 
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {
@@ -263,7 +262,7 @@ object SearchLib {
 
     // http://localhost:8983/solr/ORFDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
-    val client = new SolrClient("http://localhost:8983/solr/ORFDocs")
+    val client = new SolrClient(baseURL + "ORFDocs")
 
     var queryBuilder = client.query(searchSettings + query)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
