@@ -216,9 +216,14 @@ class FileParser {
             pwayDoc.addField("pway_id",row[1]);
             pwayDoc.addField("pway_name",row[2].replaceAll("^\"|\"$", ""));
             pwayDoc.addField("rxn_total", row[3]);
+            // rxn covered
+            Map<String,String> rxn_covered = new HashMap<>();
+            rxn_covered.put("add", row[0] + "-" +row[4]);
+            pwayDoc.addField("rxn_covered", rxn_covered);
             Map<String, ArrayList<String>> orfs = new HashMap<>();
             orfs.put("add", convertToList(row[9]));
             pwayDoc.addField("orfs",  orfs);
+            //sample runs
             Map<String, String> sample_run = new HashMap<>();
             sample_run.put("add", modifyRun(row[0]));
             pwayDoc.addField("sample_runs", sample_run);

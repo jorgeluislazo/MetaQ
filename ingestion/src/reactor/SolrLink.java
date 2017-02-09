@@ -16,7 +16,7 @@ import java.util.Collection;
 public class SolrLink {
     // http://localhost:8983/solr/
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/
-    private static final String BASE_URL = "http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/";
+    private static final String BASE_URL = "http://localhost:8983/solr/";
     private SolrClient solrClient;
 
     /**

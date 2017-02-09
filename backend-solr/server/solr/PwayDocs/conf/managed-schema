@@ -26,4 +26,5 @@
   <field name="pway_name" type="text" default="unknown"/>
   <field name="rxn_total" type="simple_number"/>
   <field name="sample_runs" type="multivaluedText"/>
+  <field name="rxn_covered" type="multivaluedText"/>
 </schema>
