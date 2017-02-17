@@ -9,7 +9,7 @@ import play.api.mvc._
 import play.api.libs.ws._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.io.Source
 import sys.process._
 
@@ -179,11 +179,8 @@ class Application @Inject() (ws: WSClient) extends Controller {
     )
   }
 
-  def test(): Action[AnyContent] = Action { implicit request =>
-    val results = SearchLib.select( "product:protein" ,request, "gene")
-    Ok(results)
-  }
-
   def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
+
+  /// User Auth stuff ///
 
 }
