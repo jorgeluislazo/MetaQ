@@ -12,9 +12,9 @@ log/
 target/
 
 # Lucene indices
-backend-solr/server/solr/ORFDocs/data/
+backend-solr/server/solr/ORFDocs_shard1_replica1/data/
 backend-solr/server/solr/pathwayRuns/data/
-backend-solr/server/solr/PwayDocs/data/
+backend-solr/server/solr/PwayDocs_shard1_replica1/data/
 
 #Solr libs
 #backend-solr/server/solr-webapp/
