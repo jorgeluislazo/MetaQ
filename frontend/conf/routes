@@ -22,6 +22,9 @@ GET     /clusterGene                controllers.Application.clusterGeneSearch(qu
 #export data
 GET     /export                      controllers.Application.exportData(query: String)
 
+#Check user
+GET     /checkUser/:user            controllers.Application.checkUser(user: String)
+
 # Map static resources from the /public folder to the /assets URL path
 GET    /assets/*file                controllers.Assets.at(path="/public", file)
 

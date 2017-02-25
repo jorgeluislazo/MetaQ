@@ -3,12 +3,20 @@ package libs.solr.scala
 import org.apache.solr.client.solrj.impl.HttpSolrServer
 import org.apache.solr.client.solrj.SolrServer
 import libs.solr.scala.query._
+import org.apache.http.impl.client.AbstractHttpClient
 
 /**
  * This is the simple Apache Solr client for Scala.
  */
 class SolrClient(url: String)
-  (implicit factory: (String) => SolrServer = { (url: String) => new HttpSolrServer(url) }, 
+  (implicit factory: (String) => SolrServer = { (url: String) =>
+    val client = new HttpSolrServer(url)
+    val httpClient : AbstractHttpClient = client.getHttpClient.asInstanceOf[AbstractHttpClient]
+    httpClient.addRequestInterceptor(new PreEmptiveBasicAuthenticator(
+      "Jorge-Admin", "Jakiro29!"
+    ))
+    client
+  },
             parser: ExpressionParser = new DefaultExpressionParser()) {
 
   private val server = factory(url)

@@ -3,6 +3,7 @@ import libs.solr.scala.QueryBuilder
 import libs.solr.scala.SolrClient
 import libs.solr.scala.MapQueryResults
 import libs.solr.scala.MapClusterQueryResult
+import org.apache.solr.client.solrj.impl.HttpSolrServer
 import play.api.libs.json._
 import play.api.mvc._
 /**
@@ -143,7 +144,8 @@ object SearchLib {
 
     // http://localhost:8983/solr/PwayDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/PwayDocs
-    val client = new SolrClient(baseURL + "PwayDocs")
+    val client = new SolrClient(baseURL + "PwayDocs"
+    )
 
     var offset: Int = 0
     if (request.getQueryString("offset").isDefined) {

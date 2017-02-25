@@ -15,6 +15,8 @@ import sys.process._
 
 class Application @Inject() (ws: WSClient) extends Controller {
 
+  val userList = Source.fromFile("taxonomyData/users").getLines().toArray
+
   def homePage = Action {
     Ok(views.html.home())
   }
@@ -49,6 +51,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
         }
         buffWriter.close()
         println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
+
         val runScript = "bash taxonomyData/script".! //todo: add params, concurrency
         //final JS Array result to send back to client
         var jsFinalResult = JsArray()
@@ -56,6 +59,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
         var seenLineageSet : Set[String] = Set()
         //for each lineage we find in our list
         println("H2 - Lineages obtained")
+
         for(line <- Source.fromFile("/tmp/exampleTaxLineages.txt").getLines()){
           var jsBranchResult = JsArray()
           //extract as a tuple (lineageString, count)
@@ -177,6 +181,15 @@ class Application @Inject() (ws: WSClient) extends Controller {
       fileName = _ => "MetaQ_" + query + "_search.txt",
       inline = false
     )
+  }
+
+  def checkUser(user : String): Action[AnyContent] = Action { implicit request =>
+    println(user)
+      if(userList.contains(user)){
+        Ok(user + " found")
+      }else{
+        Ok("user not found")
+      }
   }
 
   def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
