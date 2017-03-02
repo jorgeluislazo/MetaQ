@@ -88,47 +88,6 @@ public class Main {
         }
     }
 
-    static private void importFile(File file, String username){
-        String name = file.getName();
-
-        switch (name){
-            case "functional_and_taxonomic_table.txt":
-                client.changeTargetCore("ORFDocs");
-                orfDocs = parser.parseFuncTable(file, username);
-                client.index(orfDocs);
-                break;
-            case "ORF_annotation_table.txt":
-                orfDocs = parser.parseORFAnnotTable(file, username);
-                client.index(orfDocs);
-                break;
-            default:
-                if (name.matches(".+_combined_unique\\.orf_rpkm\\.txt")){
-                    try {
-                        orfDocs = parser.parseRPKMTable(file, username);
-                    } catch (IllegalTableException e) {
-                        e.printStackTrace();
-                        System.out.println("File originating error: " + file.getName());
-                        System.out.println("Path: " + file.getAbsoluteFile());
-                    }
-                    client.index(orfDocs);
-
-                }
-                if(name.matches(".+_combined_unique\\.pwy\\.txt")){
-                    client.changeTargetCore("PwayDocs");
-                    try {
-                        pwayDocs = parser.parsePwayTable(file, username);
-                    } catch (IllegalTableException e) {
-                        e.printStackTrace();
-                        System.out.println("File originating error: " + file.getName());
-                        System.out.println("Path: " + file.getAbsoluteFile());
-                    }
-                    client.index(pwayDocs);
-                }
-                break;
-        }
-
-    }
-
     private static void userMethods(String userName, String password) throws IOException, SolrServerException {
         boolean ask = true;
         Scanner scanner = new Scanner(System.in);
@@ -162,7 +121,7 @@ public class Main {
 
                             orfDocs = new ArrayList<>();
                             for (File f : Files.fileTreeTraverser().preOrderTraversal(metaGenomeRun)) {
-                                importFile(f, userName);
+                                importFile(f, userName, metaGenomeRun.getName());
                             }
                             System.out.println("Successfuly indexed sample run: " + metaGenomeRun.getName() +
                                     ". With " + parser.oRFRows + " ORFs and " + parser.pwayRows + " pathways.");
@@ -196,6 +155,50 @@ public class Main {
         }
     }
 
+    static private void importFile(File file, String username, String runID){
+        String name = file.getName();
+        switch (name){
+            default:
+                if (name.matches(".+functional_and_taxonomic_table\\.txt")){
+                    client.changeTargetCore("ORFDocs");
+                    orfDocs = parser.parseFuncTable(file, username, runID);
+                    client.index(orfDocs);
+                    break;
+                }
+
+                if (name.matches(".+ORF_annotation_table\\.txt")){
+                    orfDocs = parser.parseORFAnnotTable(file, username, runID);
+                    client.index(orfDocs);
+                    break;
+                }
+
+                if (name.matches(".+_combined_unique\\.orf_rpkm\\.txt")){
+                    try {
+                        orfDocs = parser.parseRPKMTable(file, username, runID);
+                    } catch (IllegalTableException e) {
+                        e.printStackTrace();
+                        System.out.println("File originating error: " + file.getName());
+                        System.out.println("Path: " + file.getAbsoluteFile());
+                    }
+                    client.index(orfDocs);
+
+                }
+                if(name.matches(".+\\.pwy\\.txt")){
+                    client.changeTargetCore("PwayDocs");
+                    try {
+                        pwayDocs = parser.parsePwayTable(file, username, runID);
+                    } catch (IllegalTableException e) {
+                        e.printStackTrace();
+                        System.out.println("File originating error: " + file.getName());
+                        System.out.println("Path: " + file.getAbsoluteFile());
+                    }
+                    client.index(pwayDocs);
+                }
+                break;
+        }
+
+    }
+
     private static boolean login(String userName, String password){
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(userName, password);
@@ -205,7 +208,7 @@ public class Main {
                 .setDefaultCredentialsProvider(provider)
                 .build();
 
-        HttpGet request = new HttpGet("http://localhost:8983/solr/admin/authentication");
+        HttpGet request = new HttpGet("http://137.82.19.141:8443/solr/admin/authentication");
         HttpResponse response;
 
         try{

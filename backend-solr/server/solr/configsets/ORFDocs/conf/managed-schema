@@ -35,6 +35,7 @@
     </analyzer>
   </fieldType>
   <fieldType name="word-list" class="solr.TextField" indexed="true" stored="true" multiValued="true"/>
+  <field name="owner" type="word_list"/>
   <field name="COGID" type="pathway_id"/>
   <field name="KEGGID" type="pathway_id"/>
   <field name="ORFID" type="ORF_key"/>

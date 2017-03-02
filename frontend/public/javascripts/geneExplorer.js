@@ -46,8 +46,10 @@ jQuery(function($) {
     //clientside variables to save
         cachedResponse =  null,
         lastFilterURL = undefined,
+        facetSearchParam = "",
+        currentClusterIDs = "",
+        //word text
         currentFacetFilter = "",
-        currentFacetField = "",
         currentClusterFilter = "",
         currentTaxonomyFilter = "";
 
@@ -107,7 +109,7 @@ jQuery(function($) {
                 $resultsInfo.text("Displaying " + response.results.length + " result(s) out of " + response.noOfResults + " results found.");
                 $results.prepend(filterGuide);
                 $documents.fadeIn("slow", function(){
-                    displayPager(response.start, response.noOfResults, true)
+                    displayPager(response.start, response.noOfResults, response.isFilterSearch)
                 });
             } else {
                 //update the cached result and parse all the new information
@@ -139,7 +141,7 @@ jQuery(function($) {
                     $sidePanel.empty();
                     displayFacets(cachedResponse.facetFields["COGID"], "COG");
                     displayFacets(cachedResponse.facetFields["KEGGID"], "KEGG");
-                    displayPager(response.start, response.noOfResults, false);
+                    displayPager(response.start, response.noOfResults, "empty");
                     $documents.fadeIn("slow");
                 }
             }
@@ -233,8 +235,8 @@ jQuery(function($) {
 
                         userSettDef["page"] = 1;
                         currentFacetFilter = facet;
-                        currentFacetField = fieldType;
-                        var facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
+                        // currentFacetField = fieldType;
+                        facetSearchParam = "&facetFilter=" + fieldType + "ID:" + facet;
                         var fetchDataURL = constructORFsearchURL(facetSearchParam);
                         $documents.fadeOut("slow", function(){
                             fetchData(fetchDataURL)
@@ -489,6 +491,7 @@ jQuery(function($) {
                 $documents.fadeOut("fast", function(){
                     userSettDef["page"] = 1;
                     var url = constructClusterFilterURL(iDs, "&clusterFilter=true");
+                    currentClusterIDs = iDs; //update user settings
                     fetchData(url);
                 });
             }
@@ -562,8 +565,8 @@ jQuery(function($) {
             function toggleTax(d){
                 //reset
                 $(".taxonomy-node circle").css("fill", "#3a9953").css("stroke", "#3a9953");
-                var facetFilterString = "&taxonomyFilter=taxonomyID:(",
-                    taxIDs = [],
+                var facetFilterString = "&taxonomyFilter=taxonomyID:(";
+                var taxIDs = [],
                     taxNames =[]; //for filter guide
 
                 var getID = function(node){
@@ -587,6 +590,7 @@ jQuery(function($) {
                 currentTaxonomyFilter = taxNames.join(", ");
                 facetFilterString = facetFilterString + taxIDs.join(" OR ") + ")";
                 userSettDef["page"] = 1;
+                facetSearchParam = facetFilterString; //user settings saved
                 var fetchDataURL = constructORFsearchURL(facetFilterString);
                 $documents.fadeOut("slow", function(){
                     fetchData(fetchDataURL);
@@ -616,12 +620,13 @@ jQuery(function($) {
                 $documents.append(hit)
             }
             $documents.fadeIn("slow", function(){
-                displayPager(cachedResponse.start, cachedResponse.noOfResults, false)
+                displayPager(cachedResponse.start, cachedResponse.noOfResults, "empty")
             });
         });
     };
 
     var displayPager = function(start, totalResults, isFilterPager){
+        console.log(facetSearchParam)
         var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
             nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),
@@ -632,11 +637,21 @@ jQuery(function($) {
         //renew pages and set handlers
         container.empty()
 
-        var filterOrEmpty
-        if(isFilterPager == true){
-            filterOrEmpty = "&facetFilter=" + currentFacetField + "ID:" + currentFacetFilter;
-        }else{
-            filterOrEmpty = ""
+        var constructURL = function(filter){
+            var fetchDataURL;
+            if(filter == "facetFilter"){
+                fetchDataURL = constructORFsearchURL(facetSearchParam);
+            }
+            if(filter == "taxonomyFilter"){
+                fetchDataURL = constructORFsearchURL(facetSearchParam);
+            }
+            if(filter == "clusterFilter"){
+                fetchDataURL = constructClusterFilterURL(currentClusterIDs, "&clusterFilter=true");;
+            }
+            if(filter == "empty"){
+                fetchDataURL = constructORFsearchURL("");
+            }
+            return fetchDataURL;
         }
 
         if(userSettDef["page"] == 1){
@@ -644,8 +659,8 @@ jQuery(function($) {
         }else{
             backButton.click(function(){
                 userSettDef["page"]--;
-                var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                 $documents.fadeOut("slow", function(){
+                    var fetchDataURL = constructURL(isFilterPager);
                     fetchData(fetchDataURL);
                 });
             }).css("cursor", "pointer");
@@ -655,8 +670,8 @@ jQuery(function($) {
         }else{
             nextButton.click(function(){
                 userSettDef["page"]++;
-                var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                 $documents.fadeOut("slow", function(){
+                    var fetchDataURL = constructURL(isFilterPager)
                     fetchData(fetchDataURL);
                 });
             }).css("cursor", "pointer");
@@ -673,8 +688,8 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                         $documents.fadeOut("slow", function(){
+                            var fetchDataURL = constructURL(isFilterPager)
                             fetchData(fetchDataURL);
                         });
                     });
@@ -690,8 +705,8 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructORFsearchURL(filterOrEmpty);
                         $documents.fadeOut("slow", function(){
+                            var fetchDataURL = constructURL(isFilterPager)
                             fetchData(fetchDataURL);
                         });
                     });

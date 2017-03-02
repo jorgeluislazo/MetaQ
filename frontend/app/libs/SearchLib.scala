@@ -10,8 +10,9 @@ import play.api.mvc._
   * Class Search performs many functions about information retrieval .
   */
 object SearchLib {
-
-  val baseURL = "http://localhost:8983/solr/"
+  // ubc production: http://137.82.19.141:8443/solr/
+  // http://localhost:8983/solr/
+  val baseURL = "http://137.82.19.141:8443/solr/"
   /**
     * is a main function that handling search /select process.
     */

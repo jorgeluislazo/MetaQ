@@ -21,6 +21,7 @@
     </analyzer>
   </fieldType>
   <field name="_version_" type="long" indexed="true" stored="false"/>
+ <field name="owner" type="multivaluedText"/>
   <field name="orfs" type="multivaluedText"/>
   <field name="pway_id" type="ID"/>
   <field name="pway_name" type="text" default="unknown"/>

@@ -16,7 +16,8 @@ import java.util.Collection;
 public class SolrLink {
     // http://localhost:8983/solr/
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/
-    private static final String BASE_URL = "http://localhost:8983/solr/";
+    // ubc production: http://137.82.19.141:8443/solr/
+    private static final String BASE_URL = "http://137.82.19.141:8443/solr/";
     private String user;
     private String pass;
     private HttpSolrClient solrClient;
@@ -60,8 +61,9 @@ public class SolrLink {
         try {
             solrClient.add(documents);
             solrClient.commit();
-        } catch (SolrServerException | IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+//            e.printStackTrace();
+
         }
     }
     /**

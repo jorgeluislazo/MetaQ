@@ -28,7 +28,7 @@ class FileParser {
         parser = new TsvParser(settings);
     }
 
-    List<SolrInputDocument> parseFuncTable(File file, String username){
+    List<SolrInputDocument> parseFuncTable(File file, String username, String runID){
         parser.beginParsing(file);
         String[] row;
         List<SolrInputDocument> documentBatch = new ArrayList<>();
@@ -37,7 +37,7 @@ class FileParser {
         oRFRows = 0L; //reset count
         while((row = parser.parseNext()) != null){
             try {
-                SolrInputDocument orfDoc = parseFunctTableRow(row, username);
+                SolrInputDocument orfDoc = parseFunctTableRow(row, username, runID);
                 documentBatch.add(orfDoc);
                 oRFRows++;
             }catch(IllegalTableException e){
@@ -50,7 +50,7 @@ class FileParser {
         return documentBatch;
     }
 
-    private SolrInputDocument parseFunctTableRow(String[] row, String username) throws IllegalTableException{
+    private SolrInputDocument parseFunctTableRow(String[] row, String username, String runID) throws IllegalTableException{
         if(row[0] == null){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
@@ -61,8 +61,8 @@ class FileParser {
         owner.put("add", username);
         doc.addField("owner", owner);
 
-        doc.addField("ORFID", modifyID(row[0]));
-        doc.addField("runID", getRunID(row[0]));
+        doc.addField("ORFID", modifyID(runID, row[0]));
+        doc.addField("runID", runID);
         doc.addField("ORF_len", row[1]);
         doc.addField("start", row[2]);
         doc.addField("end", row[3]);
@@ -71,9 +71,18 @@ class FileParser {
         String taxonomyName = row[8].replaceAll("unclassified ", "")
                 .replaceAll(" \\(miscellaneous\\)", "")
                 .replaceAll("sp\\.","sp");
+
         String taxonomyID = taxonomyName;
         if(row[8].indexOf("(") > 0){
             taxonomyName =taxonomyName.substring(0, taxonomyName.indexOf("(") -1);
+
+            //if taxonomy is given as expanded path with ; as delims
+            String[] taxonomyNameDelims = taxonomyName.split(";");
+            if(taxonomyNameDelims.length > 2){
+                taxonomyName = taxonomyNameDelims[taxonomyNameDelims.length - 2];
+                //grab the second last slot, this is the most accurate taxonomy
+            }
+
             taxonomyID = taxonomyID.substring(taxonomyID.indexOf("(") + 1, taxonomyID.length() - 1);
         }else{
             if (taxonomyName.equals("Monera")){
@@ -89,14 +98,14 @@ class FileParser {
     }
 
 
-    List<SolrInputDocument> parseORFAnnotTable(File file, String username){
+    List<SolrInputDocument> parseORFAnnotTable(File file, String username, String runID){
         parser.beginParsing(file);
         String[] row;
         List<SolrInputDocument> documentBatch = new ArrayList<>();
 
         while((row = parser.parseNext()) != null){
             try {
-                SolrInputDocument orfDoc = parseORFAnnotTableRow(row, username);
+                SolrInputDocument orfDoc = parseORFAnnotTableRow(row, username, runID);
                 documentBatch.add(orfDoc);
             }catch(IllegalTableException e){
                 e.printStackTrace();
@@ -108,14 +117,14 @@ class FileParser {
         return documentBatch;
     }
 
-    private SolrInputDocument parseORFAnnotTableRow(String[] row, String username) throws IllegalTableException{
+    private SolrInputDocument parseORFAnnotTableRow(String[] row, String username, String runID) throws IllegalTableException{
         if(row[0].equals("")){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
 
         }
         SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("ORFID",modifyID(row[0]));
+        doc.addField("ORFID",modifyID(runID, row[0]));
 
         Map<String, String> owner = new HashMap<>();
         owner.put("add", username);
@@ -143,7 +152,7 @@ class FileParser {
         return doc;
     }
 
-    List<SolrInputDocument> parseRPKMTable(File file, String username) throws IllegalTableException{
+    List<SolrInputDocument> parseRPKMTable(File file, String username, String runID) throws IllegalTableException{
         parser.beginParsing(file);
         String[] row;
         List<SolrInputDocument> documentBatch = new ArrayList<>();
@@ -157,7 +166,7 @@ class FileParser {
             owner.put("add", username);
             rpkmDoc.addField("owner", owner);
 
-            rpkmDoc.addField("ORFID", modifyID(row[0]));
+            rpkmDoc.addField("ORFID", modifyID(runID, row[0]));
             Map<String, String> rpkmValue = new HashMap<>();
             rpkmValue.put("set", row[1]);
             rpkmDoc.addField("rpkm", rpkmValue);
@@ -166,7 +175,7 @@ class FileParser {
         return documentBatch;
     }
 
-    List<SolrInputDocument> parsePwayTable(File file, String username) throws IllegalTableException{
+    List<SolrInputDocument> parsePwayTable(File file, String username, String runID) throws IllegalTableException{
         parser.beginParsing(file);
         String[] row;
         List<SolrInputDocument> documentBatch = new ArrayList<>();
@@ -187,14 +196,14 @@ class FileParser {
             pwayDoc.addField("rxn_total", row[3]);
             // rxn covered
             Map<String,String> rxn_covered = new HashMap<>();
-            rxn_covered.put("add", row[0] + "-" +row[4]);
+            rxn_covered.put("add", row[0] + ":" + row[4]);
             pwayDoc.addField("rxn_covered", rxn_covered);
             Map<String, ArrayList<String>> orfs = new HashMap<>();
-            orfs.put("add", convertToList(row[9]));
+            orfs.put("add", convertToList(runID, row[9]));
             pwayDoc.addField("orfs",  orfs);
             //sample runs
             Map<String, String> sample_run = new HashMap<>();
-            sample_run.put("add", modifyRun(row[0]));
+            sample_run.put("add", runID);
             pwayDoc.addField("sample_runs", sample_run);
 
             documentBatch.add(pwayDoc);
@@ -242,6 +251,18 @@ class FileParser {
         return run;
     }
 
+    private String modifyID(String runID, String ID){
+        String[] list = ID.split("_");
+        if (list.length >= 5){
+            ID = list[0] + "_" + list[3] + "_" + list[4];
+        }
+        if(list[0].equals("O")){
+            return runID + "_" + list[1] + "_" + list[2];
+        }else{
+            return runID + "_" + ID;
+        }
+    }
+
     private String modifyID(String ID){
         String[] list = ID.split("_");
         if (list.length >= 5){
@@ -251,10 +272,10 @@ class FileParser {
     }
 
     //helper funciton, converts [A,B,C] string to an array list.
-    private ArrayList<String> convertToList(String listString){
+    private ArrayList<String> convertToList(String runID, String listString){
         String[] arrayID = listString.substring(1, listString.length() -1).split(",");
         for(int i=0; i < arrayID.length; i++){
-            arrayID[i] = modifyID(arrayID[i]);
+            arrayID[i] = modifyID(runID, arrayID[i]);
         }
         List<String> resultList = new ArrayList<>(Arrays.asList(arrayID));
        return (ArrayList<String>) resultList;
