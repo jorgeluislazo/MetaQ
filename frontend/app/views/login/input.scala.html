@@ -1,0 +1,28 @@
+@(credentials : Form[Tuple2[String,String]], info : String)(implicit messages: Messages)
+@import helper._
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+  <form action="@routes.Application.homePage()" method="get">
+    <button class="btn btn-link">Home</button>
+  </form>
+
+
+  @helper.form(action = routes.Application.parseCredentials()) {
+
+    <p>@info</p>
+
+    @helper.inputText(credentials("username"))
+    @helper.inputText(credentials("password"))
+
+    <p><input type="submit" class="btn primary"
+    value='input'></p>
+  }
+
+</body>
+</html>

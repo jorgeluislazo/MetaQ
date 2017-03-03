@@ -2,11 +2,19 @@ package controllers
 
 import libs.SearchLib
 import java.io._
+import java.net.URL
 import javax.inject.Inject
 
+import play.api.Logger
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.ws._
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+import org.apache.http.client.methods.HttpGet
+import org.apache.commons.codec.binary.Base64
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -16,9 +24,18 @@ import sys.process._
 class Application @Inject() (ws: WSClient) extends Controller {
 
   val userList = Source.fromFile("taxonomyData/users").getLines().toArray
+  var username : String = ""
+  var password : String = ""
 
-  def homePage = Action {
-    Ok(views.html.home())
+  def homePage = Action { implicit request =>
+    val username = request.session.get("username").orNull
+    val password = request.session.get("password").orNull
+
+    if(password == null){
+      Ok(views.html.home()).withNewSession
+    }else{
+      Ok(views.html.home()).withSession("username" -> username, "password" -> password)
+    }
   }
 
   def geneExplorer(query: String) = Action {
@@ -183,6 +200,64 @@ class Application @Inject() (ws: WSClient) extends Controller {
     )
   }
 
+  def login = Action { implicit request =>
+    val data : Tuple2[String, String] = Tuple2("", "")
+    Ok(views.html.login.input(credentials.fill(data), "Please input credentials"))
+  }
+
+  def logout = Action { implicit request =>
+    Redirect(routes.Application.homePage()).withNewSession
+  }
+
+  def authenticate(credentials :Tuple2[String, String]) = Action { implicit request =>
+    Ok(views.html.home()).withSession( "username" -> credentials._1, "id" -> credentials._2)
+  }
+
+  def parseCredentials = Action { implicit request =>
+       credentials.bindFromRequest.fold(
+      formWithErrors => {
+        Logger.debug("inside error")
+        BadRequest(views.html.login.input(formWithErrors, "Error: please review below"))
+      },
+      data => {
+          if (isUserAuth(data)) {
+            this.username = data._1
+            this.password = data._2
+            Redirect(routes.Application.homePage()).withSession("username" -> username, "id" -> password)
+          } else {
+            Ok(views.html.login.input(credentials.fill(data), "Error: wrong username/id. Not found in Database"))
+          }
+      }
+    )
+  }
+
+  def isUserAuth(credentials : Tuple2[String, String]) : Boolean = {
+    var result : Boolean = false
+
+    object HttpBasicAuth {
+      val BASIC = "Basic"
+      val AUTHORIZATION = "Authorization"
+
+      def encodeCredentials(username: String, password: String): String = {
+        new String(Base64.encodeBase64String((username + ":" + password).getBytes))
+      }
+      def getHeader(username: String, password: String): String =
+        BASIC + " " + encodeCredentials(username, password)
+    }
+
+    val connection = new URL("http://137.82.19.141:8443/solr/admin/authentication").openConnection
+    connection.setRequestProperty(HttpBasicAuth.AUTHORIZATION, HttpBasicAuth.getHeader(credentials._1, credentials._2))
+    try{
+      val resp = Source.fromInputStream(connection.getInputStream)
+      result = true
+    }catch{
+      //this means a 401 was thrown
+      case ioe: IOException => result = false
+    }
+    result
+  }
+
+  //api to check user exists
   def checkUser(user : String): Action[AnyContent] = Action { implicit request =>
     println(user)
       if(userList.contains(user)){
@@ -195,5 +270,12 @@ class Application @Inject() (ws: WSClient) extends Controller {
   def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
 
   /// User Auth stuff ///
+
+  private val credentials : Form[Tuple2[String, String]] = Form(
+    mapping(
+      "username" -> text,
+      "password" -> text
+    )(Tuple2.apply)(Tuple2.unapply)
+  )
 
 }
