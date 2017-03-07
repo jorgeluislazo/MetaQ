@@ -67,7 +67,7 @@ class FileParser {
         doc.addField("start", row[2]);
         doc.addField("end", row[3]);
         doc.addField("strand_sense", row[6]);
-        doc.addField("rpkm", 3.02012); //todo default
+        doc.addField("rpkm", 3.000); //todo default
         String taxonomyName = row[8].replaceAll("unclassified ", "")
                 .replaceAll(" \\(miscellaneous\\)", "")
                 .replaceAll("sp\\.","sp");
@@ -271,7 +271,7 @@ class FileParser {
         return ID;
     }
 
-    //helper funciton, converts [A,B,C] string to an array list.
+    //helper function, converts [A,B,C] string to an array list.
     private ArrayList<String> convertToList(String runID, String listString){
         String[] arrayID = listString.substring(1, listString.length() -1).split(",");
         for(int i=0; i < arrayID.length; i++){

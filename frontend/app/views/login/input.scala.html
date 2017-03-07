@@ -4,25 +4,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>MetaQ - Login</title>
+  <link href = "https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel = "stylesheet">
+  <link rel='stylesheet' type='text/css' href="@routes.Assets.at("stylesheets/userLogin.css")">
+  <script src="@routes.Assets.at("javascripts/bootstrap.min.js")" type="text/javascript"></script>
+  <script src='@routes.Assets.at("javascripts/homePage.js")' type='text/javascript'></script>
 </head>
 <body>
 
-  <form action="@routes.Application.homePage()" method="get">
-    <button class="btn btn-link">Home</button>
+  <div class="back-button">
+  <form action="@routes.Application.homePage()" method="get" >
+    <button class="btn primary"><h5>Home / Back</h5></button>
   </form>
+  </div>
 
-
+  <div class="credentials">
   @helper.form(action = routes.Application.parseCredentials()) {
 
-    <p>@info</p>
+    <h4>@info</h4>
 
-    @helper.inputText(credentials("username"))
-    @helper.inputText(credentials("password"))
+    @helper.inputText(credentials("username"), '_label -> "Username")
+    @helper.inputPassword(credentials("password"), '_label -> "Password")
 
     <p><input type="submit" class="btn primary"
-    value='input'></p>
+    value='login'></p>
   }
+  </div>
 
 </body>
 </html>

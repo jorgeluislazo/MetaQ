@@ -5,6 +5,7 @@ import java.io._
 import java.net.URL
 import javax.inject.Inject
 
+import models.UserForm
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms._
@@ -13,7 +14,6 @@ import play.api.mvc._
 import play.api.libs.ws._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import org.apache.http.client.methods.HttpGet
 import org.apache.commons.codec.binary.Base64
 
 import scala.concurrent.duration._
@@ -38,12 +38,12 @@ class Application @Inject() (ws: WSClient) extends Controller {
     }
   }
 
-  def geneExplorer(query: String) = Action {
-    println("query: " + query)
+  def geneExplorer(query: String) = Action { implicit request =>
+//    println("query: " + query)
     Ok(views.html.geneExplorer(query))
   }
 
-  def pwayExplorer(query: String) = Action {
+  def pwayExplorer(query: String) = Action { implicit request =>
     Ok(views.html.pwayExplorer(query))
   }
 
@@ -201,7 +201,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def login = Action { implicit request =>
-    val data : Tuple2[String, String] = Tuple2("", "")
+    val data : (String, String) = Tuple2("", "")
     Ok(views.html.login.input(credentials.fill(data), "Please input credentials"))
   }
 
@@ -223,27 +223,16 @@ class Application @Inject() (ws: WSClient) extends Controller {
           if (isUserAuth(data)) {
             this.username = data._1
             this.password = data._2
-            Redirect(routes.Application.homePage()).withSession("username" -> username, "id" -> password)
+            Redirect(routes.Application.homePage()).withSession("username" -> username, "password" -> password)
           } else {
-            Ok(views.html.login.input(credentials.fill(data), "Error: wrong username/id. Not found in Database"))
+            Ok(views.html.login.input(credentials.fill(data), "Error: wrong username/password."))
           }
       }
     )
   }
 
-  def isUserAuth(credentials : Tuple2[String, String]) : Boolean = {
+  def isUserAuth(credentials : (String, String)) : Boolean = {
     var result : Boolean = false
-
-    object HttpBasicAuth {
-      val BASIC = "Basic"
-      val AUTHORIZATION = "Authorization"
-
-      def encodeCredentials(username: String, password: String): String = {
-        new String(Base64.encodeBase64String((username + ":" + password).getBytes))
-      }
-      def getHeader(username: String, password: String): String =
-        BASIC + " " + encodeCredentials(username, password)
-    }
 
     val connection = new URL("http://137.82.19.141:8443/solr/admin/authentication").openConnection
     connection.setRequestProperty(HttpBasicAuth.AUTHORIZATION, HttpBasicAuth.getHeader(credentials._1, credentials._2))
@@ -251,7 +240,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
       val resp = Source.fromInputStream(connection.getInputStream)
       result = true
     }catch{
-      //this means a 401 was thrown
+      //this means a 401 was thrown, user unauthenticated
       case ioe: IOException => result = false
     }
     result
@@ -266,6 +255,92 @@ class Application @Inject() (ws: WSClient) extends Controller {
         Ok("user not found")
       }
   }
+
+  def newUser = Action {
+    val dummyClient = UserForm("","","","","","")
+    Ok(views.html.login.userCreate(userForm.fill(dummyClient), "Please fill the required fields below"))
+  }
+
+  def saveUser = Action { implicit request =>
+    userForm.bindFromRequest.fold(
+      formWithErrors => {
+        BadRequest(views.html.login.userCreate(formWithErrors, "Error: see below"))
+      },
+      user => {
+        if(userList.contains(user.username)){
+          BadRequest(views.html.login.userCreate(userForm.fill(user), "Error: username already exists"))
+        }else{
+          if(save(user)){
+            println("new user : " + user.username)
+            this.username = user.username
+            this.password = user.password
+            Redirect(routes.Application.homePage()).withSession("username" -> username, "password" -> password)
+          }else{
+            BadRequest(views.html.login.userCreate(userForm.fill(user), "Error: could not save that username"))
+          }
+        }
+      }
+    )
+  }
+
+  def save(form: UserForm): Boolean ={
+    var result : Boolean = false
+    val connection = new URL("http://137.82.19.141:8443/solr/admin/authentication").openConnection()
+
+    connection.setDoOutput(true) //set to POST
+    connection.setRequestProperty("Content-Type", "application/json") //send data as json
+    connection.setRequestProperty(HttpBasicAuth.AUTHORIZATION, HttpBasicAuth.getHeader("Jorge-Admin", "Jakiro29!")) //need admin to accept
+
+    val message = "{\"set-user\": {\"" + form.username + "\" : \"" + form.password + "\"}}"
+
+    try{
+      //save the user using solr API call, and then save the user data in the webapp
+      val output = connection.getOutputStream
+      output.write(message.getBytes())
+
+      val resp = connection.getInputStream
+
+      val users = new java.io.File("taxonomyData/users")
+      var buffWriter = new BufferedWriter(new FileWriter(users, true))
+
+      buffWriter.write(form.username + "\n")
+      userList.+(form.username)
+      buffWriter.close()
+
+      val saveList = new java.io.File("taxonomyData/saveList")
+      buffWriter = new BufferedWriter(new FileWriter(saveList, true))
+      buffWriter.write(form.username + "\t" + form.fullName + "\t"
+        + form.institution + "\t" + form.city + "\t" + form.postalCode + "\n")
+      buffWriter.close()
+      result = true
+
+    }catch{
+      case ioe: IOException => result = false
+    }
+    result
+  }
+
+  object HttpBasicAuth {
+    val BASIC = "Basic"
+    val AUTHORIZATION = "Authorization"
+
+    def encodeCredentials(username: String, password: String): String = {
+      new String(Base64.encodeBase64String((username + ":" + password).getBytes))
+    }
+    def getHeader(username: String, password: String): String =
+      BASIC + " " + encodeCredentials(username, password)
+  }
+
+  private val userForm: Form[UserForm] = Form(
+    mapping(
+      "username" -> nonEmptyText,
+      "password" -> nonEmptyText,
+      "fullName" -> nonEmptyText,
+      "institution" -> text,
+      "city" -> text,
+      "postalCode" -> text
+    ) (UserForm.apply)(UserForm.unapply)
+  )
 
   def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
 

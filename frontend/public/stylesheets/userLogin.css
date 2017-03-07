@@ -1,0 +1,29 @@
+.credentials{
+    padding-top: 30px;
+    margin: 0 auto;
+    width: 550px;
+    background-color: #66afe9;
+    border-radius: 20px;
+}
+
+form h4{
+    margin: 0 auto;
+    width: 400px;
+    padding-bottom: 20px;
+}
+
+form p{
+    margin: 0 auto;
+    width: 400px;
+    padding-bottom: 20px;
+}
+
+form dl{
+    margin: 0 auto;
+    width: 400px;
+    padding-bottom: 20px;
+}
+
+.back-button{
+    padding: 10px;
+}

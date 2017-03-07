@@ -1,0 +1,38 @@
+@(clientForm : Form[UserForm], info : String)(implicit messages: Messages)
+
+@import helper._
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MetaQ - Signup</title>
+  <link href = "https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel = "stylesheet">
+  <link rel='stylesheet' type='text/css' href="@routes.Assets.at("stylesheets/userLogin.css")">
+  <script src="@routes.Assets.at("javascripts/bootstrap.min.js")" type="text/javascript"></script>
+  <script src='@routes.Assets.at("javascripts/homePage.js")' type='text/javascript'></script>
+</head>
+<body>
+  <div class="back-button">
+    <form action="@routes.Application.homePage()" method="get" >
+      <button class="btn primary"><h5>Home / Back</h5></button>
+    </form>
+  </div>
+
+  <div class="credentials">
+  @helper.form(action = routes.Application.saveUser) {
+    <h4>@info</h4>
+    @helper.inputText(clientForm("username"), '_label -> "Username")
+    @helper.inputPassword(clientForm("password"), '_label -> "Password")
+    @helper.inputText(clientForm("fullName"), '_label -> "Full name")
+    @helper.inputText(clientForm("institution"), '_label -> "Institution")
+    @helper.inputText(clientForm("city"), '_label -> "City")
+    @helper.inputText(clientForm("postalCode"), '_label -> "Postal code")
+
+    <p><input type="submit" class="btn primary"
+    value='Create user'></p>
+  }
+  </div>
+
+</body>
+</html>

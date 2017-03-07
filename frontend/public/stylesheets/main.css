@@ -73,6 +73,25 @@ body{
     padding-left: 15px;
     padding-right: 10px;
 }
+
+.user{
+    display: -webkit-flex;
+    display: flex;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.user h5{
+    color: white;
+}
+.user a{
+    color: white;
+}
+.log-link{
+    padding-left: 15px;
+    color: white;
+}
 input#rpkm{
     color: black;
 }

@@ -11,6 +11,16 @@
     <script src='@routes.Assets.at("javascripts/homePage.js")' type='text/javascript'></script>
   </head>
   <body>
+    <div class="user">
+    @if(session.get("username").isDefined) {
+      <h5>Hi, @session.get("username") . </h5>
+      <h5 class="log-link"><a href="@routes.Application.logout()">Log out <i class="glyphicon glyphicon-log-out"></i> </a></h5>
+    } else {
+      <p>You are not logged in</p>
+      <h5 class="log-link"><a href="@routes.Application.login()">Log in <i class="glyphicon glyphicon-log-in"></i></a></h5>
+      <h5 class="signup"><a href="@routes.Application.newUser()">Sign up </a></h5>
+    }
+    </div>
     <div class="title">
       <h1>MetaQ - Explore metagenomes</h1>
     </div>
@@ -83,11 +93,6 @@
       </div>
     </div>
     <div class="demo-info">
-      @if(session.get("id").isDefined) {
-        <p>Hi, @session.get("username") </p>
-      } else {
-        <p>You are not logged in</p>
-      }
       <h3>What is MetaQ?</h3>
       <p>MetaQ is a web-based search platform built for <a href="http://hallam.microbiology.ubc.ca/MetaPathways/" target="_blank">MetaPathways</a> data. It integrates a backend search engine server with indexed annoted metagenomic data and a frontend web visualizing module for both open reading frame annotations as well as microbiological pathway annotations.</p>
 
