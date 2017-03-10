@@ -48,87 +48,94 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def geneSearch(query: String): Action[AnyContent] = Action { implicit request =>
-    if (request.getQueryString("searchField").get == "pway"){
+    println(s"searchLib cluster - requestURI: $request)")
+
+    var queryString = ""
+
+    val results = if(request.getQueryString("searchField").get == "pway") {
       // first find list of orfs associated with that pathway
       // through a 1 time blocking search to pway explorer
-      val orfs = getOrfsAssociatedWithPway(query)
+      queryString = getOrfsAssociatedWithPway(query)
       //now call the data for those orfs, return them to client
-      val results = SearchLib.select(orfs,request, "gene")
-      Ok(results)
+      //      println("orfs: " + orfs)
+      SearchLib.select(queryString, request, "gene")
     }else{
-      if(request.getQueryString("treeBuilder").nonEmpty){
-        //get taxonomy IDs as facets and write taxonomy tree lineages
-        val solrSresults = SearchLib.select(query,request, "gene")
-        val taxonomyMap = (solrSresults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
-        val fileIDs = new java.io.File("taxonomyData/exampleTaxIDs")
-        val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
+      //Normal search: get the ORFs associated with this search
+      queryString = query
+      SearchLib.select(query,request, "gene")
+    }
 
-        for (id <- taxonomyMap.keySet){
-          buffWriter.write("^"+ id + "\n")
-        }
-        buffWriter.close()
-        println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
+    if (request.getQueryString("treeBuilder").getOrElse("f") == "t"){
+      //get taxonomy IDs as facets and write taxonomy tree lineages
+      val solrResults = SearchLib.select(queryString,request, "gene")
+      val taxonomyMap = (solrResults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
+      val fileIDs = new java.io.File("taxonomyData/exampleTaxIDs")
+      val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
 
-        val runScript = "bash taxonomyData/script".! //todo: add params, concurrency
-        //final JS Array result to send back to client
-        var jsFinalResult = JsArray()
-        //we will discard lineages seen before
-        var seenLineageSet : Set[String] = Set()
-        //for each lineage we find in our list
-        println("H2 - Lineages obtained")
-
-        for(line <- Source.fromFile("/tmp/exampleTaxLineages.txt").getLines()){
-          var jsBranchResult = JsArray()
-          //extract as a tuple (lineageString, count)
-          val tuple = line.split("\t")
-          val lineageString = tuple(0)
-          //add the unseen lineage to the set
-          if(!seenLineageSet.contains(lineageString)){
-            seenLineageSet = seenLineageSet + lineageString
-            //add the species
-            val jsEntry : JsValue = Json.obj(
-              "id" -> tuple(0).replace("(miscellaneous)", ""),
-              "taxid" -> tuple(1),
-              "count" -> taxonomyMap.get(tuple(1)).get
-            )
-            jsBranchResult = jsBranchResult.+:(jsEntry)
-
-            //now we prepend all the parent branches lineages we havent seen
-            val lineageBranches = lineageString.split("\\.")
-            var i = lineageBranches.length
-            var break = 0
-            //work upwards from leaves to root
-            while(i > 0){
-              val branchSet = lineageBranches.take(i)
-              val branchString = branchSet.mkString(".")
-              //add that branch if we havent seen it before, otherwise break
-              if(!seenLineageSet.contains(branchString)) {
-                seenLineageSet = seenLineageSet + branchString
-                val jsEntry : JsValue = Json.obj(
-                  "id" -> branchString,
-                  "taxid" -> 0,
-                  "count" -> -1
-                )
-                jsBranchResult = jsBranchResult.+:(jsEntry) //prepend
-              }else{
-                break = 1
-              }
-              i -= 1
-            }
-            jsFinalResult = jsFinalResult.++(jsBranchResult)
-            //            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
-          }
-        }
-        //this might be required for D3.js
-        val columns : JsValue = Json.arr("id")
-        //        jsFinalResult = jsFinalResult.:+(columns)
-        //        seenLineageSet.foreach{println}
-        Ok(jsFinalResult)
-      }else{
-        //Normal search: get the ORFs associated with this search
-        val results = SearchLib.select(query,request, "gene")
-        Ok(results)
+      for (id <- taxonomyMap.keySet){
+        buffWriter.write("^"+ id + "\n")
       }
+      buffWriter.close()
+      println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
+
+      val runScript = "bash taxonomyData/script".! //todo: add params, concurrency
+      //final JS Array result to send back to client
+      var jsFinalResult = JsArray()
+      //we will discard lineages seen before
+      var seenLineageSet : Set[String] = Set()
+      //for each lineage we find in our list
+      println("H2 - Lineages obtained")
+
+      for(line <- Source.fromFile("/tmp/exampleTaxLineages.txt").getLines()){
+        var jsBranchResult = JsArray()
+        //extract as a tuple (lineageString, count)
+        val tuple = line.split("\t")
+        val lineageString = tuple(0)
+        //add the unseen lineage to the set
+        if(!seenLineageSet.contains(lineageString)){
+          seenLineageSet = seenLineageSet + lineageString
+          //add the species
+          val jsEntry : JsValue = Json.obj(
+            "id" -> tuple(0).replace("(miscellaneous)", ""),
+            "taxid" -> tuple(1),
+            "count" -> taxonomyMap.get(tuple(1)).get
+          )
+          jsBranchResult = jsBranchResult.+:(jsEntry)
+
+          //now we prepend all the parent branches lineages we havent seen
+          val lineageBranches = lineageString.split("\\.")
+          var i = lineageBranches.length
+          var break = 0
+          //work upwards from leaves to root
+          while(i > 0){
+            val branchSet = lineageBranches.take(i)
+            val branchString = branchSet.mkString(".")
+            //add that branch if we havent seen it before, otherwise break
+            if(!seenLineageSet.contains(branchString)) {
+              seenLineageSet = seenLineageSet + branchString
+              val jsEntry : JsValue = Json.obj(
+                "id" -> branchString,
+                "taxid" -> 0,
+                "count" -> -1
+              )
+              jsBranchResult = jsBranchResult.+:(jsEntry) //prepend
+            }else{
+              break = 1
+            }
+            i -= 1
+          }
+          jsFinalResult = jsFinalResult.++(jsBranchResult)
+          //            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
+        }
+      }
+      //this might be required for D3.js
+      val columns : JsValue = Json.arr("id")
+      //        jsFinalResult = jsFinalResult.:+(columns)
+      //        seenLineageSet.foreach{println}
+      Ok(jsFinalResult)
+    }else{
+       //normal saerch, return results
+        Ok(results)
     }
   }
 
@@ -154,13 +161,13 @@ class Application @Inject() (ws: WSClient) extends Controller {
   def getOrfsAssociatedWithPway(pwayID: String) : String = {
     implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
     val url = "http://localhost:9000/searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
-    val result = Await.result(ws.url(url).get(), 3 second) //wait up to 3 seconds for this response to return
+    val result = Await.result(ws.url(url).get(), 4 second) //wait up to 3 seconds for this response to return
     val orfs = ((result.json \ "results") (0) \ "orfs").as[Array[String]].mkString(",").replaceAll("\\s", "") //extract orfs
     orfs
   }
 
   def exportData(query: String): Action[AnyContent] = Action{ implicit request =>
-    println(request)
+//    println(request)
     val query = if(request.getQueryString("name").isDefined){
       request.getQueryString("name").get + "_filtered"
     }else{
@@ -206,6 +213,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def logout = Action { implicit request =>
+    SearchLib.userName = ""
     Redirect(routes.Application.homePage()).withNewSession
   }
 
@@ -223,6 +231,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
           if (isUserAuth(data)) {
             this.username = data._1
             this.password = data._2
+            SearchLib.userName = this.username
             Redirect(routes.Application.homePage()).withSession("username" -> username, "password" -> password)
           } else {
             Ok(views.html.login.input(credentials.fill(data), "Error: wrong username/password."))
@@ -274,6 +283,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
             println("new user : " + user.username)
             this.username = user.username
             this.password = user.password
+            SearchLib.userName = this.username
             Redirect(routes.Application.homePage()).withSession("username" -> username, "password" -> password)
           }else{
             BadRequest(views.html.login.userCreate(userForm.fill(user), "Error: could not save that username"))
@@ -346,7 +356,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   /// User Auth stuff ///
 
-  private val credentials : Form[Tuple2[String, String]] = Form(
+  private val credentials : Form[(String, String)] = Form(
     mapping(
       "username" -> text,
       "password" -> text

@@ -13,12 +13,13 @@ object SearchLib {
   // ubc production: http://137.82.19.141:8443/solr/
   // http://localhost:8983/solr/
   val baseURL = "http://137.82.19.141:8443/solr/"
+  var userName = ""
   /**
     * is a main function that handling search /select process.
     */
   def select(query: String, request: Request[AnyContent], selectType: String): JsObject = {
     // Construct the solr query depending on the type and handling the parameters
-    println(s"searchLib select - queryString: $query, requestURI: $request, selectType: $selectType)")
+//    println(s"searchLib select - queryString: $query, requestURI: $request, selectType: $selectType)")
     val queryBuilder = if (selectType == "gene"){
       buildGeneSelectQuery(query, request)}
     else {
@@ -31,7 +32,7 @@ object SearchLib {
     try {
       // Get Results from Solr.
       val results = queryBuilder.getResultAsMap(selectType)
-      println("Solr select/ results: " + results)
+//      println("Solr select/ results: " + results)
       // prepare results
       resultsInfo = if (selectType == "gene")
         this.prepareGeneSearchResults(results, request)
@@ -52,7 +53,7 @@ object SearchLib {
 
   // main function that handles /clustering searches
   def cluster(query: String, request: Request[AnyContent]): JsObject = {
-    println(s"searchLib cluster - queryString: $query, requestURI: $request)")
+//    println(s"searchLib cluster - queryString: $query, requestURI: $request)")
     val queryBuilder = this.buildGeneClusterQuery(query, request)
     var resultsInfo = Json.obj(
       "num_of_clusters" -> 0,
@@ -61,7 +62,7 @@ object SearchLib {
     try {
       // Get Results from Solr.
       val results = queryBuilder.getClustersAsMap()
-      println("Solr cluster/ results: " + results)
+//      println("Solr cluster/ results: " + results)
 
       // prepare results
       resultsInfo = this.prepareGeneClusterResults(results, request)
@@ -79,8 +80,11 @@ object SearchLib {
   def buildGeneSelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     // Checking URL Parameters
     // if its a module linking search, do search for IDs (list has been passed as query)
-
-    val queryName = request.getQueryString("query").getOrElse(query)
+    val queryName = if(query.isEmpty){
+      request.getQueryString("query").getOrElse(query)
+    }else{
+      query
+    }
     val searchSettings = if(request.getQueryString("searchField").getOrElse("product") == "pway")
       "{!terms f=ORFID}" else "{!df=" + request.getQueryString("searchField").getOrElse("product") + "}"
     val highQualOnly = request.getQueryString("highQualOnly").getOrElse(false)
@@ -105,12 +109,19 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
-    println(resultsPerPage)
+    //set the owner
+    val owner = if(userName == ""){
+      "hallamLab"
+    }else{
+      userName
+    }
 
+//    println(resultsPerPage)
     var queryBuilder = client.query(searchSettings + queryName)
       .start(offset)
       .rows(resultsPerPage)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
+        .addFilterQuery("owner:" + owner + "")
 
     if (filterSearchQuery != "") {
       //clicked on a facet, or taxonomy node, add the filter query
@@ -155,9 +166,17 @@ object SearchLib {
       offset = (page - 1) * resultsPerPage
     }
 
+    //set the owner
+    val owner = if(userName == ""){
+      "hallamLab"
+    }else{
+      userName
+    }
+
     val queryBuilder = client.query(searchSettings + queryName)
       .start(offset)
       .rows(resultsPerPage)
+      .addFilterQuery("owner:" + owner + "")
 
     queryBuilder
   }
@@ -267,9 +286,17 @@ object SearchLib {
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/ORFDocs
     val client = new SolrClient(baseURL + "ORFDocs")
 
+    //set the owner
+    val owner = if(userName == ""){
+      "hallamLab"
+    }else{
+      userName
+    }
+
     var queryBuilder = client.query(searchSettings + query)
       .addFilterQuery("rpkm:[" + minRPKM + " TO *]")
       .setParameter("qt", "/clustering")
+      .addFilterQuery("owner:" + owner + "")
 
     if (highQualOnly.equals("true")) {
       val fq = "KEGGID:[* TO *] OR COGID:[* TO *]"
