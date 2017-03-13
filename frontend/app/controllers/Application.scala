@@ -23,7 +23,7 @@ import sys.process._
 
 class Application @Inject() (ws: WSClient) extends Controller {
 
-  val userList = Source.fromFile("taxonomyData/users").getLines().toArray
+  val userList = Source.fromFile("/home/solr/frontend/resources/users").getLines().toArray
   var username : String = ""
   var password : String = ""
 
@@ -69,7 +69,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
       //get taxonomy IDs as facets and write taxonomy tree lineages
       val solrResults = SearchLib.select(queryString,request, "gene")
       val taxonomyMap = (solrResults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
-      val fileIDs = new java.io.File("taxonomyData/exampleTaxIDs")
+      val fileIDs = new java.io.File("/home/solr/frontend/resources/exampleTaxIDs")
       val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
 
       for (id <- taxonomyMap.keySet){
@@ -78,7 +78,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
       buffWriter.close()
       println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
 
-      val runScript = "bash taxonomyData/script".! //todo: add params, concurrency
+      val runScript = "bash /home/solr/frontend/resources/script".! //todo: add params, concurrency
       //final JS Array result to send back to client
       var jsFinalResult = JsArray()
       //we will discard lineages seen before
@@ -160,8 +160,8 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   def getOrfsAssociatedWithPway(pwayID: String) : String = {
     implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
-    val url = "http://localhost:9000/searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
-    val result = Await.result(ws.url(url).get(), 4 second) //wait up to 3 seconds for this response to return
+    val url = "http://http://137.82.19.141/searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
+    val result = Await.result(ws.url(url).get(), 4 second) //wait up to 4 seconds for this response to return
     val orfs = ((result.json \ "results") (0) \ "orfs").as[Array[String]].mkString(",").replaceAll("\\s", "") //extract orfs
     orfs
   }
@@ -310,14 +310,14 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
       val resp = connection.getInputStream
 
-      val users = new java.io.File("taxonomyData/users")
+      val users = new java.io.File("/home/solr/frontend/resources/users")
       var buffWriter = new BufferedWriter(new FileWriter(users, true))
 
       buffWriter.write(form.username + "\n")
       userList.+(form.username)
       buffWriter.close()
 
-      val saveList = new java.io.File("taxonomyData/saveList")
+      val saveList = new java.io.File("/home/solr/frontend/resources/saveList")
       buffWriter = new BufferedWriter(new FileWriter(saveList, true))
       buffWriter.write(form.username + "\t" + form.fullName + "\t"
         + form.institution + "\t" + form.city + "\t" + form.postalCode + "\n")
