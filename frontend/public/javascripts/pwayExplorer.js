@@ -13,10 +13,12 @@ jQuery(function($) {
         userSettDef ={
             "searchField" : "pway_name",
             "resultsPerPage": 20,
-            "page" : 1,
+            "page" : $('.results').data('page'),
             "facetField" : ""
         },
         cachedResponse =  null;
+
+    if($.trim($documents.html())=='')$documents.append("<img src='http://i.imgur.com/ZWZZBYz.gif' class='loading-gif'>");
 
     var fetchData = function(url){
 
@@ -32,7 +34,7 @@ jQuery(function($) {
             cachedResponse = response;
             $('.filterGuide').remove();
             $resultsInfo.empty();
-
+            $documents.empty();
             if (cachedResponse.noOfResults == 0) {
                 var query = $('#searchBox').val();
 
@@ -54,7 +56,7 @@ jQuery(function($) {
                     $documents.append(hit)
                 }
                 $sidePanel.empty();
-                displayPager(response.start, response.noOfResults, false);
+                displayPager(response.start, response.noOfResults, "empty");
                 $documents.fadeIn("slow");
             }
 
@@ -102,19 +104,36 @@ jQuery(function($) {
             container = $(".pagination"),
             allPages = Math.ceil(totalResults / userSettDef["resultsPerPage"]),
             minPage = Math.max(1, userSettDef["page"] - 5),
-            maxPage = Math.min(Math.max(userSettDef["page"] + 4, 10) , allPages),
+            maxPage = Math.min(Math.max(parseInt(userSettDef["page"]) + 4, 10) , allPages),
             numPages = maxPage - minPage + 1; // to render
 
         //renew pages and set handlers
         container.empty()
+
+        var constructURL = function(filter){
+            var fetchDataURL;
+            if(filter == "facetFilter"){
+                //for future use
+            }
+            if(filter == "taxonomyFilter"){
+                //for future use
+            }
+            if(filter == "clusterFilter"){
+                //for future use
+            }
+            if(filter == "empty"){
+                fetchDataURL = constructPwaySearchURL();
+            }
+            return fetchDataURL;
+        }
 
         if(userSettDef["page"] == 1){
             backButton.attr("class", "disabled").css("cursor", "pointer");
         }else{
             backButton.click(function(){
                 userSettDef["page"]--;
-                var fetchDataURL = constructPwaySearchURL();
                 $documents.fadeOut("slow", function(){
+                    var fetchDataURL = constructURL(isFilterPager);
                     fetchData(fetchDataURL);
                 });
             }).css("cursor", "pointer");
@@ -124,8 +143,8 @@ jQuery(function($) {
         }else{
             nextButton.click(function(){
                 userSettDef["page"]++;
-                var fetchDataURL = constructPwaySearchURL();
                 $documents.fadeOut("slow", function(){
+                    var fetchDataURL = constructURL(isFilterPager);
                     fetchData(fetchDataURL);
                 });
             }).css("cursor", "pointer");
@@ -142,8 +161,8 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructPwaySearchURL();
                         $documents.fadeOut("slow", function(){
+                            var fetchDataURL = constructURL(isFilterPager);
                             fetchData(fetchDataURL);
                         });
                     });
@@ -159,8 +178,8 @@ jQuery(function($) {
                 (function(a,b){
                     b.click(function(){
                         userSettDef["page"] = a;
-                        var fetchDataURL = constructPwaySearchURL();
                         $documents.fadeOut("slow", function(){
+                            var fetchDataURL = constructURL(isFilterPager);
                             fetchData(fetchDataURL);
                         });
                     });

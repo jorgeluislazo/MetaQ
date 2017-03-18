@@ -23,6 +23,7 @@ import sys.process._
 
 class Application @Inject() (ws: WSClient) extends Controller {
 
+  val BASE_URL = "http://137.82.19.141/"
   val userList = Source.fromFile("/home/solr/frontend/resources/users").getLines().toArray
   var username : String = ""
   var password : String = ""
@@ -40,11 +41,16 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   def geneExplorer(query: String) = Action { implicit request =>
 //    println("query: " + query)
-    Ok(views.html.geneExplorer(query))
+    //why does request.getQueryString() have no effect?
+    val page = request.toString().split("page=")(1).split("&")(0) //this is only the number after page=
+    Ok(views.html.geneExplorer(query, Integer.parseInt(page)))
   }
 
-  def pwayExplorer(query: String) = Action { implicit request =>
-    Ok(views.html.pwayExplorer(query))
+  def pwayExplorer(query: String) : Action[AnyContent] = Action { implicit request =>
+    println(request.toString())
+    //why does request.getQueryString() have no effect?
+    val page = request.toString().split("page=")(1).split("&")(0) //this is only the number after page=
+    Ok(views.html.pwayExplorer(query, Integer.parseInt(page)))
   }
 
   def geneSearch(query: String): Action[AnyContent] = Action { implicit request =>
@@ -160,7 +166,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   def getOrfsAssociatedWithPway(pwayID: String) : String = {
     implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
-    val url = "http://http://137.82.19.141/searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
+    val url = BASE_URL + "searchPway?query=" + pwayID + "&searchField=pway_id&page=1"
     val result = Await.result(ws.url(url).get(), 4 second) //wait up to 4 seconds for this response to return
     val orfs = ((result.json \ "results") (0) \ "orfs").as[Array[String]].mkString(",").replaceAll("\\s", "") //extract orfs
     orfs
@@ -217,7 +223,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
     Redirect(routes.Application.homePage()).withNewSession
   }
 
-  def authenticate(credentials :Tuple2[String, String]) = Action { implicit request =>
+  def authenticate(credentials :(String, String)) = Action { implicit request =>
     Ok(views.html.home()).withSession( "username" -> credentials._1, "id" -> credentials._2)
   }
 

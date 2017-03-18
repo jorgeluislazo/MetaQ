@@ -1,4 +1,4 @@
-@(query: String)(implicit session : Session)
+@(query: String, page : Int)(implicit session : Session)
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -91,7 +91,7 @@
                     </div>
                 </div>
 
-                <div class="results well" data-cache="@query">
+                <div class="results well" data-cache="@query" data-page="@page">
                     <div class="resultsInfo">
                     </div>
                     <div class="export">

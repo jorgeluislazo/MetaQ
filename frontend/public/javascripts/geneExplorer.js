@@ -40,7 +40,7 @@ jQuery(function($) {
         userSettDef ={
             "searchField" : "product",
             "resultsPerPage": 100,
-            "page" : 1,
+            "page" : $('.results').data('page'),
             "facetField" : ""
         },
     //clientside variables to save
@@ -313,12 +313,12 @@ jQuery(function($) {
         var ratio = graphData.clusters/graphData.nodes.length;
         grav = 1300*ratio + 100 //arbitrary formulas [100 to 260]
         charge = -600*ratio -10  // [-10 to -100]
-        console.log(grav);
-        console.log(charge);
+        // console.log(grav);
+        // console.log(charge);
 
         var svg = d3.select(".clusterGraph").append("svg")
             .attr("id", "cluster-svg")
-            .attr("width", panelWidth)
+            .attr("width", panelWidth - 100)
             .attr("height", panelHeight);
 
         var simulation = d3.forceSimulation()
@@ -327,7 +327,7 @@ jQuery(function($) {
                 .distanceMin(1)
                 .distanceMax(grav)
                 .strength(charge))
-            .force("center", d3.forceCenter(panelWidth / 2, panelHeight / 2));
+            .force("center", d3.forceCenter((panelWidth - 100) / 2, panelHeight / 2));
 
         var link = svg.selectAll("line")
             .data(graphData.links)
@@ -413,7 +413,7 @@ jQuery(function($) {
         function tick() {
             link.attr("x1", function(d) {
                     if (d.source.x < 8){ return 10;}
-                    if (d.source.x > (panelWidth * 1.2)){ return (panelWidth * 1.2);}
+                    if (d.source.x > ((panelWidth - 100) * 1.2)){ return ((panelWidth - 100) * 1.2);}
                     return d.source.x;
                 })
                 .attr("y1", function(d) {
@@ -423,7 +423,7 @@ jQuery(function($) {
                 })
                 .attr("x2", function(d) {
                     if (d.target.x < 8){ return 10;}
-                    if (d.target.x > (panelWidth * 1.2)){ return (panelWidth * 1.2);}
+                    if (d.target.x > ((panelWidth - 100) * 1.2)){ return ((panelWidth - 100) * 1.2);}
                     return d.target.x;
                 })
                 .attr("y2", function(d) {
@@ -436,7 +436,7 @@ jQuery(function($) {
                 var d_x = d.x,
                     d_y = d.y;
                 if (d.x < 20){ d_x = 20;}
-                if (d.x > (panelWidth - 20)){ d_x = panelWidth - 20;}
+                if (d.x > ((panelWidth - 100) - 20)){ d_x = (panelWidth - 100) - 20;}
                 if (d.y < 30){ d_y = 30;}
                 if (d.y > (panelHeight - 10)) {d_y = panelHeight - 10;}
                 return "translate(" +  d_x + "," + d_y + ")";
@@ -626,7 +626,7 @@ jQuery(function($) {
     };
 
     var displayPager = function(start, totalResults, isFilterPager){
-        console.log(facetSearchParam)
+        // console.log(facetSearchParam)
         var backButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Previous").append($('<span>').html("&laquo;"))),
             nextButton = $("<li>").append($("<a>").attr("href", "#").attr("aria-label", "Next").append($('<span>').html("&raquo;"))),
             container = $(".pagination"),

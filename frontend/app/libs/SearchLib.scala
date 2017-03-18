@@ -151,8 +151,9 @@ object SearchLib {
   def buildPwaySelectQuery(query: String, request: Request[AnyContent]): QueryBuilder = {
     val queryName = request.getQueryString("query").getOrElse(query)
     val searchSettings = "{!df=" + request.getQueryString("searchField").getOrElse("pway_name") + "}"
+
     val page = Integer.parseInt(request.getQueryString("page").getOrElse(1).toString)
-    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(100).toString)
+    val resultsPerPage = Integer.parseInt(request.getQueryString("noOfResults").getOrElse(20).toString)
 
     // http://localhost:8983/solr/PwayDocs
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/PwayDocs
