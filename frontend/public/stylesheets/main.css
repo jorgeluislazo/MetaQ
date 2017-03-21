@@ -74,6 +74,10 @@ body{
     padding-right: 10px;
 }
 
+#highQual-CheckBox-div{
+    margin-left: 30px;
+}
+
 .user{
     display: -webkit-flex;
     display: flex;

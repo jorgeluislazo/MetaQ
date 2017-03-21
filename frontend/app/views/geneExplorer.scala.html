@@ -39,14 +39,17 @@
                     <div class="radio-inline">
                         <label><input type="radio" name="df" value="product" checked="checked">Protein product (default)</label>
                     </div>
-                    <div class="radio-inline">
-                        <label><input type="radio" name="df" value="extended_desc">Secondary Description</label>
-                    </div>
+                    @*<div class="radio-inline">*@
+                        @*<label><input type="radio" name="df" value="extended_desc">Secondary Description</label>*@
+                    @*</div>*@
                     <div class="radio-inline">
                         <label><input type="radio" name="df" value="ORFID">ORF id</label>
                     </div>
-                    <div class="checkbox-inline">
-                        <label><input type="checkbox" name="hq" value="true" >Return only high quality hits</label>
+                    <div class="radio-inline">
+                        <label><input type="radio" name="df" value="pway">Pathway ID name</label>
+                    </div>
+                    <div class="checkbox-inline" id="highQual-CheckBox-div">
+                        <label><input type="checkbox" id="highQual-CheckBox" name="hq" value="true" >Return only high quality hits</label>
                     </div>
                     <div style="padding-right:0">
                         <p>Only return hits above </p>

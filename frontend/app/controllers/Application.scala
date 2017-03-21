@@ -173,7 +173,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
   }
 
   def exportData(query: String): Action[AnyContent] = Action{ implicit request =>
-//    println(request)
+    println(request)
     val query = if(request.getQueryString("name").isDefined){
       request.getQueryString("name").get + "_filtered"
     }else{
@@ -184,8 +184,22 @@ class Application @Inject() (ws: WSClient) extends Controller {
     try{
       val writer = new PrintWriter(file) //prepare the file + writer
 
-      val data = SearchLib.select(query,request, "gene")
+      var queryString = ""
+      val data = if(request.getQueryString("searchField").get == "pway") {
+        // first find list of orfs associated with that pathway
+        // through a 1 time blocking search to pway explorer
+        queryString = getOrfsAssociatedWithPway(query)
+        //now call the data for those orfs, return them to client
+        //      println("orfs: " + orfs)
+        SearchLib.select(queryString, request, "gene")
+      }else{
+        //Normal search: get the ORFs associated with this search
+        queryString = request.getQueryString("query").getOrElse(query)
+        SearchLib.select(queryString,request, "gene")
+      }
+
       val results = (data\"results").get.as[List[JsObject]] //get results
+      println("results list size for export: " + results.length)
       writer.write("ORFID" + "\tstart" + "\tend" + "\tstrand_sense" + "\ttaxonomy" + "\trpkm" + "\tCOGID" + "\tKEGGID" + "\textended_desc" + "\n")
       for(result <- results){ //can loop through results, but not for each field, would need a matcher
         writer.write((result\"ORFID").get.toString().replace("\"", "") + "\t")

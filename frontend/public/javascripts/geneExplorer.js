@@ -39,6 +39,8 @@ jQuery(function($) {
         },
         userSettDef ={
             "searchField" : "product",
+            "highQualOnly" : "false",
+            "minRPKM" : 0,
             "resultsPerPage": 100,
             "page" : $('.results').data('page'),
             "facetField" : ""
@@ -728,6 +730,7 @@ jQuery(function($) {
         return "#"
     };
 
+    //export utility
     $exportButton.on("click", function(){
         var baseUrl = $exportButton.data("url"),
             query = $('#searchBox').val();
@@ -735,14 +738,17 @@ jQuery(function($) {
             // no filter applied
             // query = $cache.match(/^.*?(?=&)/) + "", //extract query from the cached URL
 
-            query = query + "&page=1&rows=2147483647" //select everything
+            query = query + "&searchField=" + userSettDef["searchField"] + "&highQualOnly=" + userSettDef["highQualOnly"]
+                        + "&page=1&rows=2147483647" //select everything
             $(location).attr('href',baseUrl + query);
         }else{
             //filter search export data
             //extract everything after query but before &page=
+            //TODO need to add settings in an effective way (no split)
             query = lastFilterURL.split(/query=/)[1].split(/&page=/)[0] + "&page=1&rows=2147483647&name=" + query
             $(location).attr('href',baseUrl + query);
         }
+        console.log(query)
         return false;
     });
 
@@ -818,6 +824,17 @@ jQuery(function($) {
     $('input:radio[name=df]').change(function(){
         userSettDef["searchField"] = $('input:radio[name=df]:checked').val()
     });
+    $('input:checkbox[name=hq]').change(function(){
+        if($('#highQual-CheckBox').is(":checked")){
+            console.log("high quals")
+            userSettDef["highQualOnly"] = "true"
+        }else{
+            console.log("no high quals")
+            userSettDef["highQualOnly"] = "false"
+        }
+    });
+    //TODO do the same for RPMM values on change
+
 
     //do the ajax searches
     fetchData($search.data('searchurl') + $cache);
