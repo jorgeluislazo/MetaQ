@@ -38,9 +38,9 @@ jQuery(function($) {
             "ORF_len"       : "ORF length"
         },
         userSettDef ={
-            "searchField" : "product",
-            "highQualOnly" : "false",
-            "minRPKM" : 0,
+            "searchField" : $.urlParam("searchField"),
+            "highQualOnly" : $.urlParam("highQualOnly"),
+            "minRPKM" : $.urlParam("minRPKM"),
             "resultsPerPage": 100,
             "page" : $('.results').data('page'),
             "facetField" : ""
@@ -58,11 +58,16 @@ jQuery(function($) {
     // upon loading the page, extract URI settings and save them on client page settings.
     // a new search will get the client page settings
     if($.trim($documents.html())=='')$documents.append("<img src='http://i.imgur.com/ZWZZBYz.gif' class='loading-gif'>");
-    // save/update the searchField, query box and page #
-    userSettDef["searchField"] = $.urlParam("searchField");
-    $('input:radio[name="df"]').filter('[value="' + userSettDef["searchField"] + '"]').attr('checked', true);
-    userSettDef["page"] = $.urlParam("page");
-    $('#searchBox').val($cache.match(/^.*?(?=&)/));
+    // save/update the query and settings
+    $('input:radio[name="df"]').filter('[value="' + userSettDef["searchField"] + '"]').attr('checked', true); //curr searchField
+    userSettDef["page"] = $.urlParam("page"); //current page
+    if($.urlParam("highQualOnly") == "true"){ //highQualOnly
+        $('input:checkbox[name="hq"]').attr('checked', true);
+    }else{
+        $('input:checkbox[name="hq"]').attr('checked', false);
+    }
+    $('input:text[id="rpkm"]').val($.urlParam("minRPKM")) //rpkm
+    $('#searchBox').val($cache.match(/^.*?(?=&)/)); //query box
 
 
     var fetchData = function(url){
@@ -834,7 +839,6 @@ jQuery(function($) {
         }
     });
     //TODO do the same for RPMM values on change
-
 
     //do the ajax searches
     fetchData($search.data('searchurl') + $cache);

@@ -16,6 +16,8 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import org.apache.commons.codec.binary.Base64
 
+import scala.collection.immutable.HashMap
+import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import scala.io.Source
@@ -25,6 +27,7 @@ class Application @Inject() (ws: WSClient) extends Controller {
 
   val BASE_URL = "http://137.82.19.141/"
   val userList = Source.fromFile("/home/solr/frontend/resources/users").getLines().toArray
+  val taxonomyData = loadTaxonomyData("/home/solr/frontend/resources/taxonomyLineage.txt")
   var username : String = ""
   var password : String = ""
 
@@ -74,64 +77,56 @@ class Application @Inject() (ws: WSClient) extends Controller {
     if (request.getQueryString("treeBuilder").getOrElse("f") == "t"){
       //get taxonomy IDs as facets and write taxonomy tree lineages
       val solrResults = SearchLib.select(queryString,request, "gene")
-      val taxonomyMap = (solrResults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> value
-      val fileIDs = new java.io.File("/home/solr/frontend/resources/exampleTaxIDs")
-      val buffWriter = new BufferedWriter(new FileWriter(fileIDs))
+      val taxIDResults = (solrResults \ "facetFields" \ "taxonomyID").get.as[Map[String,Int]] //taxID -> count
 
-      for (id <- taxonomyMap.keySet){
-        buffWriter.write("^"+ id + "\n")
-      }
-      buffWriter.close()
-      println("H1 - TaxIDs written, size=" + taxonomyMap.keySet.size)
-
-      val runScript = "bash /home/solr/frontend/resources/script".! //todo: add params, concurrency
       //final JS Array result to send back to client
       var jsFinalResult = JsArray()
       //we will discard lineages seen before
       var seenLineageSet : Set[String] = Set()
-      //for each lineage we find in our list
-      println("H2 - Lineages obtained")
 
-      for(line <- Source.fromFile("/tmp/exampleTaxLineages.txt").getLines()){
-        var jsBranchResult = JsArray()
-        //extract as a tuple (lineageString, count)
-        val tuple = line.split("\t")
-        val lineageString = tuple(0)
-        //add the unseen lineage to the set
-        if(!seenLineageSet.contains(lineageString)){
-          seenLineageSet = seenLineageSet + lineageString
-          //add the species
-          val jsEntry : JsValue = Json.obj(
-            "id" -> tuple(0).replace("(miscellaneous)", ""),
-            "taxid" -> tuple(1),
-            "count" -> taxonomyMap.get(tuple(1)).get
-          )
-          jsBranchResult = jsBranchResult.+:(jsEntry)
+      for(id <- taxIDResults.keySet){
+        //only proceed if we find the taxID in our list
+        if(taxonomyData.contains(id)){
+          var jsBranchResult = JsArray()
+          val lineageString = taxonomyData.getOrElse(id,"")
+//          println(lineageString)
 
-          //now we prepend all the parent branches lineages we havent seen
-          val lineageBranches = lineageString.split("\\.")
-          var i = lineageBranches.length
-          var break = 0
-          //work upwards from leaves to root
-          while(i > 0){
-            val branchSet = lineageBranches.take(i)
-            val branchString = branchSet.mkString(".")
-            //add that branch if we havent seen it before, otherwise break
-            if(!seenLineageSet.contains(branchString)) {
-              seenLineageSet = seenLineageSet + branchString
-              val jsEntry : JsValue = Json.obj(
-                "id" -> branchString,
-                "taxid" -> 0,
-                "count" -> -1
-              )
-              jsBranchResult = jsBranchResult.+:(jsEntry) //prepend
-            }else{
-              break = 1
+          //add the unseen lineage to the set
+          if(!seenLineageSet.contains(lineageString)){
+            seenLineageSet = seenLineageSet + lineageString
+            //add the species
+            val jsEntry : JsValue = Json.obj(
+              "id" -> taxonomyData.getOrElse(id,"").replace("(miscellaneous)", ""),
+              "taxid" -> id,
+              "count" -> taxIDResults.get(id).get
+            )
+            jsBranchResult = jsBranchResult.+:(jsEntry)
+
+            //now we prepend all the parent branches lineages we havent seen
+            val lineageBranches = lineageString.split("\\.")
+            var i = lineageBranches.length
+            var break = 0
+            //work upwards from leaves to root
+            while(i > 0){
+              val branchSet = lineageBranches.take(i)
+              val branchString = branchSet.mkString(".")
+              //add that branch if we haven't seen it before, otherwise break
+              if(!seenLineageSet.contains(branchString)) {
+                seenLineageSet = seenLineageSet + branchString
+                val jsEntry : JsValue = Json.obj(
+                  "id" -> branchString,
+                  "taxid" -> 0,
+                  "count" -> -1
+                )
+                jsBranchResult = jsBranchResult.+:(jsEntry) //prepend
+              }else{
+                break = 1
+              }
+              i -= 1
             }
-            i -= 1
+            jsFinalResult = jsFinalResult.++(jsBranchResult)
+            //println(taxonomyData.getOrElse(id,"") + ". Count: " + taxIDResults.get(id).get + ". taxID: " + id)
           }
-          jsFinalResult = jsFinalResult.++(jsBranchResult)
-          //            println(tuple(0) + ". Count: " + taxonomyMap.get(tuple(1)).get + ". taxID: " + tuple(1))
         }
       }
       //this might be required for D3.js
@@ -373,6 +368,18 @@ class Application @Inject() (ws: WSClient) extends Controller {
   )
 
   def manOf[T: Manifest](t: T): Manifest[T] = manifest[T]
+
+  def loadTaxonomyData(fileName : String) : Map[String,String] = {
+    var taxonomyData = new HashMap[String, String]
+    for(line <- Source.fromFile(fileName).getLines()) {
+
+      //extract as a tuple (taxID, lineage)
+      // REMEMBER TO ALWAYS DELETE THE TITLE LINE
+      val tuple = line.split("\t")
+      taxonomyData = taxonomyData + (tuple(0) -> tuple(1)) //add the tuple
+    }
+    taxonomyData
+  }
 
   /// User Auth stuff ///
 

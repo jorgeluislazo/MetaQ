@@ -130,7 +130,7 @@ object SearchLib {
       if(isTaxonomyBuilder){
         //is it a taxonomy tree builder query?
         queryBuilder = queryBuilder.facetFields("taxonomyID")
-          .setParameter("facet.limit", "20")
+          .setParameter("facet.limit", "25")
           .setParameter("facet.mincount", "1") //todo: set to log(numCountResults)*2
       }else{
         //normal query with COGID KEGGID facets returned
