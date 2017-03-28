@@ -64,7 +64,6 @@
                         <h5>Hi, @session.get("username") . </h5>
                         <h5 class="log-link"><a href="@routes.Application.logout()">Log out <i class="glyphicon glyphicon-log-out" style="color:white"></i> </a></h5>
                 } else {
-                    <p>You are not logged in</p>
                     <h5 class="log-link"><a href="@routes.Application.login()">Log in <i class="glyphicon glyphicon-log-in" style="color:white"></i></a></h5>
                 }
                 </div>
