@@ -28,7 +28,7 @@
     <div class="choose-button">
       <ul class="nav nav-tabs " role="tablist"  id="tabs">
         <li role="presentation" class="active"><a data-target="#genePanel" aria-controls="genePanel" role="tab" data-toggle="tab">
-          <h4>Explore Gene Products </h4></a>
+          <h4>Explore ORF Products </h4></a>
         </li>
         <li role="presentation"><a data-target="#pwayPanel" aria-controls="pwayPanel" role="tab" data-toggle="tab">
           <h4>Explore Pathways  </h4></a>
@@ -57,11 +57,14 @@
               <div class="radio-inline">
                 <label><input type="radio" name="df" value="product" checked="checked">Protein product (default)</label>
               </div>
-              <div class="radio-inline">
-                <label><input type="radio" name="df" value="extended_desc">Secondary Description</label>
-              </div>
+              @*<div class="radio-inline">*@
+                @*<label><input type="radio" name="df" value="extended_desc">Secondary Description</label>*@
+              @*</div>*@
               <div class="radio-inline">
                 <label><input type="radio" name="df" value="ORFID">ORF id</label>
+              </div>
+              <div class="radio-inline">
+                <label><input type="radio" name="df" value="pway">Pathway ID name</label>
               </div>
               <div class="checkbox-inline">
                 <label><input type="checkbox" name="hq" value="true" >Return only high quality hits</label>
@@ -94,17 +97,31 @@
     </div>
     <div class="demo-info">
       <h3>What is MetaQ?</h3>
-      <p>MetaQ is a web-based search platform built for <a href="http://hallam.microbiology.ubc.ca/MetaPathways/" target="_blank">MetaPathways</a> data. It integrates a backend search engine server with indexed annoted metagenomic data and a frontend web visualizing module for both open reading frame annotations as well as microbiological pathway annotations.</p>
+      <p>MetaQ is a web application tailored for navigation and exploration of <a href="http://hallam.microbiology.ubc.ca/MetaPathways/" target="_blank">MetaPathways</a> results.
+        MetaQ couples a back-end database of indexed data products generated from MetaPathways with an interactive front end web service with which to explore, query,
+        and visualize the indexed data. Users can make individual or shared accounts as well as export results as tab separated value (TSV) files</p>
 
       <h3>How does this demo work?</h3>
 
-      <p>For this demo, 10 functionally annotated bacterial metagenome samples were indexed, courtesy of the Hallam Lab. This data includes over 2 million individual open reading frames to explore, each annotated against <a href="http://www.metacyc.org/" target="_blank">MetaCyc</a>, <a href="http://www.genome.jp/kegg/" target="_blank">KEGG</a> and <a href="http://www.ncbi.nlm.nih.gov/COG/" target="_blank">COG</a> protein databases.
-      <p>MetaQ is still a work in progress, and it currently supports 2 search modules. The GeneExplorer module works for searches based on open reading frames, so one can search functionally annotated genes through protein product names (as default), as well as add filters like a minimum rpkm allowed or for results to require a functionally annotation id (from COG or KEGG) to refine the searches. In addition, the GeneExplorer module also includes a clustering visualization which groups up results based on common keywords between them for explorative purposes. On the other hand, the PathwayExplorer module works around protein pathways. A user can search what identified pathways were annotated from the data (based on their pathway name), and extract the ORFs associated with it, as well as what metagenome sample it was found on.</p>
+      <p>For this demo, We tested MetaQ using the <a href="http://www.gutcyc.org/" target="_blank">GutCyc</a> compendium which boasts 37 million ORFs, and over 1000 metabolic pathways across 400+ metagenomes.
+        Each ORF is annotated against <a href="http://www.metacyc.org/" target="_blank">MetaCyc</a>, <a href="http://www.genome.jp/kegg/" target="_blank">KEGG</a>
+        and <a href="http://www.ncbi.nlm.nih.gov/COG/" target="_blank">COG</a> protein databases.
+      <p>MetaQ is still a work in progress, and it currently supports 2 search modules.
+      The ORF Exploration module works for searches based on open reading frames, so one can search functionally annotated genes through protein product names (as default),
+      as well as add filters like a minimum RPKM allowed or for results to require a functionally annotation id (from COG or KEGG) to refine the searches.
+      In addition, the GeneExplorer module also includes a clustering visualization which groups up results based on common keywords between them for explorative purposes.
+      On the other hand, the PathwayExplorer module works around protein pathways. A user can search what identified pathways were annotated from the data (based on their pathway name),
+      and extract the ORFs associated with it, as well as what metagenome sample it was found on.</p>
       <p>Current functionality also supports exporting the results found and downloading them as a TSV file with each column attribute for further use.</p>
 
       <h3>What is MetaQ built on?</h3>
 
-      <p>The backend is an Apache Solr server instance, it indexes both ORFs and pathways and serves all the data to the frontend application. This frontend application was built using the Play Framework, which parses user input and communicates with the backend directly. Complimentary data visualization in the frontend is done through JavaScript's D3 library.</p>
+      <p>The backend is an Apache Solr server instance, it indexes both ORFs and pathways and serves all the data to the frontend application.
+        This frontend application was built using the Play Framework, which parses user input and communicates with the backend directly.
+        Complimentary data visualization in the frontend is done through JavaScript's D3 library.</p>
+
+      @*<h3>Demo Example</h3>*@
+      @*<p></p>*@
     </div>
 
     <div class="author">
