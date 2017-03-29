@@ -434,6 +434,16 @@ AutoCommit
        not be initialized until the first request that uses it.
 
     -->
+
+    <updateRequestProcessorChain name="uniq-fields">
+        <processor class="org.apache.solr.update.processor.DistributedUpdateProcessorFactory"/>
+        <processor class="org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory">
+            <str name="fieldName">owner</str>
+            <str name="fieldName">rxn</str>
+        </processor>
+        <processor class="solr.RunUpdateProcessorFactory" />
+    </updateRequestProcessorChain>
+
   <!-- SearchHandler
 
        http://wiki.apache.org/solr/SearchHandler

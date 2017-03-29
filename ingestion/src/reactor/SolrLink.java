@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.common.SolrInputDocument;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 
 
 /**
@@ -17,7 +18,7 @@ public class SolrLink {
     // http://localhost:8983/solr/
     // http://ec2-52-53-226-52.us-west-1.compute.amazonaws.com:8983/solr/
     // ubc production: http://137.82.19.141:8443/solr/
-    private static final String BASE_URL = "http://137.82.19.141:8443/solr/";
+    private static final String BASE_URL = "http://localhost:8983/solr/";
     private String user;
     private String pass;
     private HttpSolrClient solrClient;
@@ -57,32 +58,14 @@ public class SolrLink {
      * @param documents: the {@link java.util.Collection} of {@link org.apache.solr.common.SolrInputDocument}
      *                   to index to Solr.
      */
-    public void index(Collection<SolrInputDocument> documents) {
+    public void index(HashMap<String, SolrInputDocument> documents) {
+
         try {
-            solrClient.add(documents);
+            solrClient.add(documents.values());
             solrClient.commit();
         } catch (Exception e) {
 //            e.printStackTrace();
 
-        }
-    }
-    /**
-     * This method is called to index data to Solr with authentification.
-     * See https://wiki.apache.org/solr/Solrj#Adding_Data_to_Solr
-     *
-     * @param documents: the {@link java.util.Collection} of {@link org.apache.solr.common.SolrInputDocument}
-     *                   to index to Solr.
-     */
-    public void indexWithAuth(Collection<SolrInputDocument> documents, String username, String password) {
-        try {
-            QueryRequest req = new QueryRequest();
-            req.setBasicAuthCredentials(username, password);
-//            QueryResponse rsp = req.process(solrClient);
-            solrClient.request(req);
-            solrClient.add(documents);
-            solrClient.commit();
-        } catch (SolrServerException | IOException e) {
-            e.printStackTrace();
         }
     }
 

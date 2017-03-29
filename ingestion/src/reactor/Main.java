@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by jorgeluis on 20/05/16.
@@ -33,8 +31,8 @@ public class Main {
 
     private static SolrLink client;
     private static FileParser parser;
-    private static List<SolrInputDocument> orfDocs;
-    private static List<SolrInputDocument> pwayDocs;
+    public static HashMap<String, SolrInputDocument> orfDocs;
+    public static HashMap<String, SolrInputDocument> pwayDocs;
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -119,12 +117,18 @@ public class Main {
                         if (metaGenomeRun.isDirectory()) {
 //                            String runID = metaGenomeRun.getName().substring(0, metaGenomeRun.getName().indexOf("_"));
 
-                            orfDocs = new ArrayList<>();
+                            orfDocs = new HashMap<>();
+                            pwayDocs = new HashMap<>();
                             for (File f : Files.fileTreeTraverser().preOrderTraversal(metaGenomeRun)) {
                                 importFile(f, userName, metaGenomeRun.getName());
                             }
+                            //index all the data for this metagenome run
+                            client.changeTargetCore("ORFDocs");
+                            client.index(orfDocs);
+                            client.changeTargetCore("PwayDocs");
+                            client.index(pwayDocs);
                             System.out.println("Successfuly indexed sample run: " + metaGenomeRun.getName() +
-                                    ". With " + parser.oRFRows + " ORFs and " + parser.pwayRows + " pathways.");
+                                    ". With " + orfDocs.size() + " ORFs and " + pwayDocs.size() + " pathways.");
                         }
                     }
 
@@ -160,43 +164,46 @@ public class Main {
         switch (name){
             default:
                 if (name.matches(".+functional_and_taxonomic_table\\.txt")){
-                    client.changeTargetCore("ORFDocs");
-                    orfDocs = parser.parseFuncTable(file, username, runID);
-                    client.index(orfDocs);
+                    parser.parseFuncTable(file, username, runID);
                     break;
                 }
 
                 if (name.matches(".+ORF_annotation_table\\.txt")){
-                    orfDocs = parser.parseORFAnnotTable(file, username, runID);
-                    client.index(orfDocs);
+                    parser.parseORFAnnotTable(file, username, runID);
                     break;
                 }
 
                 if (name.matches(".+_combined_unique\\.orf_rpkm\\.txt")){
                     try {
-                        orfDocs = parser.parseRPKMTable(file, username, runID);
+                        parser.parseRPKMTable(file, username, runID);
                     } catch (IllegalTableException e) {
                         e.printStackTrace();
                         System.out.println("File originating error: " + file.getName());
                         System.out.println("Path: " + file.getAbsoluteFile());
                     }
-                    client.index(orfDocs);
-
+                    break;
+                }
+                if (name.matches(".+metacyc\\.orf\\.annots\\.txt")){
+                    try {
+                        parser.parseMetaCycTable(file, username, runID);
+                    } catch (IllegalTableException e) {
+                        e.printStackTrace();
+                        System.out.println("File originating error: " + file.getName());
+                        System.out.println("Path: " + file.getAbsoluteFile());
+                    }
+                    break;
                 }
                 if(name.matches(".+\\.pwy\\.txt")){
-                    client.changeTargetCore("PwayDocs");
                     try {
-                        pwayDocs = parser.parsePwayTable(file, username, runID);
+                        parser.parsePwayTable(file, username, runID);
                     } catch (IllegalTableException e) {
                         e.printStackTrace();
                         System.out.println("File originating error: " + file.getName());
                         System.out.println("Path: " + file.getAbsoluteFile());
                     }
-                    client.index(pwayDocs);
+                    break;
                 }
-                break;
         }
-
     }
 
     private static boolean login(String userName, String password){

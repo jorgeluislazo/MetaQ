@@ -443,6 +443,7 @@
   <updateRequestProcessorChain name="uniq-fields">
     <processor class="org.apache.solr.update.processor.DistributedUpdateProcessorFactory"/>
     <processor class="org.apache.solr.update.processor.UniqFieldsUpdateProcessorFactory">
+      <str name="fieldName">owner</str>
       <str name="fieldName">sample_runs</str>
       <str name="fieldName">orfs</str>
     </processor>

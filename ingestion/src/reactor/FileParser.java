@@ -13,8 +13,6 @@ import java.util.*;
  */
 class FileParser {
     private TsvParser parser;
-    public Long oRFRows;
-    public Long pwayRows;
 
     FileParser(){
         TsvParserSettings settings = new TsvParserSettings();
@@ -28,18 +26,14 @@ class FileParser {
         parser = new TsvParser(settings);
     }
 
-    List<SolrInputDocument> parseFuncTable(File file, String username, String runID){
+    void parseFuncTable(File file, String username, String runID){
         parser.beginParsing(file);
         String[] row;
-        List<SolrInputDocument> documentBatch = new ArrayList<>();
 
         parser.parseNext(); //skip the titles...
-        oRFRows = 0L; //reset count
         while((row = parser.parseNext()) != null){
             try {
-                SolrInputDocument orfDoc = parseFunctTableRow(row, username, runID);
-                documentBatch.add(orfDoc);
-                oRFRows++;
+                parseFunctTableRow(row, username, runID);
             }catch(IllegalTableException e){
                 e.printStackTrace();
                 System.out.println("File originating error: " + file.getName());
@@ -47,21 +41,22 @@ class FileParser {
                 System.out.println("row #: " + parser.getContext().currentLine());
             }
         }
-        return documentBatch;
     }
 
-    private SolrInputDocument parseFunctTableRow(String[] row, String username, String runID) throws IllegalTableException{
+    private void parseFunctTableRow(String[] row, String username, String runID) throws IllegalTableException{
         if(row[0] == null){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
         }
-        SolrInputDocument doc = new SolrInputDocument();
+        SolrInputDocument doc;
+        if(Main.orfDocs.containsKey(modifyID(runID, row[0]))){
+            doc = Main.orfDocs.get(modifyID(runID, row[0]));
+        }else{
+            doc = new SolrInputDocument();
+            doc.addField("ORFID", modifyID(runID, row[0]));
+            doc.addField("owner", username);
+        }
 
-        Map<String, String> owner = new HashMap<>();
-        owner.put("add", username);
-        doc.addField("owner", owner);
-
-        doc.addField("ORFID", modifyID(runID, row[0]));
         doc.addField("runID", runID);
         doc.addField("ORF_len", row[1]);
         doc.addField("start", row[2]);
@@ -74,7 +69,7 @@ class FileParser {
 
         String taxonomyID = taxonomyName;
         if(row[8].indexOf("(") > 0){
-            taxonomyName =taxonomyName.substring(0, taxonomyName.indexOf("(") -1);
+            taxonomyName =taxonomyName.substring(0, taxonomyName.lastIndexOf("(") -1);
 
             //if taxonomy is given as expanded path with ; as delims
             String[] taxonomyNameDelims = taxonomyName.split(";");
@@ -82,8 +77,7 @@ class FileParser {
                 taxonomyName = taxonomyNameDelims[taxonomyNameDelims.length - 2];
                 //grab the second last slot, this is the most accurate taxonomy
             }
-
-            taxonomyID = taxonomyID.substring(taxonomyID.indexOf("(") + 1, taxonomyID.length() - 1);
+            taxonomyID = taxonomyID.substring(taxonomyID.lastIndexOf("(") + 1, taxonomyID.length() - 1);
         }else{
             if (taxonomyName.equals("Monera")){
                 taxonomyID = "2";
@@ -94,19 +88,18 @@ class FileParser {
         doc.addField("taxonomy", taxonomyName);
         doc.addField("taxonomyID", taxonomyID);
         doc.addField("product", row[9]);
-        return doc;
+
+        Main.orfDocs.put(modifyID(runID, row[0]), doc);
     }
 
 
-    List<SolrInputDocument> parseORFAnnotTable(File file, String username, String runID){
+    void parseORFAnnotTable(File file, String username, String runID){
         parser.beginParsing(file);
         String[] row;
-        List<SolrInputDocument> documentBatch = new ArrayList<>();
 
         while((row = parser.parseNext()) != null){
             try {
-                SolrInputDocument orfDoc = parseORFAnnotTableRow(row, username, runID);
-                documentBatch.add(orfDoc);
+                parseORFAnnotTableRow(row, username, runID);
             }catch(IllegalTableException e){
                 e.printStackTrace();
                 System.out.println("File originating error: " + file.getName());
@@ -114,21 +107,22 @@ class FileParser {
                 System.out.println("row #: " + parser.getContext().currentLine());
             }
         }
-        return documentBatch;
     }
 
-    private SolrInputDocument parseORFAnnotTableRow(String[] row, String username, String runID) throws IllegalTableException{
+    private void parseORFAnnotTableRow(String[] row, String username, String runID) throws IllegalTableException{
         if(row[0].equals("")){
             //no id found
             throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
 
         }
-        SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("ORFID",modifyID(runID, row[0]));
-
-        Map<String, String> owner = new HashMap<>();
-        owner.put("add", username);
-        doc.addField("owner", owner);
+        SolrInputDocument doc;
+        if(Main.orfDocs.containsKey(modifyID(runID, row[0]))){
+            doc = Main.orfDocs.get(modifyID(runID, row[0]));
+        }else{
+            doc = new SolrInputDocument();
+            doc.addField("ORFID", modifyID(runID, row[0]));
+            doc.addField("owner", username);
+        }
 
         Map<String, String> cogID = new HashMap<>();
         cogID.put("set", row[2]);
@@ -149,55 +143,88 @@ class FileParser {
             extendeDesc.add(row[6]);
         }
         doc.addField("extended_desc", extendeDesc);
-        return doc;
+        Main.orfDocs.put(modifyID(runID, row[0]), doc);
     }
 
-    List<SolrInputDocument> parseRPKMTable(File file, String username, String runID) throws IllegalTableException{
+    void parseRPKMTable(File file, String username, String runID) throws IllegalTableException{
         parser.beginParsing(file);
         String[] row;
-        List<SolrInputDocument> documentBatch = new ArrayList<>();
         while((row = parser.parseNext()) != null){
-            SolrInputDocument rpkmDoc = new SolrInputDocument();
             if(row[0].equals("")){
                 throw new IllegalTableException("No id found in this row:\n'" + prettyPrintRow(row) + "'");
             }
+            SolrInputDocument doc;
+            if(Main.orfDocs.containsKey(modifyID(runID, row[0]))){
+                doc = Main.orfDocs.get(modifyID(runID, row[0]));
+            }else{
+                doc = new SolrInputDocument();
+                doc.addField("ORFID", modifyID(runID, row[0]));
+                doc.addField("owner", username);
+            }
 
-            Map<String, String> owner = new HashMap<>();
-            owner.put("add", username);
-            rpkmDoc.addField("owner", owner);
-
-            rpkmDoc.addField("ORFID", modifyID(runID, row[0]));
             Map<String, String> rpkmValue = new HashMap<>();
             rpkmValue.put("set", row[1]);
-            rpkmDoc.addField("rpkm", rpkmValue);
-            documentBatch.add(rpkmDoc);
+            doc.addField("rpkm", rpkmValue);
+            Main.orfDocs.put(modifyID(runID, row[0]), doc);
         }
-        return documentBatch;
     }
 
-    List<SolrInputDocument> parsePwayTable(File file, String username, String runID) throws IllegalTableException{
+    void parseMetaCycTable(File file, String username, String runID) throws IllegalTableException{
         parser.beginParsing(file);
         String[] row;
-        List<SolrInputDocument> documentBatch = new ArrayList<>();
+
+        while((row = parser.parseNext()) != null){
+            int i = row.length - 1;
+            String rxn = row[0];
+            while(i >= 2){
+                // ORFs were identified with this reaction
+                //start from the last ORF, go backwards
+                String orfID = row[i].substring(1, row[i].length() - 1);
+                orfID = modifyID(runID, orfID);
+
+                SolrInputDocument doc;
+                if(Main.orfDocs.containsKey(orfID)){
+                    doc = Main.orfDocs.get(orfID);
+                }else{
+                    doc = new SolrInputDocument();
+                    doc.addField("ORFID", orfID);
+                    doc.addField("owner", username);
+                }
+
+//                Map<String, String> rxnValue = new HashMap<>();
+//                rxnValue.put("add", rxn);
+                doc.addField("rxn", rxn);
+
+                Main.orfDocs.put(modifyID(runID, row[0]), doc);
+                i--;
+            }
+        }
+    }
+
+    void parsePwayTable(File file, String username, String runID) throws IllegalTableException{
+        parser.beginParsing(file);
+        String[] row;
         parser.parseNext(); //skip the titles...
-        pwayRows = 0L; //reset count
         while ((row = parser.parseNext()) != null){
-            SolrInputDocument pwayDoc = new SolrInputDocument();
             if(row[1].equals("")){
                 throw new IllegalTableException("No pwayID found in this row:\n" + prettyPrintRow(row));
             }
 
-            Map<String, String> owner = new HashMap<>();
-            owner.put("add", username);
-            pwayDoc.addField("owner", owner);
+            SolrInputDocument pwayDoc;
+            if(Main.pwayDocs.containsKey(row[1])){
+                pwayDoc = Main.pwayDocs.get(row[1]);
+            }else{
+                pwayDoc = new SolrInputDocument();
+                pwayDoc.addField("pway_id",row[1]);
+                pwayDoc.addField("owner", username);
+            }
 
-            pwayDoc.addField("pway_id",row[1]);
+
             pwayDoc.addField("pway_name",row[2].replaceAll("^\"|\"$", ""));
             pwayDoc.addField("rxn_total", row[3]);
             // rxn covered
-            Map<String,String> rxn_covered = new HashMap<>();
-            rxn_covered.put("add", row[0] + ":" + row[4]);
-            pwayDoc.addField("rxn_covered", rxn_covered);
+            pwayDoc.addField("rxn_covered", row[0] + ":" + row[4]);
+
             Map<String, ArrayList<String>> orfs = new HashMap<>();
             orfs.put("add", convertToList(runID, row[9]));
             pwayDoc.addField("orfs",  orfs);
@@ -206,10 +233,8 @@ class FileParser {
             sample_run.put("add", runID);
             pwayDoc.addField("sample_runs", sample_run);
 
-            documentBatch.add(pwayDoc);
-            pwayRows++;
+            Main.pwayDocs.put(row[1],pwayDoc);
         }
-        return documentBatch;
     }
 
     private String getRunID(String idString){
@@ -256,7 +281,7 @@ class FileParser {
         if (list.length >= 5){
             ID = list[0] + "_" + list[3] + "_" + list[4];
         }
-        if(list[0].equals("O")){
+        if(list[0].equals("O")){ //sometimes it starts with an O_23423_223
             return runID + "_" + list[1] + "_" + list[2];
         }else{
             return runID + "_" + ID;
@@ -278,7 +303,7 @@ class FileParser {
             arrayID[i] = modifyID(runID, arrayID[i]);
         }
         List<String> resultList = new ArrayList<>(Arrays.asList(arrayID));
-       return (ArrayList<String>) resultList;
+        return (ArrayList<String>) resultList;
     }
 
     private String prettyPrintRow(String[] row){

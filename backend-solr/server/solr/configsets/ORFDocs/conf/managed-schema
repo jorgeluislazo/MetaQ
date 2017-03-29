@@ -34,7 +34,7 @@
       <filter class="solr.ASCIIFoldingFilterFactory"/>
     </analyzer>
   </fieldType>
-  <fieldType name="word-list" class="solr.TextField" indexed="true" stored="true" multiValued="true"/>
+  <fieldType name="word_list" class="solr.TextField" indexed="true" stored="true" multiValued="true"/>
   <field name="owner" type="word_list"/>
   <field name="COGID" type="pathway_id"/>
   <field name="KEGGID" type="pathway_id"/>
@@ -44,6 +44,7 @@
   <field name="end" type="simple_number"/>
   <field name="extended_desc" type="extended_text"/>
   <field name="product" type="text" default="Hypothetical protein"/>
+  <field name="rxn" type="word_list"/>
   <field name="rpkm" type="simple_float"/>
   <field name="rpkm_stats" type="extended_text"/>
   <field name="runID" type="simple_string"/>
